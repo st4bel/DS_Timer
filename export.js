@@ -47,7 +47,7 @@ $(function(){
         var button_export       = $("<button>")
         .attr("id","btn_export")
         .click(function(){
-            alert(input_time.val());
+            createExportString();
         })
         .text("Exportieren")
         .attr("class","btn")
@@ -55,6 +55,7 @@ $(function(){
         var input_time = $("<input>")
         .attr("type","datetime-local")
         .attr("step","0.25")
+        .attr("id","export_time")
         .val(curtime.date[2]+"-"+curtime.date[1]+"-"+curtime.date[0]+"T"+curtime.time[0]  +":"+curtime.time[1]+":"+curtime.time[2]+".000")
 
         addRow(input_time,button_export);
@@ -65,12 +66,36 @@ $(function(){
                 .appendTo(settingsTable);
         }
     }
+
     function createExportString(){
-        var own_id = getPageAttribute("village");
-        var own_coord = {};
-        var coord_string = game_data.village.coord.split("|");
-        own_koords.x = coord_string[0];
-        own_koords.y = coord_string[1];
+        var ex_str              = {}
+
+        ex_str.own_id           = getPageAttribute("village");
+
+        ex_str.own_coord        = {};
+        var coord_string        = game_data.village.coord.split("|");
+        ex_str.own_coord.x      = coord_string[0];
+        ex_str.own_coord.y      = coord_string[1];
+
+        ex_str.target_id        = $("a",$(".village_anchor").first()).first().attr("href")
+        ex_str.target_id        = ex_str.target_id.substring(ex_str.target_id.indexOf("id=")+3,ex_str.target_id.length);
+
+        ex_str.target_coord     = {};
+        coord_string            = $("a",$(".village_anchor").first()).first().text();
+        coord_string            = coord_string.substring(coord_string.lastIndexOf("(")+1,coord_string.lastIndexOf(")"));
+        ex_str.target_coord.x   = coord_string.split("|")[0];
+        ex_str.target_coord.y   = coord_string.split("|")[1];
+
+        ex_str.attack_time      = {};
+        datetime                = $("#export_time").val().split("T");
+        var date                = datetime[0].split("-");
+        var time                = datetime[1].split(":");
+        time[3]                 = time[2].split(".")[1];
+        time[2]                 = time[2].split(".")[0];
+        ex_str.attack_time.time = time;
+        ex_str.attack_time.date = date;
+
+        alert(JSON.stringify(ex_str));
     }
     function timestrings(){
         var dates	= $("#serverDate").text().split("/");
