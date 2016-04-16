@@ -3,7 +3,7 @@ import re
 FORMAT = re.compile(r"\[([a-zA-Z\.\-0-9]+)\|([a-zA-Z0-9%:]+)\|([a-zA-Z0-9]{8})\]")
 
 def java_hash_code(str):
-    """Recompute the hash given in an exported. TODO This does not work as expected."""
+    """Recompute the hash given in an exported cookie. TODO This does not work as expected."""
     hash = 0
     if len(str) == 0:
         return hash
