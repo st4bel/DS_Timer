@@ -1,4 +1,6 @@
 import math
+import requests
+import xml.etree.ElementTree as ET
 
 def distance(source_x, source_y, target_x, target_y):
     return math.sqrt(pow(target_x - source_x, 2) + pow(target_y - source_y, 2))
@@ -14,3 +16,11 @@ def speed(units, attack_or_support, stats):
 
 def runtime(speed, distance):
     return 60 * speed * distance
+
+def get_unit_info(domain):
+    response = requests.get("https://" + domain + "/interface.php?func=get_unit_info")
+    tree = ET.fromstring(response.content)
+    units = dict()
+    for unit in tree:
+        units[unit.tag] = round(float(unit.find("speed").text))
+    return units
