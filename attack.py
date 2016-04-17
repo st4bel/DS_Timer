@@ -35,9 +35,8 @@ def get_confirm_screen(keks, form, units, target_x, target_y, attack_or_support)
     for unit in units:
         payload[unit] = units[unit]
 
-    response = requests.post("https://" + keks["domain"] + "/game.php", params=params, cookies=cookies, headers=headers, data=payload)
-    with open('out.html', 'w') as file:
-        file.write(str(response.content, "utf-8"))
+    response = requests.post("https://" + keks["domain"] + "/game.php",
+        params=params, cookies=cookies, headers=headers, data=payload)
 
     soup = BeautifulSoup(response.content, 'html.parser')
     error_box = soup.select("div[class=error_box]")
@@ -53,3 +52,9 @@ def get_confirm_screen(keks, form, units, target_x, target_y, attack_or_support)
         if "name" in input.attrs and "value" in input.attrs:
             data[input["name"]] = input["value"]
     return (action, data)
+
+def just_do_it(keks, action, data):
+    cookies = dict(sid=keks["sid"])
+    headers = {"user-agent": USER_AGENT}
+    response = requests.post("https://" + keks["domain"] + action,
+        cookies=cookies, headers=headers, data=data)
