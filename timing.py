@@ -1,6 +1,7 @@
 import math
 import requests
 import xml.etree.ElementTree as ET
+from datetime import timedelta
 
 def distance(source_x, source_y, target_x, target_y):
     return math.sqrt(pow(target_x - source_x, 2) + pow(target_y - source_y, 2))
@@ -15,7 +16,7 @@ def speed(units, attack_or_support, stats):
     return slowest
 
 def runtime(speed, distance):
-    return 60 * speed * distance
+    return timedelta(seconds=round(60 * speed * distance))
 
 def get_unit_info(domain):
     response = requests.get("https://" + domain + "/interface.php?func=get_unit_info")
