@@ -18,7 +18,7 @@ similar.
 
 Then install the required Python packages (using `cmd.exe`):
 ```
-pip install requests beautifulsoup4 ntplib
+pip install requests beautifulsoup4 ntplib python-dateutil
 ```
 
 [Download a git client for Windows.](https://git-scm.com/downloads)
@@ -26,5 +26,5 @@ pip install requests beautifulsoup4 ntplib
 ### Requirements for Debian/Ubuntu
 ```
 sudo apt-get install git python3
-sudo pip install requests beautifulsoup4 ntplib
+sudo pip install requests beautifulsoup4 ntplib python-dateutil
 ```
