@@ -3,7 +3,17 @@ import requests
 import json
 import os
 from tkinter import Tk
-import kekse
+import re
+
+FORMAT = re.compile(r"\[([a-zA-Z\.\-0-9]+)\|([a-zA-Z0-9%:]+)\|([a-zA-Z0-9]{8})\]")
+
+def parse_keks(str):
+    """Parse an exported session cookie string from DS Kekse."""
+    match = FORMAT.search(str)
+    if match:
+        return dict(domain=match.group(1), sid=match.group(2))
+    else:
+        return None
 
 def player_from_keks(keks):
     cookies = dict(sid=keks["sid"])
@@ -28,7 +38,7 @@ def main():
         text = Tk().clipboard_get()
     else:
         text = sys.argv[1]
-    keks = kekse.parse(text)
+    keks = parse_keks(text)
     if keks is None:
         print("Invalid keks: {0}".format(text))
         sys.exit(1)
