@@ -12,11 +12,12 @@
 // ==/UserScript==
 
 var $ = typeof unsafeWindow != 'undefined' ? unsafeWindow.$ : window.$;
+var troopspead = {"spear":18,"sword":22,"axe":18,"archer":18,"spy":9,"light":10,"marcher":10,"heavy":11,"ram":30,"catapult":30,"snob":35};
 
 $(function(){
 
     var storage = localStorage;
-    var storagePrefix="GM_";
+    var storagePrefix="Timer_";
 
     //Speicherfunktionen
     function storageGet(key,defaultValue) {
@@ -28,6 +29,18 @@ $(function(){
         storage.setItem(storagePrefix+key,val);
         //GM_setValue(key,val);
     }
+
+    storageSet("troops",storageGet("troops",JSON.stringify({"current":{"spear":0,"sword":0,"axe":0,"archer":0,"spy":0,"light":0,"marcher":0,"heavy":0,"ram":1,"catapult":0,"snob":0},
+                                                            "leer":{"spear":0,"sword":0,"axe":0,"archer":0,"spy":0,"light":0,"marcher":0,"heavy":0,"ram":0,"catapult":0,"snob":0}})));
+    //storageSet("troops",JSON.stringify({"current":{"spear":0,"sword":0,"axe":0,"archer":0,"spy":0,"light":0,"marcher":0,"heavy":0,"ram":1,"catapult":0,"snob":0},
+    //                                        "leer":{"spear":0,"sword":0,"axe":0,"archer":0,"spy":0,"light":0,"marcher":0,"heavy":0,"ram":0,"catapult":0,"snob":0}}));
+
+    storageSet("current_template",storageGet("current_template","leer"));
+    var troops	= JSON.parse(storageGet("troops"));
+    if(troops[storageGet("current_template")]==undefined){
+        storageSet("current_template","leer")
+    }
+
 
     initUI();
     function initUI(){
@@ -41,28 +54,168 @@ $(function(){
         .attr("class","content-border")
         .attr("width","100%")
         .appendTo(settingsCell)
-        //.append($("<tbody>"))
         .append($("<h3>").text("DS Timer"));
 
+
+        var unitTable		= $("<table>").appendTo(settingsCell);
+
+		var unitTableHead	= $("<tr>").attr("id","AF_unitTableHead").appendTo(unitTable);
+		var unitTableInput	= $("<tr>").attr("id","AF_unitTableInput").appendTo(unitTable);
+		for(var name in troopspead){
+			$("<th>")
+			.append(
+				$("<span>")
+				.append(
+					$("<img>").attr("src","https://dsde.innogamescdn.com/8.40.2/27945/graphic/unit/unit_"+name+".png")
+				)
+			)
+			.attr("id","AF_unitTableHead_"+name)
+			.appendTo(unitTableHead);
+
+			$("<td>")
+			.append(
+				$("<span>")
+				.append(
+					$("<input>")
+					.attr("type","text")
+					.attr("size","5")
+					.attr("id",name)
+					.on("input",function(){
+						var thisname = $(this).attr("id");
+
+						//troops[$("option:selected",select_template).val()][thisname]	= $(this).val()>0 ? parseInt($(this).val()) : 0;
+                        troops.current[thisname]	= $(this).val()>0 ? parseInt($(this).val()) : undefined;
+						storageSet("troops",JSON.stringify(troops));
+                        if(storageGet("current_template")!="---"){
+                            $("<option>")
+                            .appendTo($("#select_template"))
+                            .val("---")
+                            .text("---")
+                            $("option",$("#select_template")).each(function(){
+                                $(this).prop("selected",false);
+                            })
+                            storageSet("current_template","---")
+                            $('option[value="'+storageGet("current_template")+'"]',$("#select_template")).eq(0).prop('selected', true);
+                        }
+						console.log(storageGet("troops"));
+					})
+				)
+			)
+			.attr("id","AF_unitTableInput_"+name)
+			.appendTo(unitTableInput);
+		}
+        addRow2(unitTable,"unit-Table-row")
+
+        var button_store_new_template = $("<button>")
+            .attr("id","btn_store_new_template")
+            .click(function(){
+                if(input_name_template.val()=="current" || input_name_template.val()=="leer"){
+                    console.log("Ungültiger name!");
+                    return;
+                }
+                troops[input_name_template.val()] = {};
+                troops[input_name_template.val()] = JSON.parse(JSON.stringify(troops.current));
+                $("<option>")
+                    .text(input_name_template.val())
+                    .attr("value",input_name_template.val())
+                    .appendTo(select_template);
+                $("option",$("#select_template")).each(function(){
+                    $(this).prop("selected",false);
+                })
+                storageSet("troops",JSON.stringify(troops));
+                storageSet("current_template",input_name_template.val())
+                $('option[value="'+storageGet("current_template")+'"]',$("#select_template")).eq(0).prop('selected', true);
+                $('option[value="---"]',$("#select_template")).remove();
+                console.log(storageGet("troops"));
+                console.log(storageGet("current_template"))
+            })
+            .text("Als neue Vorlage speichern")
+            .attr("class","btn")
+
+        var button_remove_template = $("<button>")
+            .attr("id","btn_store_template")
+            .click(function(){
+                if(select_template.val()!="---" && select_template.val()!="leer"&& select_template.val()!="current"){
+                    troops[select_template.val()]=undefined;
+                    $('option[value="'+select_template.val()+'"]',$("#select_template")).remove();
+                    storageSet("current_template","leer")
+                    $('option[value="leer"]',$("#select_template")).eq(0).prop('selected', true);
+                    storageSet("troops",JSON.stringify(troops));
+                    fillTroops();
+                }else{console.log("Diese Vorlage kann nicht gelöscht werden.")}
+                console.log(storageGet("troops"));
+            })
+            .text("Vorlage Entfernen")
+            .attr("class","btn")
+
+        var input_name_template = $("<input>")
+            .attr("type","text")
+            .attr("id","input_name_template")
+            .val("Name")
+
+
+
+
+        var select_template = $("<select>")
+        //.append($("<option>").text("Neue Vorlage").attr("value","new"))
+            .attr("id","select_template")
+            .change(function(){
+                storageSet("current_template", $("option:selected",select_template).val());
+                fillTroops();
+                $('option[value="---"]',$(this)).remove();
+                console.log("current template: "+storageGet("current_template"));
+            });
+        for(var template_name in troops){
+            if(template_name!="current"){
+                $("<option>")
+                    .text(template_name)
+                    .attr("value",template_name)
+                    .appendTo(select_template)
+                //.attr("id","opt_"+template_name)
+                console.log(template_name+" "+storageGet("current_template"));
+            }
+        }
+
+
+
         var button_export       = $("<button>")
-        .attr("id","btn_export")
-        .click(function(){
-            createExportString();
-        })
-        .text("Exportieren")
-        .attr("class","btn")
+            .attr("id","btn_export")
+            .click(function(){
+                createExportString();
+            })
+            .text("Exportieren")
+            .attr("class","btn")
         var curtime = timestrings();
         var input_time = $("<input>")
-        .attr("type","datetime-local")
-        .attr("step","0.25")
-        .attr("id","export_time")
-        .val(curtime.date[2]+"-"+curtime.date[1]+"-"+curtime.date[0]+"T"+curtime.time[0]  +":"+curtime.time[1]+":"+curtime.time[2]+".000")
+            .attr("type","datetime-local")
+            .attr("step","0.25")
+            .attr("id","export_time")
+            .val(curtime.date[2]+"-"+curtime.date[1]+"-"+curtime.date[0]+"T"+curtime.time[0]  +":"+curtime.time[1]+":"+curtime.time[2]+".000")
 
+        addRow(select_template,button_remove_template)
+        addRow(input_name_template,button_store_new_template);
         addRow(input_time,button_export);
+
+        $('option[value="'+storageGet("current_template")+'"]',$("#select_template")).eq(0).prop('selected', true);
+
+        fillTroops();
+
+        function fillTroops(){
+            for(var name in troopspead){
+                $("input#"+name).val(troops[$("option:selected",select_template).val()][name]);
+            }
+            troops.current = JSON.parse(JSON.stringify(troops[storageGet("current_template")]));
+        }
         function addRow(desc,content) {
             $("<tr>")
                 .append($("<td>").append(desc))
                 .append($("<td>").append(content))
+                .appendTo(settingsTable);
+        }
+        function addRow2(obj,id){
+            $("<tr>")
+                .append($("<td>").append(obj))
+                .attr("id",id)
                 .appendTo(settingsTable);
         }
     }
@@ -95,7 +248,11 @@ $(function(){
         ex_str.attack_time.time = time;
         ex_str.attack_time.date = date;
 
-        alert(JSON.stringify(ex_str));
+        var type                = $('input[name="attack"]').val();
+        ex_str.attack           = type == "true" ? true :false;
+        ex_str.units            = {};
+        ex_str.units            = JSON.parse(JSON.stringify(troops.current));
+        console.log(JSON.stringify(ex_str));
     }
     function timestrings(){
         var dates	= $("#serverDate").text().split("/");
