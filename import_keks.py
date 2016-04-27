@@ -2,7 +2,7 @@ import sys
 import requests
 import json
 import os
-from tkinter import Tk
+import pyperclip
 import re
 
 FORMAT = re.compile(r"\[([a-zA-Z\.\-0-9]+)\|([a-zA-Z0-9%:]+)\|([a-zA-Z0-9]{8})\]")
@@ -21,8 +21,8 @@ def player_from_keks(keks):
     response = requests.get("https://" +  keks["domain"] + "/game.php",
         cookies=cookies) # headers=headers
     for line in response.content.decode("utf-8").splitlines():
-        if line.strip().startswith("var game_data = {"):
-            game_data = json.loads(line[line.index("=")+1:line.rindex(";")])
+        if line.strip().startswith("TribalWars.updateGameData("):
+            game_data = json.loads(line[line.index("(")+1:line.rindex(")")])
             return game_data["player"]["name"]
     return None
 
@@ -35,7 +35,7 @@ def write_keks(keks, player):
 
 def main():
     if len(sys.argv) == 1:
-        text = Tk().clipboard_get()
+        text = pyperclip.paste()
     else:
         text = sys.argv[1]
     keks = parse_keks(text)
