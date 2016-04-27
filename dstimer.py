@@ -16,11 +16,9 @@ import socket
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36"
 
-def get_place_screen(keks, village_id):
-    cookies = dict(sid=keks["sid"])
-    headers = {"user-agent": USER_AGENT}
+def get_place_screen(session, domain, village_id):
     params = dict(village=village_id, screen="place")
-    response = requests.get("https://" + keks["domain"] + "/game.php", params=params, cookies=cookies, headers=headers)
+    response = session.get("https://" + domain + "/game.php", params=params)
     soup = BeautifulSoup(response.content, 'html.parser')
     form = soup.select("form#command-data-form")[0]
     units = dict()
@@ -29,12 +27,9 @@ def get_place_screen(keks, village_id):
     data = dict()
     for input in form.select("input"):
         data[input["name"]] = input["value"]
-
     return (units, data)
 
-def get_confirm_screen(keks, form, units, target_x, target_y, type):
-    cookies = dict(sid=keks["sid"])
-    headers = {"user-agent": USER_AGENT}
+def get_confirm_screen(session, domain, form, units, target_x, target_y, type):
     params = {"village": form["source_village"], "screen": "place", "try": "confirm"}
 
     payload = form.copy()
@@ -47,8 +42,8 @@ def get_confirm_screen(keks, form, units, target_x, target_y, type):
     for unit in units:
         payload[unit] = units[unit]
 
-    response = requests.post("https://" + keks["domain"] + "/game.php",
-        params=params, cookies=cookies, headers=headers, data=payload)
+    response = session.post("https://" + domain + "/game.php",
+        params=params, data=payload)
 
     soup = BeautifulSoup(response.content, 'html.parser')
     error_box = soup.select("div[class=error_box]")
@@ -65,11 +60,8 @@ def get_confirm_screen(keks, form, units, target_x, target_y, type):
             data[input["name"]] = input["value"]
     return (action, data)
 
-def just_do_it(keks, action, data):
-    cookies = dict(sid=keks["sid"])
-    headers = {"user-agent": USER_AGENT}
-    response = requests.post("https://" + keks["domain"] + action,
-        cookies=cookies, headers=headers, data=data)
+def just_do_it(session, domain, action, data):
+    response = session.post("https://" + domain + action, data=data)
 
 def get_local_offset():
     client = ntplib.NTPClient()
@@ -88,33 +80,38 @@ class SendActionThread(threading.Thread):
     def __init__(self, action):
         threading.Thread.__init__(self)
         self.action = action
-        print(action)
 
     def run(self):
         keks_file = os.path.join(os.path.expanduser("~"), ".dstimer", "keks", self.action["domain"], self.action["player"])
         with open(keks_file) as fd:
             sid = fd.read()
-        keks = dict(domain=self.action["domain"], sid=sid)
+        domain = self.action["domain"]
 
-        (units, form) = get_place_screen(keks, self.action["source_id"])
-        (action, data) = get_confirm_screen(keks, form, self.action["units"],
-            self.action["target_coord"]["x"], self.action["target_coord"]["y"], self.action["type"])
+        with requests.Session() as session:
+            session.cookies.set("sid", sid)
+            session.headers.update({"user-agent": USER_AGENT})
 
-        offset = get_local_offset()
-        ping = get_ping(keks["domain"])
-        print("Offset {0} Ping {1}".format(offset, ping))
-        real_departure = dateutil.parser.parse(self.action["departure_time"]) - offset - ping
+            offset = get_local_offset()
+            ping = get_ping(domain)
+            print("Offset {0} seconds, Ping {1} ms".format(offset.total_seconds(), ping.total_seconds() * 1000))
+            real_departure = dateutil.parser.parse(self.action["departure_time"]) - offset - ping
 
-        print(real_departure)
+            while real_departure - datetime.datetime.now() > datetime.timedelta(seconds=3):
+                time_left = real_departure - datetime.datetime.now() - datetime.timedelta(seconds=3)
+                time.sleep((time_left / 2).total_seconds())
 
-        while real_departure - datetime.datetime.now() > datetime.timedelta(milliseconds=5):
-            time_left = real_departure - datetime.datetime.now()
-            print(time_left)
-            time.sleep((time_left / 2).total_seconds())
+            print("Prepare job")
+            (units, form) = get_place_screen(session, domain, self.action["source_id"])
+            (action, data) = get_confirm_screen(session, domain, form, self.action["units"],
+                self.action["target_coord"]["x"], self.action["target_coord"]["y"], self.action["type"])
 
-        print(datetime.datetime.now())
-        just_do_it(keks, action, data)
-        print(datetime.datetime.now())
+            print("Wait for sending")
+            while real_departure - datetime.datetime.now() > datetime.timedelta(milliseconds=1):
+                time_left = real_departure - datetime.datetime.now()
+                time.sleep((time_left / 2).total_seconds())
+
+            just_do_it(session, domain, action, data)
+            print("Finished job")
 
 def cycle():
     now = datetime.datetime.now()
@@ -128,9 +125,7 @@ def cycle():
             with open(os.path.join(schedule_path, file)) as fd:
                 action = json.load(fd)
             departure = dateutil.parser.parse(action["departure_time"])
-            print("departure {0}".format(departure))
-            print("now {0}".format(now))
-            if departure - now < datetime.timedelta(seconds=90):
+            if departure - now < datetime.timedelta(seconds=65):
                 # Move action file to trash folder
                 os.rename(os.path.join(schedule_path, file), os.path.join(trash_path, file))
                 # Execute the action in the near future
