@@ -6,6 +6,7 @@ class IntelliSingleTest(unittest.TestCase):
         self.assertEqual(intelli_single("100", 101), 100)
         self.assertEqual(intelli_single("100", 100), 100)
         self.assertEqual(intelli_single("100", 99), 99)
+        self.assertEqual(intelli_single("0", 10), 0)
 
     def test_star(self):
         self.assertEqual(intelli_single("*", 100), 100)

@@ -5,6 +5,7 @@
     <tr>
         <th>Spieler</th>
         <th>Abschicken</th>
+        <th>Ankunft</th>
         <th>Start</th>
         <th>Ziel</th>
         <th>Einheiten</th>
@@ -13,6 +14,7 @@
     <tr>
         <td><a href="https://{{ action.domain }}/game.php" rel="noreferrer"><span class="badge">{{action.world }}</span></a> {{ action.player }}</td>
         <td>{{ action.departure_time }}</td>
+        <td>{{ action.arrival_time }}</td>
         <td>
             <a href="https://{{action.domain}}/game.php?screen=info_village&id={{action.source_id}}" rel="noreferrer">{{ action.source_coord.x }} | {{ action.source_coord.y }}</a>
         </td>

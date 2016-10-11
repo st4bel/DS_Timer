@@ -64,8 +64,8 @@ def autocomplete(action):
 def random_id(length):
     return "".join(random.choice(string.ascii_lowercase) for i in range(length))
 
-def main():
-    action = json.loads(pyperclip.paste())
+def import_from_text(text):
+    action = json.loads(text)
     autocomplete(action)
 
     filename = dateutil.parser.parse(action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + random_id(6) + ".txt"
@@ -75,6 +75,9 @@ def main():
     os.makedirs(directory, exist_ok=True)
     with open(file, "w") as fd:
         json.dump(action, fd, indent=4)
+
+def main():
+    import_from_text(pyperclip.paste())
 
 if __name__ == "__main__":
     main()
