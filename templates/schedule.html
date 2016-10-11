@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block title %}Schedule{% endblock %}
+{% block content %}
+<table class="table">
+    <tr>
+        <th>Spieler</th>
+        <th>Abschicken</th>
+        <th>Start</th>
+        <th>Ziel</th>
+        <th>Einheiten</th>
+    </tr>
+    {% for action in actions %}
+    <tr>
+        <td><a href="https://{{ action.domain }}/game.php" rel="noreferrer"><span class="badge">{{action.world }}</span></a> {{ action.player }}</td>
+        <td>{{ action.departure_time }}</td>
+        <td>
+            <a href="https://{{action.domain}}/game.php?screen=info_village&id={{action.source_id}}" rel="noreferrer">{{ action.source_coord.x }} | {{ action.source_coord.y }}</a>
+        </td>
+        <td>
+            <a href="https://{{action.domain}}/game.php?screen=info_village&id={{action.target_id}}" rel="noreferrer">{{ action.target_coord.x }} | {{ action.target_coord.y }}</a>
+        </td>
+        <td>
+            {% for unit, amount in action.units|dictsort %}
+                {% if not loop.first %}{% endif %}
+                <span class="badge alert-success" title="{{unit}}">{{ amount }} <img src="https://dsde.innogamescdn.com/8.58/30847/graphic/unit/unit_{{unit}}.png"></span>
+            {% endfor %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
