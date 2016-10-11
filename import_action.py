@@ -3,11 +3,12 @@ import sys
 import json
 import os
 import math
-from tkinter import Tk
+import pyperclip
 import requests
 import xml.etree.ElementTree as ET
 from datetime import timedelta
 import dateutil.parser
+import random, string
 
 def distance(source, target):
     return math.sqrt(pow(target["x"] - source["x"], 2) + pow(target["y"] - source["y"], 2))
@@ -43,7 +44,7 @@ def get_cached_unit_info(domain):
     except:
         # otherwise load the actual data
         unit_info = get_unit_info(domain)
-        os.makedirs(cache_diectory, exist_ok=True)
+        os.makedirs(directory, exist_ok=True)
         # and save it in a cache file
         with open(file, "w") as fd:
             json.dump(unit_info, fd)
@@ -60,11 +61,14 @@ def autocomplete(action):
     if "arrival_time" not in action:
         action["arrival_time"] = (dateutil.parser.parse(action["departure_time"]) + duration).isoformat()
 
+def random_id(length):
+    return "".join(random.choice(string.ascii_lowercase) for i in range(length))
+
 def main():
-    action = json.loads(Tk().clipboard_get())
+    action = json.loads(pyperclip.paste())
     autocomplete(action)
 
-    filename = dateutil.parser.parse(action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + ".txt"
+    filename = dateutil.parser.parse(action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + random_id(6) + ".txt"
 
     directory = os.path.join(os.path.expanduser("~"), ".dstimer", "schedule")
     file = os.path.join(directory, filename)
