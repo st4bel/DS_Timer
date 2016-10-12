@@ -28,3 +28,28 @@ pip install requests beautifulsoup4 ntplib python-dateutil
 sudo apt-get install git python3
 sudo pip install requests beautifulsoup4 ntplib python-dateutil
 ```
+
+## Example JSON
+
+```json
+{
+    "domain": "de132.die-staemme.de",
+    "player": "Nickname",
+    "type": "attack",
+    "arrival_time": "2016-10-12T17:30:00",
+    "departure_time": "2016-10-12T16:49:45",
+    "source_id": 1234,
+    "source_coord": {
+        "y": 200,
+        "x": 300
+    },
+    "target_id": 12345,
+    "target_coord": {
+        "x": 200,
+        "y": 100
+    },
+    "units": {
+        "spear": 100
+    }
+}
+```
