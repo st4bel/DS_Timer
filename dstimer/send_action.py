@@ -168,10 +168,12 @@ def cycle():
                 thread = SendActionThread(action)
                 thread.start()
 
-def main():
-    while True:
-        cycle()
-        time.sleep(60)
+class DaemonThread(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
 
-if __name__ == "__main__":
-    main()
+    def run(self):
+        print("Daemon is running")
+        while True:
+            cycle()
+            time.sleep(60)
