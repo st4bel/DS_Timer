@@ -52,6 +52,18 @@ def get_cached_unit_info(domain):
 
 def autocomplete(action):
     """Add missing information about an action like departure time"""
+    action["source_coord"]["x"] = int(action["source_coord"]["x"])
+    action["source_coord"]["y"] = int(action["source_coord"]["y"])
+    action["target_coord"]["x"] = int(action["target_coord"]["x"])
+    action["target_coord"]["y"] = int(action["target_coord"]["y"])
+
+    units_to_delete = []
+    for unit, amount in action["units"].items():
+        if str(amount).strip() == "0":
+            units_to_delete.append(unit)
+    for unit in units_to_delete:
+        del action["units"][unit]
+
     unit_info = get_cached_unit_info(action["domain"])
     duration = runtime(speed(action["units"], action["type"], unit_info),
         distance(action["source_coord"], action["target_coord"]))
