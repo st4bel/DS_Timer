@@ -145,7 +145,7 @@ def cycle():
 
 class DaemonThread(threading.Thread):
     def __init__(self):
-        threading.Thread.__init__(self)
+        threading.Thread.__init__(self, daemon=True)
 
     def run(self):
         print("Daemon is running")
