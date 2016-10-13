@@ -12,7 +12,7 @@ app.jinja_env.globals.update(innocdn_url=innocdn_url)
 
 @app.route("/")
 def index():
-    return redirect("/schedule", code=302)
+    return render_template("erklaerbaer.html")
 
 @app.route("/schedule")
 def schedule():
