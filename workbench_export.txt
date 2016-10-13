@@ -1,0 +1,26 @@
+Direckter export in zwischenablage:
+
+(Clean-Off)	the stabel	~WeLoveToEntertainYou~ (440|276) K24	Ramme	Gebieter des Todes	207 (593|383) K35	20.04.16 23:13:25.355	24.04.16 20:34:30.705
+(Clean-Off)	the stabel	~WeLoveToEntertainYou~ (493|371) K34	Ramme	stanis*	198 (605|396) K36	20.04.16 23:13:35.102	23.04.16 08:36:16.376
+(Clean-Off)	the stabel	~WeLoveToEntertainYou~ (496|376) K34	Ramme	Gebieter des Todes	171- K.Mikaze XXXII (613|381) K36	20.04.16 23:15:38.964	23.04.16 09:48:51.183
+(Clean-Off)	the stabel	~WeLoveToEntertainYou~ (408|280) K24	Ramme	Gebieter des Todes	189 (602|389) K36	20.04.16 23:15:53.549	25.04.16 14:31:37.029
+(Clean-Off)	the stabel	~WeLoveToEntertainYou~ (446|290) K24	Ramme	Gebieter des Todes	201 (604|388) K36	20.04.16 23:16:43.863	24.04.16 20:14:28.351
+(Clean-Off)	the stabel	~WeLoveToEntertainYou~ (367|328) K33	Ramme	Gebieter des Todes	113- K.Mikaze V (595|386) K35	20.04.16 23:17:27.491	25.04.16 20:55:18.292
+(Clean-Off)	the stabel	~WeLoveToEntertainYou~ (441|274) K24	Ramme	Gebieter des Todes	207 (593|383) K35	20.04.16 23:17:33.281	24.04.16 20:48:50.277
+
+
+bb-code-Export:
+
+[b]Angriffsplan[/b]
+Anzahl der Angriffe: 7
+[table]
+[**]ID[||]Art[||]Einheit[||]Herkunft[||]Ziel[||]Abschickzeit[||]Versammlungsplatz[/**]
+[*]1[|]Angriff (Clean-Off)[|]Ramme[|][coord]440|276[/coord][|][coord]593|383[/coord][|]20.04.16 um 23:13:25.355[|][url="https://de118.die-staemme.de/game.php?village=62708&screen=place&mode=command&target=23634"]Versammlungsplatz[/url][/*]
+[*]2[|]Angriff (Clean-Off)[|]Ramme[|][coord]493|371[/coord][|][coord]605|396[/coord][|]20.04.16 um 23:13:35.102[|][url="https://de118.die-staemme.de/game.php?village=15252&screen=place&mode=command&target=21758"]Versammlungsplatz[/url][/*]
+[*]3[|]Angriff (Clean-Off)[|]Ramme[|][coord]496|376[/coord][|][coord]613|381[/coord][|]20.04.16 um 23:15:38.964[|][url="https://de118.die-staemme.de/game.php?village=15526&screen=place&mode=command&target=27311"]Versammlungsplatz[/url][/*]
+[*]4[|]Angriff (Clean-Off)[|]Ramme[|][coord]408|280[/coord][|][coord]602|389[/coord][|]20.04.16 um 23:15:53.549[|][url="https://de118.die-staemme.de/game.php?village=63876&screen=place&mode=command&target=23762"]Versammlungsplatz[/url][/*]
+[*]5[|]Angriff (Clean-Off)[|]Ramme[|][coord]446|290[/coord][|][coord]604|388[/coord][|]20.04.16 um 23:16:43.863[|][url="https://de118.die-staemme.de/game.php?village=49989&screen=place&mode=command&target=23476"]Versammlungsplatz[/url][/*]
+[*]6[|]Angriff (Clean-Off)[|]Ramme[|][coord]367|328[/coord][|][coord]595|386[/coord][|]20.04.16 um 23:17:27.491[|][url="https://de118.die-staemme.de/game.php?village=50001&screen=place&mode=command&target=22140"]Versammlungsplatz[/url][/*]
+[*]7[|]Angriff (Clean-Off)[|]Ramme[|][coord]441|274[/coord][|][coord]593|383[/coord][|]20.04.16 um 23:17:33.281[|][url="https://de118.die-staemme.de/game.php?village=60874&screen=place&mode=command&target=23634"]Versammlungsplatz[/url][/*]
+
+[/table]

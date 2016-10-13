@@ -2,7 +2,7 @@
 // @name        DS_Timer_Export
 // @namespace   de.die-staemme
 // @version     0.1
-// @description Export your Attack-Details fpr DS_Timer
+// @description Export your Attack-Details for DS_Timer
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       unsafeWindow
@@ -36,14 +36,67 @@ $(function(){
     //                                        "leer":{"spear":0,"sword":0,"axe":0,"archer":0,"spy":0,"light":0,"marcher":0,"heavy":0,"ram":0,"catapult":0,"snob":0}}));
 
     storageSet("current_template",storageGet("current_template","leer"));
+    storageSet("exported_data",storageGet("exported_data",JSON.stringify({})));
+    storageSet("toogle_arriv_depart",storageGet("toogle_arriv_depart","arriv"));
+
+    var exported_data = JSON.parse(storageGet("exported_data"));
     var troops	= JSON.parse(storageGet("troops"));
     if(troops[storageGet("current_template")]==undefined){
         storageSet("current_template","leer")
     }
 
+    if(getPageAttribute("screen")=="place"){
+        initUI_place();
+    }else if(getPageAttribute("screen")=="settings" && getPageAttribute("mode")=="settings"){
+        //initUI_settings();
+    }
 
-    initUI();
-    function initUI(){
+    var btn_settings = $("<button>").appendTo($("#linkContainer"))
+    .click(function(){
+        initUI_settings();
+    })
+    .text("DSTIMER")
+    .attr("class","btn")
+
+    function initUI_settings(){
+        //Seiteninhalt entfernen, damit Einstellungsseite aufgebaut werden kann
+        var contentContainer   = $("#contentContainer");
+        $("tbody",contentContainer).first().remove();
+
+        //Aufbau neuer Seiteninhalt
+        var settingsRow         = $("<tr>")
+            .appendTo(contentContainer);
+        var settingsCell        = $("<td>")
+            .appendTo(settingsRow);
+        var settingsTable       = $("<table>")
+            .attr("class","content-border")
+            .attr("width","100%")
+            .appendTo(settingsCell)
+            .append($("<h3>").text("DS Timer - Einstellungen"));
+
+        var exportsRow         = $("<tr>")
+            .appendTo(contentContainer);
+        var exportsCell        = $("<td>")
+            .appendTo(exportsRow);
+        var exportsTable       = $("<table>")
+            .attr("class","content-border")
+            .attr("width","100%")
+            .attr("id","exportsTable")
+            .appendTo(exportsCell)
+            .append($("<h3>").text("DS Timer - exportierte Daten"));
+
+        var exported_data_Table		= $("<table>").appendTo(exportsCell);
+
+    	var exported_data_Table_Head	= $("<tr>").attr("id","exported_data_Table_Head").appendTo(exported_data_Table);
+
+        function addExportedDataRow(data){
+            $("<tr>")
+                .appendTo(exported_data_Table)
+
+        }
+    }
+
+    function initUI_place(){
         //var div_linkContainer = $("#linkContainer");
         var command_data_form   = $("#command-data-form");
         var contentContainer    = $("#contentContainer");
@@ -151,7 +204,7 @@ $(function(){
         var input_name_template = $("<input>")
             .attr("type","text")
             .attr("id","input_name_template")
-            .val("Name")
+            .val("Neue Vorlage")
 
 
 
@@ -181,20 +234,42 @@ $(function(){
         var button_export       = $("<button>")
             .attr("id","btn_export")
             .click(function(){
+                input_export.attr("type","");
                 createExportString();
             })
             .text("Exportieren")
             .attr("class","btn")
+        var input_export        = $("<input>")
+            .attr("type","hidden")
+            .attr("id","input_export")
+            .val("")
         var curtime = timestrings();
         var input_time = $("<input>")
             .attr("type","datetime-local")
             .attr("step","0.25")
             .attr("id","export_time")
-            .val(curtime.date[2]+"-"+curtime.date[1]+"-"+curtime.date[0]+"T"+curtime.time[0]  +":"+curtime.time[1]+":"+curtime.time[2]+".000")
+            .val(curtime.date[2]+"-"+curtime.date[1]+"-"+curtime.date[0]+"T"+curtime.time[0]  +":"+curtime.time[1]+":"+curtime.time[2]+".000");
+        var label_arrival_departure =$("<span>")
+            .click(function(){
+                if(storageGet("toogle_arriv_depart")=="depart"){
+                    label_arrival_departure.text("Ankunftszeit");
+                    storageSet("toogle_arriv_depart","arriv");
+                }else{
+                    label_arrival_departure.text("Abschickzeit");
+                    storageSet("toogle_arriv_depart","depart");
+                }
+            });
+
+        if(storageGet("toogle_arriv_depart")=="arriv"){
+            label_arrival_departure.text("Ankunftszeit");
+        }else{
+            label_arrival_departure.text("Abschickzeit");
+        }
 
         addRow(select_template,button_remove_template)
         addRow(input_name_template,button_store_new_template);
-        addRow(input_time,button_export);
+        addRow($("<span>").append(input_time).append(label_arrival_departure),button_export);
+        addRow2(input_export,"export");
 
         $('option[value="'+storageGet("current_template")+'"]',$("#select_template")).eq(0).prop('selected', true);
 
@@ -216,42 +291,58 @@ $(function(){
             $("<tr>")
                 .append($("<td>").append(obj))
                 .attr("id",id)
-                .appendTo(settingsTable);
+                .appendTo(settingsTable)
+
         }
     }
 
     function createExportString(){
         var ex_str              = {}
 
-        ex_str.own_id           = getPageAttribute("village");
+        ex_str.source_id        = parseInt(getPageAttribute("village"));
 
-        ex_str.own_coord        = {};
+        ex_str.source_coord     = {};
         var coord_string        = game_data.village.coord.split("|");
-        ex_str.own_coord.x      = coord_string[0];
-        ex_str.own_coord.y      = coord_string[1];
+        ex_str.source_coord.x   = parseInt(coord_string[0]);
+        ex_str.source_coord.y   = parseInt(coord_string[1]);
 
         ex_str.target_id        = $("a",$(".village_anchor").first()).first().attr("href")
-        ex_str.target_id        = ex_str.target_id.substring(ex_str.target_id.indexOf("id=")+3,ex_str.target_id.length);
+        ex_str.target_id        = parseInt(ex_str.target_id.substring(ex_str.target_id.indexOf("id=")+3,ex_str.target_id.length));
 
         ex_str.target_coord     = {};
         coord_string            = $("a",$(".village_anchor").first()).first().text();
         coord_string            = coord_string.substring(coord_string.lastIndexOf("(")+1,coord_string.lastIndexOf(")"));
-        ex_str.target_coord.x   = coord_string.split("|")[0];
-        ex_str.target_coord.y   = coord_string.split("|")[1];
+        ex_str.target_coord.x   = parseInt(coord_string.split("|")[0]);
+        ex_str.target_coord.y   = parseInt(coord_string.split("|")[1]);
 
-        ex_str.attack_time      = {};
+        /*ex_str.attack_time      = {};
         datetime                = $("#export_time").val().split("T");
         var date                = datetime[0].split("-");
         var time                = datetime[1].split(":");
         time[3]                 = time[2].split(".")[1];
         time[2]                 = time[2].split(".")[0];
         ex_str.attack_time.time = time;
-        ex_str.attack_time.date = date;
+        ex_str.attack_time.date = date;*/
+        if(storageGet("toogle_arriv_depart")=="arriv"){
+            ex_str.arrival_time     = $("#export_time").val();
+        }else{
+            ex_str.departure_time   = $("#export_time").val();
+        }
 
         var type                = $('input[name="attack"]').val();
-        ex_str.attack           = type == "true" ? true :false;
+        ex_str.type             = type == "true" ? "attack" : "support";
         ex_str.units            = {};
         ex_str.units            = JSON.parse(JSON.stringify(troops.current));
+        for(var unit in ex_str.units){
+            ex_str.units[unit]  = parseInt(ex_str.units[unit]);
+        }
+
+        ex_str.domain           = location.host;
+        ex_str.player           = game_data.player.name;
+        console.log(JSON.stringify(ex_str));
+        $("#input_export").val(JSON.stringify(ex_str));
+
+        exported_data[Object.keys(exported_data).length] = ex_str;
         console.log(JSON.stringify(ex_str));
     }
     function timestrings(){
