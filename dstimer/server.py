@@ -36,8 +36,8 @@ def import_action_get():
 @app.route("/import", methods=["POST"])
 def import_action_post():
     text = request.form["text"]
-    if request.form["action"] == "action"
+    if request.form["action"] == "action":
         import_action.import_from_text(text)
-    elif request.form["action"] == "keks"
+    elif request.form["action"] == "keks":
         import_keks.import_from_text(text)
     return redirect("/schedule", code=302)
