@@ -1,9 +1,6 @@
-#!/usr/bin/env python3
-import sys
 import requests
 import json
 import os
-import pyperclip
 import re
 
 FORMAT = re.compile(r"\[([a-zA-Z\.\-0-9]+)\|([a-zA-Z0-9%:]+)\|([a-zA-Z0-9]{8})\]")
@@ -34,20 +31,11 @@ def write_keks(keks, player):
     with open(file, "w") as fd:
         fd.write(keks["sid"])
 
-def main():
-    if len(sys.argv) == 1:
-        text = pyperclip.paste()
-    else:
-        text = sys.argv[1]
+def import_from_text(text):
     keks = parse_keks(text)
     if keks is None:
-        print("Invalid keks: {0}".format(text))
-        sys.exit(1)
+        raise ValueError("Invalid keks: {0}".format(text))
     player = player_from_keks(keks)
     if player is None:
-        print("Session is expired or invalid")
-        sys.exit(1)
+        raise ValueError("Session is expired or invalid")
     write_keks(keks, player)
-
-if __name__ == "__main__":
-    main()

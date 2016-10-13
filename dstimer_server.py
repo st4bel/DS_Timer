@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from dstimer import server, send_action
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@
         <label for="text">JSON Blob:</label>
         <textarea rows="20" id="text" name="text" class="form-control">{% if text is not none %}{{ text }}{% endif %}</textarea>
     </div>
-    <button type="submit">Importiere jetzt!!</button>
+    <button type="submit" name="type" value="action" class="btn btn-default">Angriff importieren</button>
+    <button type="submit" name="type" value="keks" class="btn btn-default">Keks importieren</button>
 </form>
 {% endblock %}

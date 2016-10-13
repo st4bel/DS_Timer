@@ -3,7 +3,6 @@ import sys
 import json
 import os
 import math
-import pyperclip
 import requests
 import xml.etree.ElementTree as ET
 from datetime import timedelta
@@ -87,9 +86,3 @@ def import_from_text(text):
     os.makedirs(directory, exist_ok=True)
     with open(file, "w") as fd:
         json.dump(action, fd, indent=4)
-
-def main():
-    import_from_text(pyperclip.paste())
-
-if __name__ == "__main__":
-    main()
