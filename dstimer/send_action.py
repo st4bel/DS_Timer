@@ -77,9 +77,11 @@ def get_ping(domain):
     return after - before
 
 class SendActionThread(threading.Thread):
-    def __init__(self, action):
+    def __init__(self, action, offset, ping):
         threading.Thread.__init__(self)
         self.action = action
+        self.offset = offset
+        self.ping = ping
 
     def run(self):
         keks_file = os.path.join(os.path.expanduser("~"), ".dstimer", "keks", self.action["domain"], self.action["player"])
@@ -91,10 +93,7 @@ class SendActionThread(threading.Thread):
             session.cookies.set("sid", sid)
             session.headers.update({"user-agent": USER_AGENT})
 
-            offset = get_local_offset()
-            ping = get_ping(domain)
-            print("Offset {0} seconds, Ping {1} ms".format(offset.total_seconds(), ping.total_seconds() * 1000))
-            real_departure = dateutil.parser.parse(self.action["departure_time"]) - offset - ping
+            real_departure = dateutil.parser.parse(self.action["departure_time"]) - self.offset - self.ping
 
             while real_departure - datetime.datetime.now() > datetime.timedelta(seconds=3):
                 time_left = real_departure - datetime.datetime.now() - datetime.timedelta(seconds=3)
@@ -120,17 +119,28 @@ def cycle():
     os.makedirs(schedule_path, exist_ok=True)
     os.makedirs(trash_path, exist_ok=True)
 
+    offset = None
+    ping = {}
+
     for file in os.listdir(schedule_path):
         if os.path.isfile(os.path.join(schedule_path, file)):
             with open(os.path.join(schedule_path, file)) as fd:
                 action = json.load(fd)
             departure = dateutil.parser.parse(action["departure_time"])
-            if departure - now < datetime.timedelta(seconds=65):
+            if departure - now < datetime.timedelta(seconds=90):
                 # Move action file to trash folder
                 os.rename(os.path.join(schedule_path, file), os.path.join(trash_path, file))
+                # Request Offset & Ping
+                domain = action["domain"]
+                if offset is None:
+                    offset = get_local_offset()
+                    print("Time Offset: {0} seconds".format(offset.total_seconds()))
+                if domain not in ping:
+                    ping[domain] = get_ping(domain)
+                    print("Ping for {0}: {1}".format(domain, round(ping[domain].total_seconds() * 1000)))
                 # Execute the action in the near future
                 print("Schedule action for {0}".format(departure))
-                thread = SendActionThread(action)
+                thread = SendActionThread(action, offset, ping[domain])
                 thread.start()
 
 class DaemonThread(threading.Thread):
