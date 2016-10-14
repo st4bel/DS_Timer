@@ -88,34 +88,46 @@ class SendActionThread(threading.Thread):
         self.ping = ping
 
     def run(self):
-        keks_file = os.path.join(os.path.expanduser("~"), ".dstimer", "keks", self.action["domain"], self.action["player"])
-        with open(keks_file) as fd:
-            sid = fd.read()
-        domain = self.action["domain"]
+        try:
+            keks_file = os.path.join(os.path.expanduser("~"), ".dstimer", "keks", self.action["domain"], self.action["player"])
+            with open(keks_file) as fd:
+                sid = fd.read()
+            domain = self.action["domain"]
 
-        with requests.Session() as session:
-            session.cookies.set("sid", sid)
-            session.headers.update({"user-agent": USER_AGENT})
+            with requests.Session() as session:
+                session.cookies.set("sid", sid)
+                session.headers.update({"user-agent": USER_AGENT})
 
-            real_departure = dateutil.parser.parse(self.action["departure_time"]) - self.offset - self.ping
+                real_departure = dateutil.parser.parse(self.action["departure_time"]) - self.offset - self.ping
 
-            while real_departure - datetime.datetime.now() > datetime.timedelta(seconds=3):
-                time_left = real_departure - datetime.datetime.now() - datetime.timedelta(seconds=3)
-                time.sleep((time_left / 2).total_seconds())
+                while real_departure - datetime.datetime.now() > datetime.timedelta(seconds=5):
+                    time_left = real_departure - datetime.datetime.now() - datetime.timedelta(seconds=5)
+                    if time_left.total_seconds() <= 0:
+                        break
+                    time.sleep((time_left / 2).total_seconds())
 
-            logger.info("Prepare job")
-            (actual_units, form) = get_place_screen(session, domain, self.action["source_id"])
-            units = intelli_all(self.action["units"], actual_units)
-            (action, data) = get_confirm_screen(session, domain, form, units,
-                self.action["target_coord"]["x"], self.action["target_coord"]["y"], self.action["type"])
+                logger.info("Prepare job")
+                (actual_units, form) = get_place_screen(session, domain, self.action["source_id"])
+                units = intelli_all(self.action["units"], actual_units)
 
-            logger.info("Wait for sending")
-            while real_departure - datetime.datetime.now() > datetime.timedelta(milliseconds=1):
-                time_left = real_departure - datetime.datetime.now()
-                time.sleep((time_left / 2).total_seconds())
+                if units is None:
+                    raise ValueError("Could not satisfy unit conditions. Expected: {0}, Actual {1}".format(
+                        self.action["units"], actual_units))
 
-            just_do_it(session, domain, action, data)
-            logger.info("Finished job")
+                (action, data) = get_confirm_screen(session, domain, form, units,
+                    self.action["target_coord"]["x"], self.action["target_coord"]["y"], self.action["type"])
+
+                logger.info("Wait for sending")
+                while real_departure - datetime.datetime.now() > datetime.timedelta(milliseconds=1):
+                    time_left = real_departure - datetime.datetime.now()
+                    if time_left.total_seconds() <= 0:
+                        break
+                    time.sleep((time_left / 2).total_seconds())
+
+                just_do_it(session, domain, action, data)
+                logger.info("Finished job")
+        except Exception as e:
+            logger.error(str(e))
 
 def cycle():
     now = datetime.datetime.now()
