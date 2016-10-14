@@ -12,13 +12,16 @@ import random, string
 def distance(source, target):
     return math.sqrt(pow(target["x"] - source["x"], 2) + pow(target["y"] - source["y"], 2))
 
+def is_zero(format):
+    return str(format) == "0" or format == "=0" or format == ""
+
 def speed(units, type, stats):
-    if type == "support" and units.get("knight", 0) > 0:
+    if type == "support" and not is_zero(units.get("knight", 0)):
         # travel with knight speed if there is a knight
         return stats["knight"]
     slowest = 0
     for unit in units:
-        if units[unit] > 0 and stats[unit] > slowest:
+        if not is_zero(units[unit]) and stats[unit] > slowest:
             slowest = stats[unit]
     return slowest
 

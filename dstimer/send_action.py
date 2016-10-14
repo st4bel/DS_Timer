@@ -14,6 +14,7 @@ import os
 import json
 import socket
 import logging
+from dstimer.intelli_unit import intelli_all
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36"
 
@@ -103,8 +104,9 @@ class SendActionThread(threading.Thread):
                 time.sleep((time_left / 2).total_seconds())
 
             logger.info("Prepare job")
-            (units, form) = get_place_screen(session, domain, self.action["source_id"])
-            (action, data) = get_confirm_screen(session, domain, form, self.action["units"],
+            (actual_units, form) = get_place_screen(session, domain, self.action["source_id"])
+            units = intelli_all(self.action["units"], actual_units)
+            (action, data) = get_confirm_screen(session, domain, form, units,
                 self.action["target_coord"]["x"], self.action["target_coord"]["y"], self.action["type"])
 
             logger.info("Wait for sending")
