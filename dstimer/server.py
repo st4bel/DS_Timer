@@ -41,3 +41,10 @@ def import_action_post():
     elif request.form["type"] == "keks":
         import_keks.import_from_text(text)
     return redirect("/schedule", code=302)
+
+@app.route("/logs")
+def logs():
+    path = os.path.join(os.path.expanduser("~"), ".dstimer", "logs", "dstimer.log")
+    with open(path) as file:
+        logs = map(json.loads, reversed(file.read().splitlines()))
+    return render_template("logs.html", logs=logs)

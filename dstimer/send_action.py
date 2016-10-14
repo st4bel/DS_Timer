@@ -13,8 +13,11 @@ import threading
 import os
 import json
 import socket
+import logging
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36"
+
+logger = logging.getLogger("dstimer")
 
 def get_place_screen(session, domain, village_id):
     params = dict(village=village_id, screen="place")
@@ -99,18 +102,18 @@ class SendActionThread(threading.Thread):
                 time_left = real_departure - datetime.datetime.now() - datetime.timedelta(seconds=3)
                 time.sleep((time_left / 2).total_seconds())
 
-            print("Prepare job")
+            logger.info("Prepare job")
             (units, form) = get_place_screen(session, domain, self.action["source_id"])
             (action, data) = get_confirm_screen(session, domain, form, self.action["units"],
                 self.action["target_coord"]["x"], self.action["target_coord"]["y"], self.action["type"])
 
-            print("Wait for sending")
+            logger.info("Wait for sending")
             while real_departure - datetime.datetime.now() > datetime.timedelta(milliseconds=1):
                 time_left = real_departure - datetime.datetime.now()
                 time.sleep((time_left / 2).total_seconds())
 
             just_do_it(session, domain, action, data)
-            print("Finished job")
+            logger.info("Finished job")
 
 def cycle():
     now = datetime.datetime.now()
@@ -134,12 +137,12 @@ def cycle():
                 domain = action["domain"]
                 if offset is None:
                     offset = get_local_offset()
-                    print("Time Offset: {0} seconds".format(offset.total_seconds()))
+                    logger.info("Time Offset: {0} seconds".format(offset.total_seconds()))
                 if domain not in ping:
                     ping[domain] = get_ping(domain)
-                    print("Ping for {0}: {1} ms".format(domain, round(ping[domain].total_seconds() * 1000)))
+                    logger.info("Ping for {0}: {1} ms".format(domain, round(ping[domain].total_seconds() * 1000)))
                 # Execute the action in the near future
-                print("Schedule action for {0}".format(departure))
+                logger.info("Schedule action for {0}".format(departure))
                 thread = SendActionThread(action, offset, ping[domain])
                 thread.start()
 
