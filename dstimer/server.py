@@ -2,8 +2,8 @@ from flask import Flask, render_template, request, redirect
 import os
 import json
 import dateutil.parser
-import dstimer.import_action
-import dstimer.import_keks
+from dstimer import import_action
+from dstimer import import_keks
 app = Flask(__name__)
 
 def innocdn_url(path):
@@ -36,8 +36,8 @@ def import_action_get():
 @app.route("/import", methods=["POST"])
 def import_action_post():
     text = request.form["text"]
-    if request.form["action"] == "action":
+    if request.form["type"] == "action":
         import_action.import_from_text(text)
-    elif request.form["action"] == "keks":
+    elif request.form["type"] == "keks":
         import_keks.import_from_text(text)
     return redirect("/schedule", code=302)

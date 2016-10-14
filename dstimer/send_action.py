@@ -137,7 +137,7 @@ def cycle():
                     print("Time Offset: {0} seconds".format(offset.total_seconds()))
                 if domain not in ping:
                     ping[domain] = get_ping(domain)
-                    print("Ping for {0}: {1}".format(domain, round(ping[domain].total_seconds() * 1000)))
+                    print("Ping for {0}: {1} ms".format(domain, round(ping[domain].total_seconds() * 1000)))
                 # Execute the action in the near future
                 print("Schedule action for {0}".format(departure))
                 thread = SendActionThread(action, offset, ping[domain])
