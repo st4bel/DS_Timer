@@ -1,7 +1,7 @@
 import re
 
 def intelli_single(format, actual):
-    format = str(format)
+    format = str(format).strip()
     # Format: x
     match = re.fullmatch(r"[0-9]+", format)
     if match is not None:
@@ -31,6 +31,15 @@ def intelli_single(format, actual):
     if match is not None:
         reduce = int(match.group(1))
         return max(actual - reduce, 0)
+    # Combined format: x, >= y or -x, >= y
+    if "," in format:
+        format = format.partition(",")
+        left = intelli_single(format[0], actual)
+        right = intelli_single(format[2], actual)
+        if left is None or right is None:
+            return None
+        else:
+            return min(left, right)
     # Error
     raise ValueError("Unknown format: {0}".format(format))
 
