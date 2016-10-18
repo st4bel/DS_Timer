@@ -35,12 +35,23 @@ class IntelliSingleTest(unittest.TestCase):
         self.assertEqual(intelli_single("100, >=50", 50), 50)
         self.assertEqual(intelli_single("100, >=50", 49), None)
 
-    def test_minus_and_gte(self):
+    def test_default_and_minus(self):
         self.assertEqual(intelli_single("100, -10", 120), 100)
         self.assertEqual(intelli_single("100, -10", 105), 95)
         self.assertEqual(intelli_single("100, -10", 100), 90)
         self.assertEqual(intelli_single("100, -10", 90), 80)
         self.assertEqual(intelli_single("100, -10", 10), 0)
+
+    def test_gte_and_minus(self):
+        self.assertEqual(intelli_single(">=100, -10", 111), 101)
+        self.assertEqual(intelli_single(">=100, -10", 110), 100)
+        self.assertEqual(intelli_single(">=100, -10", 109), None)
+
+    def test_eq_and_minus(self):
+        self.assertEqual(intelli_single("=100, -10", 130), 100)
+        self.assertEqual(intelli_single("=100, -10", 111), 100)
+        self.assertEqual(intelli_single("=100, -10", 110), 100)
+        self.assertEqual(intelli_single("=100, -10", 109), None)
 
 class IntelliAllTest(unittest.TestCase):
     def test_default(self):

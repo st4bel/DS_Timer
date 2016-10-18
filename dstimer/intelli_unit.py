@@ -38,8 +38,11 @@ def intelli_single(format, actual):
         right = intelli_single(format[2], actual)
         if left is None or right is None:
             return None
+        result = min(left, right)
+        if intelli_single(format[0], result) is not None and intelli_single(format[2], result) is not None:
+            return result
         else:
-            return min(left, right)
+            return None
     # Error
     raise ValueError("Unknown format: {0}".format(format))
 
