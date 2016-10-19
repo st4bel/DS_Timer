@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import unittest
 from dstimer.intelli_unit import intelli_single, intelli_all
+from dstimer.import_action import speed
 
 class IntelliSingleTest(unittest.TestCase):
     def test_default(self):
@@ -74,6 +75,18 @@ class IntelliAllTest(unittest.TestCase):
 
     def test_empty_units(self):
         self.assertEqual(intelli_all(dict(spear=5, snob=1), dict()), dict(spear=0, snob=0))
+
+class UnitSpeedTest(unittest.TestCase):
+    def test_speed(self):
+        stats = {"axe": 18, "militia": 0, "catapult": 30, "heavy": 11,
+            "sword": 22, "ram": 30, "snob": 35, "knight": 10, "spear": 18,
+            "spy": 9, "light": 10}
+
+        self.assertEqual(speed(dict(spear=4, axe=2), "attack", stats), 18)
+        self.assertEqual(speed(dict(spear=4, snob=0), "attack", stats), 18)
+        self.assertEqual(speed(dict(spear=4, snob=1), "attack", stats), 35)
+        self.assertEqual(speed(dict(knight=1, snob="=0"), "attack", stats), 10)
+        self.assertEqual(speed(dict(light=">=20", snob="=0"), "attack", stats), 10)
 
 if __name__ == "__main__":
     unittest.main()

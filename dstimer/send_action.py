@@ -151,7 +151,7 @@ def cycle():
                 domain = action["domain"]
                 if offset is None:
                     offset = get_local_offset()
-                    logger.info("Time Offset: {0} seconds".format(offset.total_seconds()))
+                    logger.info("Time Offset: {0} ms".format(round(offset.total_seconds() * 1000)))
                 if domain not in ping:
                     ping[domain] = get_ping(domain)
                     logger.info("Ping for {0}: {1} ms".format(domain, round(ping[domain].total_seconds() * 1000)))
