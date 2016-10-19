@@ -50,11 +50,9 @@ def get_confirm_screen(session, domain, form, units, target_x, target_y, type):
         params=params, data=payload)
 
     soup = BeautifulSoup(response.content, 'html.parser')
-    error_box = soup.select("div[class=error_box]")
-    if len(error_box) >= 1:
-        error = error_box[0].get_text().strip()
-        print(error)
-        return None
+    error = parse_after_send_error(soup)
+    if error is not None:
+        raise ValueError(error)
 
     form = soup.select("form#command-data-form")[0]
     action = form["action"]
@@ -66,6 +64,16 @@ def get_confirm_screen(session, domain, form, units, target_x, target_y, type):
 
 def just_do_it(session, domain, action, data):
     response = session.post("https://" + domain + action, data=data)
+    soup = BeautifulSoup(response.content, 'html.parser')
+    error = parse_after_send_error(soup)
+    if error is not None:
+        raise ValueError(error)
+
+def parse_after_send_error(soup):
+    error_box = soup.select("div[class=error_box]")
+    if len(error_box) >= 1:
+        return error_box[0].get_text().strip()
+    return None
 
 def get_local_offset():
     client = ntplib.NTPClient()
