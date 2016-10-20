@@ -130,6 +130,14 @@ class SendActionThread(threading.Thread):
                     raise ValueError("Could not satisfy unit conditions. Expected: {0}, Actual {1}".format(
                         self.action["units"], actual_units))
 
+                # Check if speed of troops has changed
+                stats = dstimer.import_action.get_cached_unit_info(domain)
+                original_speed = dstimer.import_action.speed(self.action["units"], self.action["type"], stats)
+                current_speed = dstimer.import_action.speed(units, self.action["type"], stats)
+                if original_speed != current_speed:
+                    raise ValueError("Unit speed changed from {0} to {1} with units in village {2}, user format {3} and calculated {4}".format(
+                        original_speed, current_speed, actual_units, self.action["units"], units))
+
                 (action, data) = get_confirm_screen(session, domain, form, units,
                     self.action["target_coord"]["x"], self.action["target_coord"]["y"], self.action["type"])
 
