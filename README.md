@@ -1,9 +1,12 @@
 ## Download and Run
 
+[![Appveyor](https://ci.appveyor.com/api/projects/status/github/st4bel/DS_Timer?svg=true)](https://ci.appveyor.com/project/st4bel/ds-timer)
+
 ```
 git clone https://github.com/st4bel/DS_Timer.git
 cd DS_Timer
-python daemon.py
+pip install -r requirements.txt
+python dstimer_server.py
 ```
 
 ### Requirements for Windows
@@ -16,18 +19,7 @@ This should contain `%localappdata%\Programs\Python\Python35-32` and
 `%localappdata%\Programs\Python\Python35-32\Scripts` or something
 similar.
 
-Then install the required Python packages (using `cmd.exe`):
-```
-pip install requests beautifulsoup4 ntplib python-dateutil
-```
-
 [Download a git client for Windows.](https://git-scm.com/downloads)
-
-### Requirements for Debian/Ubuntu
-```
-sudo apt-get install git python3
-sudo pip install requests beautifulsoup4 ntplib python-dateutil
-```
 
 ## Example JSON
 
