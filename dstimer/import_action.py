@@ -61,7 +61,7 @@ def autocomplete(action):
 
     units_to_delete = []
     for unit, amount in action["units"].items():
-        if str(amount).strip() == "0":
+        if is_zero(amount):
             units_to_delete.append(unit)
     for unit in units_to_delete:
         del action["units"][unit]
