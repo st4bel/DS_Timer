@@ -15,14 +15,20 @@ import json
 import socket
 import logging
 from dstimer.intelli_unit import intelli_all
+import dstimer.import_action
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36"
 
 logger = logging.getLogger("dstimer")
 
+def check_reponse(response):
+    if response.url.endswith("/sid_wrong.php"):
+        raise ValueError("Session is invalid")
+
 def get_place_screen(session, domain, village_id):
     params = dict(village=village_id, screen="place")
     response = session.get("https://" + domain + "/game.php", params=params)
+    check_reponse(response)
     soup = BeautifulSoup(response.content, 'html.parser')
     form = soup.select("form#command-data-form")[0]
     units = dict()
@@ -48,6 +54,7 @@ def get_confirm_screen(session, domain, form, units, target_x, target_y, type):
 
     response = session.post("https://" + domain + "/game.php",
         params=params, data=payload)
+    check_reponse(response)
 
     soup = BeautifulSoup(response.content, 'html.parser')
     error = parse_after_send_error(soup)
@@ -64,6 +71,7 @@ def get_confirm_screen(session, domain, form, units, target_x, target_y, type):
 
 def just_do_it(session, domain, action, data):
     response = session.post("https://" + domain + action, data=data)
+    check_reponse(response)
     soup = BeautifulSoup(response.content, 'html.parser')
     error = parse_after_send_error(soup)
     if error is not None:
