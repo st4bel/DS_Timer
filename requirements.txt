@@ -5,3 +5,4 @@ requests==2.11.1
 pyperclip==1.5.27
 flask==0.11
 python-json-logger==0.1.5
+pyinstaller==3.2
