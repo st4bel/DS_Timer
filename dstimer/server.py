@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, flash, url_for
 import os
 import json
 import dateutil.parser
 from dstimer import import_action
 from dstimer import import_keks
 app = Flask(__name__)
+app.secret_key = 'ds_timer'
 
 def innocdn_url(path):
     return "https://dsde.innogamescdn.com/8.58/30847" + path
@@ -44,16 +45,20 @@ def schedule_post():
 
 @app.route("/import")
 def import_action_get():
-    return render_template("import_action.html", text=request.args.get('text'))
+    return render_template("import_action.html")
 
 @app.route("/import", methods=["POST"])
 def import_action_post():
-    text = request.form["text"]
-    if request.form["type"] == "action":
-        import_action.import_from_text(text)
-    elif request.form["type"] == "keks":
-        import_keks.import_from_text(text)
-    return redirect("/schedule", code=302)
+    try:
+        text = request.form["text"]
+        if request.form["type"] == "action":
+            import_action.import_from_text(text)
+        elif request.form["type"] == "keks":
+            import_keks.import_from_text(text)
+        return redirect("/schedule", code=302)
+    except Exception as e:
+        flash(str(e))
+        return redirect(url_for("import_action_get"))
 
 @app.route("/logs")
 def logs():

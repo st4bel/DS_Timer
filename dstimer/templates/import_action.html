@@ -1,10 +1,21 @@
 {% extends "layout.html" %}
 {% block title %}Schedule{% endblock %}
 {% block content %}
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-danger">
+    <strong>Import fehlgeschlagen!</strong> {{ message }}
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
 <form action="" method="post">
     <div class="form-group">
         <label for="text">Angriff oder Cookie einfügen:</label>
-        <textarea rows="20" id="text" name="text" class="form-control">{% if text is not none %}{{ text }}{% endif %}</textarea>
+        <textarea rows="20" id="text" name="text" class="form-control">{{ request.args.text }}</textarea>
     </div>
     <button type="submit" name="type" value="action" class="btn btn-default">Angriff importieren</button>
     <button type="submit" name="type" value="keks" class="btn btn-default">Keks importieren</button>
