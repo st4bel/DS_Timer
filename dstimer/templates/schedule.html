@@ -36,6 +36,11 @@
                 <span class="badge alert-success" title="{{unit}}">{{ amount }} <img src="{{ innocdn_url('/graphic/unit/unit_' + unit + '.png') }}"></span>
             {% endfor %}
         </td>
+        <td>
+            <form action="" method="post">
+                <button type="submit" name="type" value="delete_{{action.id}}" class="btn btn-default">Löschen</button>
+            </form>
+        </td>
     </tr>
     {% endfor %}
 </table>

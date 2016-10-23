@@ -23,11 +23,24 @@ def schedule():
         if os.path.isfile(os.path.join(schedule_path, file)):
             with open(os.path.join(schedule_path, file)) as fd:
                 action = json.load(fd)
-                action["departure_time"] = dateutil.parser.parse(action["departure_time"])
-                action["arrival_time"] = dateutil.parser.parse(action["arrival_time"])
-                action["world"] = action["domain"].partition(".")[0]
+                action["departure_time"]    = dateutil.parser.parse(action["departure_time"])
+                action["arrival_time"]      = dateutil.parser.parse(action["arrival_time"])
+                action["world"]             = action["domain"].partition(".")[0]
+                action["id"]                = file[file.find("_")+1:len(file)-4]
                 actions.append(action)
     return render_template("schedule.html", actions=actions)
+
+@app.route("/schedule", methods=["POST"])
+def schedule_post():
+    schedule_path   = os.path.join(os.path.expanduser("~"), ".dstimer", "schedule")
+    trash_path      = os.path.join(os.path.expanduser("~"), ".dstimer", "trash")
+    type = request.form["type"]
+    if "delete_" in type:
+        id  = type[7:len(type)]
+        for file in os.listdir(schedule_path):
+            if id in file:
+                os.rename(os.path.join(schedule_path, file), os.path.join(trash_path, file))
+                return redirect ("/schedule") #reload
 
 @app.route("/import")
 def import_action_get():
