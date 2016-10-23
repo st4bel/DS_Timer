@@ -30,8 +30,10 @@ $(function(){
         //GM_setValue(key,val);
     }
 
-    storageSet("troops",storageGet("troops",JSON.stringify({"current":{"spear":0,"sword":0,"axe":0,"archer":0,"spy":0,"light":0,"marcher":0,"heavy":0,"ram":1,"catapult":0,"snob":0},
-                                                            "leer":{"spear":0,"sword":0,"axe":0,"archer":0,"spy":0,"light":0,"marcher":0,"heavy":0,"ram":0,"catapult":0,"snob":0}})));
+    /*storageSet("troops",storageGet("troops",JSON.stringify({"current":{"spear":0,"sword":0,"axe":0,"archer":0,"spy":0,"light":0,"marcher":0,"heavy":0,"ram":1,"catapult":0,"snob":0},
+                                                            "leer":{"spear":0,"sword":0,"axe":0,"archer":0,"spy":0,"light":0,"marcher":0,"heavy":0,"ram":0,"catapult":0,"snob":0}})));*/
+    storageSet("troops",storageGet("troops",JSON.stringify({"current":{"spear":0,"sword":0,"axe":0,"archer":0,"spy":0,"light":0,"marcher":0,"heavy":0,"ram":1,"catapult":0,"snob":0},"leer":{}})));
+    //storageSet("troops",JSON.stringify({"current":{"spear":0,"sword":0,"axe":0,"archer":0,"spy":0,"light":0,"marcher":0,"heavy":0,"ram":1,"catapult":0,"snob":0},"leer":{}}));
     //storageSet("troops",JSON.stringify({"current":{"spear":0,"sword":0,"axe":0,"archer":0,"spy":0,"light":0,"marcher":0,"heavy":0,"ram":1,"catapult":0,"snob":0},
     //                                        "leer":{"spear":0,"sword":0,"axe":0,"archer":0,"spy":0,"light":0,"marcher":0,"heavy":0,"ram":0,"catapult":0,"snob":0}}));
 
@@ -137,7 +139,7 @@ $(function(){
 						var thisname = $(this).attr("id");
 
 						//troops[$("option:selected",select_template).val()][thisname]	= $(this).val()>0 ? parseInt($(this).val()) : 0;
-                        troops.current[thisname]	= $(this).val()>0 ? parseInt($(this).val()) : undefined;
+                        troops.current[thisname]	= $(this).val()!="0" && $(this).val()!="" ? $(this).val() : "";//undefined;
 						storageSet("troops",JSON.stringify(troops));
                         if(storageGet("current_template")!="---"){
                             $("<option>")
@@ -216,7 +218,6 @@ $(function(){
                 storageSet("current_template", $("option:selected",select_template).val());
                 fillTroops();
                 $('option[value="---"]',$(this)).remove();
-                console.log("current template: "+storageGet("current_template"));
             });
         for(var template_name in troops){
             if(template_name!="current"){
@@ -277,7 +278,12 @@ $(function(){
 
         function fillTroops(){
             for(var name in troopspead){
-                $("input#"+name).val(troops[$("option:selected",select_template).val()][name]);
+                if(troops[$("option:selected",select_template).val()][name]!=""){
+                    $("input#"+name).val(troops[$("option:selected",select_template).val()][name]);
+                }else{
+                    $("input#"+name).val("0");
+                }
+
             }
             troops.current = JSON.parse(JSON.stringify(troops[storageGet("current_template")]));
         }
@@ -333,9 +339,9 @@ $(function(){
         ex_str.type             = type == "true" ? "attack" : "support";
         ex_str.units            = {};
         ex_str.units            = JSON.parse(JSON.stringify(troops.current));
-        for(var unit in ex_str.units){
-            ex_str.units[unit]  = parseInt(ex_str.units[unit]);
-        }
+        //for(var unit in ex_str.units){
+        //    ex_str.units[unit]  = parseInt(ex_str.units[unit]);
+        //}
 
         ex_str.domain           = location.host;
         ex_str.player           = game_data.player.name;
