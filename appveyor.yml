@@ -25,3 +25,10 @@ test_script:
 artifacts:
   - path: dist/*.exe
     name: Executable
+
+deploy:
+  provider: GitHub
+  auth_token:
+    secure: sXFkwnbLwvhjrveFyW3nCab26BYmdnB4rIunNs2Vp1Zwwcl7MNn7eFDx+5rqL+y+
+  on:
+    appveyor_repo_tag: true
