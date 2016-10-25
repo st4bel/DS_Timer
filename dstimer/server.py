@@ -4,13 +4,14 @@ import json
 import dateutil.parser
 from dstimer import import_action
 from dstimer import import_keks
+from dstimer import __version__
 app = Flask(__name__)
 app.secret_key = 'ds_timer'
 
 def innocdn_url(path):
     return "https://dsde.innogamescdn.com/8.58/30847" + path
 
-app.jinja_env.globals.update(innocdn_url=innocdn_url)
+app.jinja_env.globals.update(innocdn_url=innocdn_url, version=__version__)
 
 @app.route("/")
 def index():
@@ -58,7 +59,7 @@ def import_action_post():
         return redirect("/schedule", code=302)
     except Exception as e:
         flash(str(e))
-        return redirect(url_for("import_action_get"))
+        return redirect(url_for("import_action_get", text=text))
 
 @app.route("/logs")
 def logs():
