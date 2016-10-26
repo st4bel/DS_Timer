@@ -7,7 +7,8 @@ a = Analysis(['dstimer_server.py'],
              pathex=['.'],
              binaries=None,
              datas=[
-                ('dstimer/templates/*.html', 'dstimer/templates')
+                ('dstimer/templates/*.html', 'dstimer/templates'),
+                ('dstimer/static/*', 'dstimer/static')
              ],
              hiddenimports=[],
              hookspath=[],
@@ -27,4 +28,5 @@ exe = EXE(pyz,
           debug=False,
           strip=False,
           upx=True,
-          console=True )
+          console=True,
+          icon='dstimer/static/crow.ico' )

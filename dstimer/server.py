@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, flash, url_for
+from flask import Flask, render_template, request, redirect, flash, url_for, send_from_directory
 import os
 import json
 import dateutil.parser
@@ -12,6 +12,10 @@ def innocdn_url(path):
     return "https://dsde.innogamescdn.com/8.58/30847" + path
 
 app.jinja_env.globals.update(innocdn_url=innocdn_url, version=__version__)
+
+@app.route("/static/<path:path>")
+def static_files(path):
+    return send_from_directory("static", path)
 
 @app.route("/")
 def index():

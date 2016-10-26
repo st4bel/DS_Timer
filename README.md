@@ -1,6 +1,11 @@
-## Download and Run
+# DS-Timer
 
 [![Appveyor](https://ci.appveyor.com/api/projects/status/github/st4bel/DS_Timer?svg=true)](https://ci.appveyor.com/project/st4bel/ds-timer)
+[![GitHub release](https://img.shields.io/github/release/st4bel/DS_Timer.svg)]()
+
+![Crow](dstimer/static/crow.png)
+
+## Download and Run
 
 ```
 git clone https://github.com/st4bel/DS_Timer.git
@@ -45,3 +50,6 @@ similar.
     }
 }
 ```
+
+## Credits
+Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>
