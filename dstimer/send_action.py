@@ -157,8 +157,10 @@ def cycle():
     now = datetime.datetime.now()
     schedule_path = os.path.join(os.path.expanduser("~"), ".dstimer", "schedule")
     trash_path = os.path.join(os.path.expanduser("~"), ".dstimer", "trash")
+    expired_path = os.path.join(os.path.expanduser("~"), ".dstimer", "expired")
     os.makedirs(schedule_path, exist_ok=True)
     os.makedirs(trash_path, exist_ok=True)
+    os.makedirs(expired_path, exist_ok=True)
 
     offset = None
     ping = {}
@@ -168,7 +170,11 @@ def cycle():
             with open(os.path.join(schedule_path, file)) as fd:
                 action = json.load(fd)
             departure = dateutil.parser.parse(action["departure_time"])
-            if departure - now < datetime.timedelta(seconds=90):
+            if departure < now:
+                logger.error("Action scheduled for {0} is expired. Will not send.".format(departure))
+                # Move action file to expired folder
+                os.rename(os.path.join(schedule_path, file), os.path.join(expired_path, file))
+            elif departure - now < datetime.timedelta(seconds=90):
                 # Move action file to trash folder
                 os.rename(os.path.join(schedule_path, file), os.path.join(trash_path, file))
                 # Request Offset & Ping
