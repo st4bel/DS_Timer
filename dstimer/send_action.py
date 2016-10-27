@@ -26,7 +26,8 @@ def check_reponse(response):
 
 def get_place_screen(session, domain, village_id):
     params = dict(village=village_id, screen="place")
-    response = session.get("https://" + domain + "/game.php", params=params)
+    headers = dict(referer="https://" + domain + "/game.php")
+    response = session.get("https://" + domain + "/game.php", params=params, headers=headers)
     check_reponse(response)
     soup = BeautifulSoup(response.content, 'html.parser')
     form = soup.select("form#command-data-form")[0]
@@ -36,9 +37,9 @@ def get_place_screen(session, domain, village_id):
     data = dict()
     for input in form.select("input"):
         data[input["name"]] = input["value"]
-    return (units, data)
+    return (units, data, response.url)
 
-def get_confirm_screen(session, domain, form, units, target_x, target_y, type):
+def get_confirm_screen(session, domain, form, units, target_x, target_y, type, referer):
     params = {"village": form["source_village"], "screen": "place", "try": "confirm"}
 
     payload = form.copy()
@@ -51,8 +52,9 @@ def get_confirm_screen(session, domain, form, units, target_x, target_y, type):
     for unit in units:
         payload[unit] = units[unit]
 
+    headers = dict(referer=referer)
     response = session.post("https://" + domain + "/game.php",
-        params=params, data=payload)
+        params=params, data=payload, headers=headers)
     check_reponse(response)
 
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -66,10 +68,11 @@ def get_confirm_screen(session, domain, form, units, target_x, target_y, type):
     for input in form.select("input"):
         if "name" in input.attrs and "value" in input.attrs:
             data[input["name"]] = input["value"]
-    return (action, data)
+    return (action, data, response.url)
 
-def just_do_it(session, domain, action, data):
-    response = session.post("https://" + domain + action, data=data)
+def just_do_it(session, domain, action, data, referer):
+    headers = dict(referer=referer)
+    response = session.post("https://" + domain + action, data=data, headers=headers)
     check_reponse(response)
     soup = BeautifulSoup(response.content, 'html.parser')
     error = parse_after_send_error(soup)
@@ -122,7 +125,7 @@ class SendActionThread(threading.Thread):
                     time.sleep((time_left / 2).total_seconds())
 
                 logger.info("Prepare job")
-                (actual_units, form) = get_place_screen(session, domain, self.action["source_id"])
+                (actual_units, form, referer) = get_place_screen(session, domain, self.action["source_id"])
                 units = intelli_all(self.action["units"], actual_units)
 
                 if units is None:
@@ -137,8 +140,8 @@ class SendActionThread(threading.Thread):
                     raise ValueError("Unit speed changed from {0} to {1} with units in village {2}, user format {3} and calculated {4}".format(
                         original_speed, current_speed, actual_units, self.action["units"], units))
 
-                (action, data) = get_confirm_screen(session, domain, form, units,
-                    self.action["target_coord"]["x"], self.action["target_coord"]["y"], self.action["type"])
+                (action, data, referer) = get_confirm_screen(session, domain, form, units,
+                    self.action["target_coord"]["x"], self.action["target_coord"]["y"], self.action["type"], referer)
 
                 logger.info("Wait for sending")
                 while real_departure - datetime.datetime.now() > datetime.timedelta(milliseconds=1):
@@ -147,7 +150,7 @@ class SendActionThread(threading.Thread):
                         break
                     time.sleep((time_left / 2).total_seconds())
 
-                just_do_it(session, domain, action, data)
+                just_do_it(session, domain, action, data, referer)
                 logger.info("Finished job")
         except Exception as e:
             logger.error(str(e))
