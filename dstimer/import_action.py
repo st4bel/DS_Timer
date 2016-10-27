@@ -8,6 +8,7 @@ import xml.etree.ElementTree as ET
 from datetime import timedelta
 import dateutil.parser
 import random, string
+from dstimer import common
 
 def distance(source, target):
     return math.sqrt(pow(target["x"] - source["x"], 2) + pow(target["y"] - source["y"], 2))
@@ -29,7 +30,8 @@ def runtime(speed, distance):
     return timedelta(seconds=round(60 * speed * distance))
 
 def get_unit_info(domain):
-    response = requests.get("https://" + domain + "/interface.php?func=get_unit_info")
+    headers = {"user-agent": common.USER_AGENT}
+    response = requests.get("https://" + domain + "/interface.php?func=get_unit_info", headers=headers)
     tree = ET.fromstring(response.content)
     units = dict()
     for unit in tree:
@@ -37,7 +39,7 @@ def get_unit_info(domain):
     return units
 
 def get_cached_unit_info(domain):
-    directory =  os.path.join(os.path.expanduser("~"), ".dstimer", "cache")
+    directory = os.path.join(common.get_root_folder(), "cache")
     file = os.path.join(directory, domain)
     try:
         # try to load cached file
@@ -84,8 +86,7 @@ def import_from_text(text):
 
     filename = dateutil.parser.parse(action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + random_id(6) + ".txt"
 
-    directory = os.path.join(os.path.expanduser("~"), ".dstimer", "schedule")
+    directory = os.path.join(common.get_root_folder(), "schedule")
     file = os.path.join(directory, filename)
-    os.makedirs(directory, exist_ok=True)
     with open(file, "w") as fd:
         json.dump(action, fd, indent=4)

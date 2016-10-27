@@ -2,6 +2,7 @@ import requests
 import json
 import os
 import re
+from dstimer import common
 
 FORMAT = re.compile(r"\[([a-zA-Z\.\-0-9]+)\|([a-zA-Z0-9%:]+)\|([a-zA-Z0-9]{8})\]")
 
@@ -15,9 +16,9 @@ def parse_keks(str):
 
 def player_from_keks(keks):
     cookies = dict(sid=keks["sid"])
-    #TODO headers = {"user-agent": USER_AGENT}
+    headers = {"user-agent": common.USER_AGENT}
     response = requests.get("https://" +  keks["domain"] + "/game.php",
-        cookies=cookies) # headers=headers
+        cookies=cookies, headers=headers)
     for line in response.content.decode("utf-8").splitlines():
         if line.strip().startswith("TribalWars.updateGameData("):
             game_data = json.loads(line[line.index("(")+1:line.rindex(")")])
@@ -25,7 +26,7 @@ def player_from_keks(keks):
     return None
 
 def write_keks(keks, player):
-    directory = os.path.join(os.path.expanduser("~"), ".dstimer", "keks", keks["domain"])
+    directory = os.path.join(common.get_root_folder(), "keks", keks["domain"])
     file = os.path.join(directory, player)
     os.makedirs(directory, exist_ok=True)
     with open(file, "w") as fd:

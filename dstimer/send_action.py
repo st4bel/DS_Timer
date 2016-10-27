@@ -16,8 +16,7 @@ import socket
 import logging
 from dstimer.intelli_unit import intelli_all
 import dstimer.import_action
-
-USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36"
+import dstimer.common as common
 
 logger = logging.getLogger("dstimer")
 
@@ -112,7 +111,7 @@ class SendActionThread(threading.Thread):
 
             with requests.Session() as session:
                 session.cookies.set("sid", sid)
-                session.headers.update({"user-agent": USER_AGENT})
+                session.headers.update({"user-agent": common.USER_AGENT})
 
                 real_departure = dateutil.parser.parse(self.action["departure_time"]) - self.offset - self.ping
 
@@ -155,12 +154,9 @@ class SendActionThread(threading.Thread):
 
 def cycle():
     now = datetime.datetime.now()
-    schedule_path = os.path.join(os.path.expanduser("~"), ".dstimer", "schedule")
-    trash_path = os.path.join(os.path.expanduser("~"), ".dstimer", "trash")
-    expired_path = os.path.join(os.path.expanduser("~"), ".dstimer", "expired")
-    os.makedirs(schedule_path, exist_ok=True)
-    os.makedirs(trash_path, exist_ok=True)
-    os.makedirs(expired_path, exist_ok=True)
+    schedule_path = os.path.join(common.get_root_folder(), "schedule")
+    trash_path = os.path.join(common.get_root_folder(), "trash")
+    expired_path = os.path.join(common.get_root_folder(), "expired")
 
     offset = None
     ping = {}

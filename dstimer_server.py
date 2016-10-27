@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from dstimer import server, send_action
+from dstimer import server, send_action, common
 import logging
 from logging import handlers
 import os, sys
@@ -19,8 +19,10 @@ if __name__ == "__main__":
         print("Starting DS_Timer as root or with sudo is disabled. Use --allow-root")
         sys.exit(1)
 
+    common.create_folder_structure()
+
     # init logger
-    log_dir = os.path.join(os.path.expanduser("~"), ".dstimer", "logs")
+    log_dir = os.path.join(common.get_root_folder(), "logs")
     os.makedirs(log_dir, exist_ok=True)
     log_path = os.path.join(log_dir, "dstimer.log")
     logger = logging.getLogger("dstimer")
