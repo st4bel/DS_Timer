@@ -50,6 +50,7 @@
                     {{ issue.player }}:
                     {% if issue.issue == "notfound" %}Nicht importiert
                     {% elif issue.issue == "invalid" %}Session abgelaufen
+                    {% elif issue.issue == "botcheck" %}Botschutz aktiv
                     {% endif %}
                 </li>
                 {% endfor %}

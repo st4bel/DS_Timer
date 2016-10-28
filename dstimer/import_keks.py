@@ -3,6 +3,7 @@ import json
 import os
 import re
 from dstimer import common
+from bs4 import BeautifulSoup
 
 FORMAT = re.compile(r"\[([a-zA-Z\.\-0-9]+)\|([a-zA-Z0-9%:]+)\|([a-zA-Z0-9]{8})\]")
 
@@ -59,8 +60,14 @@ def check_sids():
         except:
             issues.append(dict(domain=domain, player=player, issue="notfound"))
             continue
-        if player_from_keks(dict(sid=sid, domain=domain)) is None:
+        response = requests.get("https://" +  domain + "/game.php",
+            cookies=dict(sid=sid), headers={"user-agent": common.USER_AGENT})
+        if response.url.endswith("/sid_wrong.php"):
             issues.append(dict(domain=domain, player=player, issue="invalid"))
+            continue
+        soup = BeautifulSoup(response.content, 'html.parser')
+        if len(soup.select("div#bot_check")) >= 1:
+            issues.append(dict(domain=domain, player=player, issue="botcheck"))
     return issues
 
 def check_and_save_sids():
