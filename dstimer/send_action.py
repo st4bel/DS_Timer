@@ -17,6 +17,8 @@ import logging
 from dstimer.intelli_unit import intelli_all
 import dstimer.import_action
 import dstimer.common as common
+import random
+from dstimer.import_keks import check_and_save_sids
 
 logger = logging.getLogger("dstimer")
 
@@ -107,7 +109,7 @@ class SendActionThread(threading.Thread):
 
     def run(self):
         try:
-            keks_file = os.path.join(os.path.expanduser("~"), ".dstimer", "keks", self.action["domain"], self.action["player"])
+            keks_file = os.path.join(common.get_root_folder(), "keks", self.action["domain"], self.action["player"])
             with open(keks_file) as fd:
                 sid = fd.read()
             domain = self.action["domain"]
@@ -195,6 +197,12 @@ class DaemonThread(threading.Thread):
 
     def run(self):
         print("Daemon is running")
+        check_sid_counter = 0
         while True:
             cycle()
+            if check_sid_counter == 0:
+                check_and_save_sids()
+                check_sid_counter = random.randint(30, 90) # every 30 to 90 minutes
+            else:
+                check_sid_counter -= 1
             time.sleep(60)

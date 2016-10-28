@@ -39,6 +39,25 @@
     </nav>
 
     <div class="container">
+        {% with status = sids_status() %}
+        {% if status %}
+        <div class="alert alert-warning">
+            <strong>Session-IDs fehlerhaft:</strong>
+            <ul>
+                {% for issue in status %}
+                <li>
+                    <span class="badge">{{ issue.domain.partition(".")[0] }}</span>
+                    {{ issue.player }}:
+                    {% if issue.issue == "notfound" %}Nicht importiert
+                    {% elif issue.issue == "invalid" %}Session abgelaufen
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% endwith %}
+
         {% block content %}{% endblock %}
     </div>
 

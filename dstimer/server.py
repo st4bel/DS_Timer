@@ -5,13 +5,22 @@ import dateutil.parser
 from dstimer import import_action
 from dstimer import import_keks
 from dstimer import __version__
+import dstimer.common as common
+from dstimer.import_keks import check_and_save_sids
 app = Flask(__name__)
 app.secret_key = 'ds_timer'
 
 def innocdn_url(path):
     return "https://dsde.innogamescdn.com/8.58/30847" + path
 
-app.jinja_env.globals.update(innocdn_url=innocdn_url, version=__version__)
+def sids_status():
+    try:
+        with open(os.path.join(common.get_root_folder(), "status.txt")) as fd:
+            return json.load(fd)
+    except:
+        return []
+
+app.jinja_env.globals.update(innocdn_url=innocdn_url, version=__version__, sids_status=sids_status)
 
 @app.route("/static/<path:path>")
 def static_files(path):
@@ -60,6 +69,7 @@ def import_action_post():
             import_action.import_from_text(text)
         elif request.form["type"] == "keks":
             import_keks.import_from_text(text)
+            check_and_save_sids()
         return redirect("/schedule", code=302)
     except Exception as e:
         flash(str(e))

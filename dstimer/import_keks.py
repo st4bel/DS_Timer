@@ -40,3 +40,30 @@ def import_from_text(text):
     if player is None:
         raise ValueError("Session is expired or invalid")
     write_keks(keks, player)
+
+def check_sids():
+    schedule_path = os.path.join(common.get_root_folder(), "schedule")
+    players_to_check = set()
+    for file in os.listdir(schedule_path):
+        if os.path.isfile(os.path.join(schedule_path, file)):
+            with open(os.path.join(schedule_path, file)) as fd:
+                action = json.load(fd)
+            players_to_check.add((action["domain"], action["player"]))
+
+    issues = []
+    for (domain, player) in players_to_check:
+        keks_file = os.path.join(common.get_root_folder(), "keks", domain, player)
+        try:
+            with open(keks_file) as fd:
+                sid = fd.read()
+        except:
+            issues.append(dict(domain=domain, player=player, issue="notfound"))
+            continue
+        if player_from_keks(dict(sid=sid, domain=domain)) is None:
+            issues.append(dict(domain=domain, player=player, issue="invalid"))
+    return issues
+
+def check_and_save_sids():
+    issues = check_sids()
+    with open(os.path.join(common.get_root_folder(), "status.txt"), "w") as fd:
+        json.dump(issues, fd)
