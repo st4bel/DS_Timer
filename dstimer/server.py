@@ -7,6 +7,7 @@ from dstimer import import_keks
 from dstimer import __version__
 import dstimer.common as common
 from dstimer.import_keks import check_and_save_sids
+from operator import itemgetter, attrgetter
 app = Flask(__name__)
 app.secret_key = 'ds_timer'
 
@@ -46,7 +47,14 @@ def schedule():
                 if action["player"] not in player:
                     player.append(action["player"])
                 actions.append(action)
-    return render_template("schedule.html", actions=actions, player=player)
+    args=""
+    if "sort" in request.args:
+        args = request.args.get("sort")
+        if "coord" not in args:
+            actions.sort(key=lambda x: x[args])
+        else: #target_coords or source_coord
+            actions.sort(key=lambda x: x[args]["x"])
+    return render_template("schedule.html", actions=actions, player=player, args=args)
 
 @app.route("/schedule", methods=["POST"])
 def schedule_post():

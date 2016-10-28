@@ -1,16 +1,17 @@
 {% extends "layout.html" %}
 {% block title %}Schedule{% endblock %}
 {% block content %}
+    <h1>{{args}}</h1>
     {% for name in player %}
     <h2>{{name}}</h2>
     <table class="table">
         <tr>
-            <th>Spieler</th>
-            <th>Abschicken</th>
-            <th>Ankunft</th>
+            <th><a href="/schedule?player={{name}}&sort=player">Spieler</a></th>
+            <th><a href="/schedule?player={{name}}&sort=departure_time">Abschicken</a></th>
+            <th><a href="/schedule?player={{name}}&sort=arrival_time">Ankunft</a></th>
             <th></th>
-            <th>Start</th>
-            <th>Ziel</th>
+            <th><a href="/schedule?player={{name}}&sort=source_coord">Start</a></th>
+            <th><a href="/schedule?player={{name}}&sort=target_coord">Ziel</a></th>
             <th>Einheiten</th>
             <th></th>
         </tr>
