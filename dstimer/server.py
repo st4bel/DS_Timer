@@ -34,6 +34,7 @@ def index():
 def schedule():
     schedule_path = os.path.join(os.path.expanduser("~"), ".dstimer", "schedule")
     actions = []
+    player = []
     for file in os.listdir(schedule_path):
         if os.path.isfile(os.path.join(schedule_path, file)):
             with open(os.path.join(schedule_path, file)) as fd:
@@ -42,8 +43,10 @@ def schedule():
                 action["arrival_time"]      = dateutil.parser.parse(action["arrival_time"])
                 action["world"]             = action["domain"].partition(".")[0]
                 action["id"]                = file[file.find("_")+1:len(file)-4]
+                if action["player"] not in player:
+                    player.append(action["player"])
                 actions.append(action)
-    return render_template("schedule.html", actions=actions)
+    return render_template("schedule.html", actions=actions, player=player)
 
 @app.route("/schedule", methods=["POST"])
 def schedule_post():
