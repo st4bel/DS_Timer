@@ -48,13 +48,21 @@ def schedule():
                     player.append(action["player"])
                 actions.append(action)
     args=""
+    rev=""
     if "sort" in request.args:
         args = request.args.get("sort")
+        rev = request.args.get("reverse")
+        if "true" in rev:
+            rev_bool = True
+            rev = "false"
+        else:
+            rev_bool = False
+            rev = "true"
         if "coord" not in args:
-            actions.sort(key=lambda x: x[args])
+            actions.sort(key=lambda x: x[args],reverse = rev_bool)
         else: #target_coords or source_coord
-            actions.sort(key=lambda x: x[args]["x"])
-    return render_template("schedule.html", actions=actions, player=player, args=args)
+            actions.sort(key=lambda x: x[args]["x"],reverse = rev_bool)
+    return render_template("schedule.html", actions=actions, player=player, rev=rev)
 
 @app.route("/schedule", methods=["POST"])
 def schedule_post():

@@ -5,12 +5,12 @@
     <h2>{{name}}</h2>
     <table class="table">
         <tr>
-            <th><a href="/schedule?player={{name}}&sort=player">Spieler</a></th>
-            <th><a href="/schedule?player={{name}}&sort=departure_time">Abschicken</a></th>
-            <th><a href="/schedule?player={{name}}&sort=arrival_time">Ankunft</a></th>
+            <th><a href="/schedule?player={{name}}&sort=player&reverse={{rev}}">Spieler</a></th>
+            <th><a href="/schedule?player={{name}}&sort=departure_time&reverse={{rev}}">Abschicken</a></th>
+            <th><a href="/schedule?player={{name}}&sort=arrival_time&reverse={{rev}}">Ankunft</a></th>
             <th></th>
-            <th><a href="/schedule?player={{name}}&sort=source_coord">Start</a></th>
-            <th><a href="/schedule?player={{name}}&sort=target_coord">Ziel</a></th>
+            <th><a href="/schedule?player={{name}}&sort=source_coord&reverse={{rev}}">Start</a></th>
+            <th><a href="/schedule?player={{name}}&sort=target_coord&reverse={{rev}}">Ziel</a></th>
             <th>Einheiten</th>
             <th></th>
         </tr>
