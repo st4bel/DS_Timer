@@ -13,6 +13,6 @@ def create_folder_structure():
     """
     root = get_root_folder()
     os.makedirs(root, exist_ok=True)
-    folders = ["schedule", "trash", "expired", "cache", "keks", "logs"]
+    folders = ["schedule", "expired", "cache", "keks", "logs", "pending", "failed"]
     for folder in folders:
         os.makedirs(os.path.join(root, folder), exist_ok=True)

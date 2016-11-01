@@ -101,14 +101,17 @@ def get_ping(domain):
     return after - before
 
 class SendActionThread(threading.Thread):
-    def __init__(self, action, offset, ping):
+    def __init__(self, action, offset, ping, file):
         threading.Thread.__init__(self)
         self.action = action
         self.offset = offset
         self.ping = ping
+        self.file = file
 
     def run(self):
         try:
+            pending_path = os.path.join(common.get_root_folder(), "pending")
+            failed_path = os.path.join(common.get_root_folder(), "failed")
             keks_file = os.path.join(common.get_root_folder(), "keks", self.action["domain"], self.action["player"])
             with open(keks_file) as fd:
                 sid = fd.read()
@@ -154,13 +157,17 @@ class SendActionThread(threading.Thread):
 
                 just_do_it(session, domain, action, data, referer)
                 logger.info("Finished job")
+                # Delete finished action file
+                os.remove(os.path.join(pending_path, self.file))
         except Exception as e:
             logger.error(str(e))
+            # Move action file to failed folder
+            os.rename(os.path.join(pending_path, self.file), os.path.join(failed_path, self.file))
 
 def cycle():
     now = datetime.datetime.now()
     schedule_path = os.path.join(common.get_root_folder(), "schedule")
-    trash_path = os.path.join(common.get_root_folder(), "trash")
+    pending_path = os.path.join(common.get_root_folder(), "pending")
     expired_path = os.path.join(common.get_root_folder(), "expired")
 
     offset = None
@@ -176,8 +183,8 @@ def cycle():
                 # Move action file to expired folder
                 os.rename(os.path.join(schedule_path, file), os.path.join(expired_path, file))
             elif departure - now < datetime.timedelta(seconds=90):
-                # Move action file to trash folder
-                os.rename(os.path.join(schedule_path, file), os.path.join(trash_path, file))
+                # Move action file to pending folder
+                os.rename(os.path.join(schedule_path, file), os.path.join(pending_path, file))
                 # Request Offset & Ping
                 domain = action["domain"]
                 if offset is None:
@@ -188,7 +195,7 @@ def cycle():
                     logger.info("Ping for {0}: {1} ms".format(domain, round(ping[domain].total_seconds() * 1000)))
                 # Execute the action in the near future
                 logger.info("Schedule action for {0}".format(departure))
-                thread = SendActionThread(action, offset, ping[domain])
+                thread = SendActionThread(action, offset, ping[domain], file)
                 thread.start()
 
 class DaemonThread(threading.Thread):
