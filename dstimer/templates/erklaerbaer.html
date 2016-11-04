@@ -1,7 +1,207 @@
 {% extends "layout.html" %}
 {% block title %}Guide{% endblock %}
-{% block content %}
-<h2>Guide</h2>
+{% block header %}
+<style>
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
 
-Hier werden mal relefante Dinge stehen.
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+</style>
+{% endblock %}
+{% block content %}
+<h1>Guide</h1>
+Hier ein kurzer Guide für die Benutzung sowie einige Installationshinweise, falls Du es auf einem Minicomputer wie z.B. dem <a href="https://www.amazon.de/Raspberry-Pi-3-Model-B/dp/B01CEFWQFA">Raspberry-Pi</a> o.ä. installieren willst.<br>
+Gibt es bei den folgenden Hinweisen irgendwelche Probleme, bitte melde Dich in meinem <a href="http://blog.ds-kalation.de/?p=38">Hilfethread zum DS-Timer</a>.. es könnte allerdings 1-2 Tage dauern, bis eine Antwort kommt!
+<h2>Installationshinweise / der erste Test</h2>
+In diesem Abschnitt folgt eine kleine Anleitung, was benötigt wird, um euren ersten Angriff mit dem DS-Timer zu verschicken. Bitte geht die Schritte nacheinander durch und schaltet das Gehirn nicht aus..<br>
+<h3>Schritt 0: Vorbereitung</h3>
+Um den DS-Timer benutzen zu können, werden folgende Dinge gebraucht:
+<ul>
+    <li>das Browser-Addon Tampermonkey: für <a href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=de">Chrome</a>, <a href="https://addons.opera.com/de/extensions/details/tampermonkey-beta/?display=en">Opera</a>, <a href="https://addons.mozilla.org/de/firefox/addon/tampermonkey/?src=search">Firefox</a></li>
+    <li>das Browser-Addon DS-Kekse: für <a href="https://chrome.google.com/webstore/detail/ds-kekse/mecnejnplbngenlpfllpfemebkkhnepi?hl=de">Chrome</a>, <a href="https://addons.opera.com/de/extensions/details/ds-kekse/?display=de">Opera</a>, <a href="https://addons.mozilla.org/de/firefox/addon/ds-kekse/?src=search">Firefox</a></li>
+    <li>das Benutzerscript "<i>DS_Timer_Export</i>"</li>
+</ul>
+Also die Installation der Addons sollte hoffentlich jeder hinbekommen haben. Jetzt muss noch das Benutzerscript "DS_Timer_Export" installiert werden. Gehe dazu auf diesen Link (<a href="https://github.com/st4bel/DS_Timer/raw/master/DS_Timer_Export.user.js">DS_Timer_Export.user.js</a>), und die Installation sollte automatisch starten! Kommen wir endlich zum 1. Schritt..<br>
+<h3>Schritt 1: Übertragung des Cookies</h3>
+Import des Session-Cookies: Da sich der DS-Timer in deinen Staemme-Acc einloggen muss, um die Angriffe losschicken zu können muss der sogenannte "Session-Cookie" an das Programm übergeben werden. Dieser Cookie ist wie ein Ausweis, den Du nach dem Einloggen in <i>die-staemme.de</i> bekommen hast. Dieser Ausweis wird auf Deiner Festplatte gespeichert und wird bei jeder Kommunikation von Dir mit den <i>die-staemme.de</i>-Servern zur Identifikation vorgezeigt. Mit diesem Ausweis ausgestattet, können auch externe Programme wie der DS-Timer auf deinen Staemme-Account zugreifen und die von dir geplanten Angriffe schicken.<br>
+Um nun diesen Cookie in den DS-Timer zu übertragen, führe folgende Aktionen aus:
+<ul>
+    <li>logge dich bei die-Staemme ein</li>
+    <li>öffne das Addon "DS-Kekse" in der rechten oberen Ecke deines Browsers</li>
+    <li>klicke auf den Button "Kopieren" neben deiner Welt im Abschnitt "Aktive Sitzungen"</li>
+    <li>gehe nun auf die <a href="/import">Import-Seite</a> des DS-Timers</li>
+    <li>füge den kopierten Text in das Textfeld ein; er sollte die Form <b>[de100.die-staemme.de|0%3Acab326cd4488|071610a3]</b> haben</li>
+    <li>klicke auf "Keks importieren"</li>
+</ul>
+
+Wenn keine Fehlermeldung kommt, sollte alles geklappt haben! Weiter zu Schritt 2.<br>
+<h3>Schritt 2: Angriff importieren</h3>
+Nun zum Importieren des ersten Angriffs. Geht dazu in die-Staemme auf die Karte, und wählt am besten zunächst ein Barbarendorf aus, das als erstes Opfer des Timers herhalten muss.
+<ul>
+    <li>Drückt auf <i>Truppen schicken</i> in der Dorfübersicht des BB's, sodass ihr in den Versammlungsplatz gelangt.</li>
+    <li>Wählt nun einige Truppen aus und drückt auf <i>Angreifen</i>!</li>
+    <li>Auf dieser Bestätigungsseite habt ihr nun eine neue Übersicht "DS-Timer"</li>
+</ul>
+In dieser neuen Übersicht müssen nun folgende Dinge eingetragen werden:
+<ul>
+    <li>in der Spalte für Späher beispielsweise eine "5" eintragen</li>
+    <li>Für die <i>Abschickzeit</i> eine Zeit eintragen, die in mindestens 5 Minuten ist</li>
+    <li>Falls neben dem Feld mit dem Datum und der Uhrzeit statt "Abschickzeit" nur "Ankunftszeit" steht, klickt einmal mit der Maus auf den Text.</li>
+    <li>nun auf den Button "Exportieren" drücken, es erscheint ein neues Textfeld</li>
+    <li>den gesamten Text dieses Feldes kopieren</li>
+</ul>
+Geht nun erneut auf die <a href="/import">Import-Seite</a>, fügt den kopierten Text ein und drückt diesmal auf "Angriff importieren"! Wenn alles geklappt hat, solltet ihr nun auf die <a href="/schedule">Angriffs-Übersicht</a> weitergeleitet worden sein. Hier sind alle Daten des importierten Angriffs noch einmal zu sehen.<br>
+An dieser Stelle musst Du nur noch warten, bis die Abschickzeit erreicht wird. Ungefähr eine Minute bevor der Angriff losgeschickt werden muss, verschwindet der Angriff aus der Übersicht. Das Abschicken kann nun nicht mehr verhindert werden. Ist die Angriffszeit erreicht, sollte der Angriff vom DS-Timer abgeschickt worden sein. Kontrolliert das am besten selbst in Staemme selbst.<br>
+<small>Falls an dieser Stelle der Angriff noch nicht verschickt wurde, hilft euch eventuell ein Blick in das <a href="/logs">Logbuch</a>. Sollte es trotz mehrmaligen Probierens nicht klappen, schaut auf der <a href="http://blog.ds-kalation.de/?p=38">Hilfeseite</a> in meinem Blog vorbei. Nach einer <a href="http://blog.ds-kalation.de/wp-login.php">Anmeldung</a> im Blog musst Du einen kleinen Kommentar mit einer Beschreibung deines Problems verfassen, und ich werde schnellsmöglich versuchen dir zu helfen.</small>
+<h2>Weitere Benutzungshinweise</h2>
+<h3>Erstellen und Verwalten von Vorlagen im User-Script</h3>
+<i>kommt noch</i>
+<h3>Parameter für fortgeschrittene Truppeneingaben</h3>
+Es ist möglich, relativ komplexe Regeln festzulegen, unter denen der Timer entscheidet wie viele Truppen einer Gattung (z.B. Späher) geschickt werden sollen. <br>
+Allgemein liest der DS-Timer kurz bevor er die Truppen verschickt (ca. eine Minute) die Truppenzahlen im Herkunftsdorf des geplanten Angriffs aus. Nun wird er in Abhängigkeit von den importierten Daten eine Truppenzahl berechnen, die tatsächlich abgeschickt wird. In den Folgenden Tabellen sind alle Formate für die Angabe von Truppenzahlen angegeben, die vom Timer akzeptiert wird. Bei diesen Formaten steht das <code>x</code> für eine Zahl in der Eingabe, und das <code>c</code> für die aktuell im Dorf befindlichen Truppen. In der Spalte "Logik" wird mit Pseudocode die Logik angegeben:
+<br>
+<table>
+    <tr>
+        <th>
+            Typ/Beschreibung
+        </th>
+        <th>
+            Format
+        </th>
+        <th>
+            Logik
+        </th>
+    </tr>
+    <tr>
+        <td>
+            Standard<br>
+            schicke <code>x</code>, sonst so viel wie da ist.
+        </td>
+        <td>
+            <code>'x'</code>
+        </td>
+        <td>
+            <code>wenn 'c>=x': 'x', sonst: 'c'</code>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Exakt<br>
+            schicke <code>x</code>, oder breche ab
+        </td>
+        <td>
+            <code>'=x'</code>
+        </td>
+        <td>
+            <code>wenn 'c>=x': 'x', sonst: 'Abbruch'</code>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Alles<br>
+            schicke alle die da sind
+        </td>
+        <td>
+            <code>'*'</code>
+        </td>
+        <td>
+            <code>'c'</code>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Alles, aber mindestens<br>
+            schicke alles, solange mindestens <code>x</code> da sind
+        </td>
+        <td>
+            <code>'>=x'</code>
+        </td>
+        <td>
+            <code>wenn 'c>=x': 'c', sonst: 'Abbruch'</code>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Alles, ohne<br>
+            schicke alles, aber lasse <code>x</code> im dorf<br>
+            falls weniger als <code>x</code> im dorf, schicke 0
+        </td>
+        <td>
+            <code>'-x'</code>
+        </td>
+        <td>
+            <code>wenn 'c-x>0': 'c-x', sonst: '0'</code>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+            <b>Kombinationen:</b>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Standard + aber mindestens<br>
+            schicke <code>x</code>, oder so viel wie vorhanden, aber mindestens <code>y</code>
+        </td>
+        <td>
+            <code>'x, >=y'</code>
+        </td>
+        <td>
+            <code>wenn 'c>=y': wenn 'c>=x': 'x', sonst: 'c', sonst: 'Abbruch'</code>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Standard, ohne<br>
+            schicke <code>x</code>, oder so viel wie vorhanden, aber lasse <code>y</code> im Dorf
+        </td>
+        <td>
+            <code>'x, -y'</code>
+        </td>
+        <td>
+            <code>wenn 'c-y>0': wenn 'c-y>=x': 'x', sonst: 'c-y', sonst: '0'</code>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            mindestens, ohne<br>
+            schicke alles ohne <code>x</code>, aber mindestens <code>y</code>
+        </td>
+        <td>
+            <code>'-x, >=y'</code>
+        </td>
+        <td>
+            <code>wenn 'c-x>=y': 'c-x', sonst: 'Abbruch'</code>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            exakt, ohne<br>
+            schicke exakt <code>x</code>, aber lass <code>y</code> im dorf
+        </td>
+        <td>
+            <code>'=x, -y'</code>
+        </td>
+        <td>
+            <code>wenn 'c-y>=x': 'x', sonst: 'Abbruch'</code>
+        </td>
+    </tr>
+</table>
+<br>
+
+
+<h3>Import von Angriffen mittels Workbench</h3>
+<i>kommt noch</i>
+
+<tiny>Zuletzt aktualisiert zur Version 0.5</tiny>
 {% endblock %}
