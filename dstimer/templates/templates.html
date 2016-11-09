@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+{% block title %}Templates{% endblock %}
+{% block header %}
+
+{% endblock %}
+{% block content %}
+
+<h2>Vorlage erstellen</h2>
+<div id="div_new_template">
+    <form action="" method="post">
+        <div  align="left">
+            <label for="newname">Name</label>
+            <input id="newname" name="newname" type="text"><br><br>
+        </div>
+        <table>
+            <tbody>
+                <tr><td valign="top">
+                        <table class="vis" width="100%"><tbody>
+                            <tr><th>Infanterie</th></tr>
+                            <tr><td><img src="https://dsde.innogamescdn.com/8.60/31135/graphic/unit/unit_spear.png" title="Speerträger" alt="" class=""> <input id="unit_input_spear" name="spear" type="text" style="width: 40px"></td></tr>
+                            <tr><td><img src="https://dsde.innogamescdn.com/8.60/31135/graphic/unit/unit_sword.png" title="Schwertkämpfer" alt="" class=""><input id="unit_input_sword" name="sword" type="text" style="width: 40px"></td></tr>
+                            <tr><td><img src="https://dsde.innogamescdn.com/8.60/31135/graphic/unit/unit_axe.png" title="Axtkämpfer" alt="" class=""><input id="unit_input_axe" name="axe" type="text" style="width: 40px"></td></tr>
+                            <tr><td><img src="https://dsde.innogamescdn.com/8.60/31135/graphic/unit/unit_archer.png" title="Bogenschützen" alt="" class=""><input id="unit_input_archer" name="archer" type="text" style="width: 40px"></td></tr>
+                        </tbody></table>
+                    </td>
+                    <td>
+                        <table class="vis" width="100%"><tbody>
+                            <tr><th>Kavallerie</th></tr>
+                            <tr><td><img src="https://dsde.innogamescdn.com/8.60/31135/graphic/unit/unit_spy.png" title="Späher" alt="" class=""><input id="unit_input_spy" name="spy" type="text" style="width: 40px"></td></tr>
+                            <tr><td><img src="https://dsde.innogamescdn.com/8.60/31135/graphic/unit/unit_light.png" title="Leichte Kavallerie" alt="" class=""><input id="unit_input_light" name="light" type="text" style="width: 40px"></td></tr>
+                            <tr><td><img src="https://dsde.innogamescdn.com/8.60/31135/graphic/unit/unit_marcher.png" title="Berittene Bogenschützen" alt="" class=""><input id="unit_input_marcher" name="marcher" type="text" style="width: 40px"></td></tr>
+                            <tr><td><img src="https://dsde.innogamescdn.com/8.60/31135/graphic/unit/unit_heavy.png" title="Schwere Kavallerie" alt="" class=""><input id="unit_input_heavy" name="heavy" type="text" style="width: 40px"></td></tr>
+                        </tbody></table>
+                    </td>
+                    <td>
+                        <table class="vis" width="100%"><tbody>
+                            <tr><th>Belagerungswaffen</th></tr>
+                            <tr><td><img src="https://dsde.innogamescdn.com/8.60/31135/graphic/unit/unit_ram.png" title="Rammbock" alt="" class=""><input id="unit_input_ram" name="ram" type="text" style="width: 40px"></td></tr>
+                            <tr><td><img src="https://dsde.innogamescdn.com/8.60/31135/graphic/unit/unit_catapult.png" title="Katapult" alt="" class=""><input id="unit_input_catapult" name="catapult" type="text" style="width: 40px"></td></tr>
+                        </tbody></table>
+                    </td>
+                    <td>
+                        <table class="vis" width="100%"><tbody>
+                            <tr><th>Andere</th></tr>
+                            <tr><td><img src="https://dsde.innogamescdn.com/8.60/31135/graphic/unit/unit_knight.png" title="Paladin" alt="" class=""><input id="unit_input_knight" name="knight" type="text" style="width: 40px"></td></tr>
+                            <tr><td><img src="https://dsde.innogamescdn.com/8.60/31135/graphic/unit/unit_snob.png" title="Adelsgeschlecht" alt="" class=""><input id="unit_input_snob" name="snob" type="text" style="width: 40px"></td></tr>
+                        </tbody></table>
+                    </td>
+                </tr>
+            </tbody></table><br>
+        <button type="submit" name="type" value="create_template" class="btn btn-default">Speichern</button>
+    </form>
+<div>
+<h2>Vorlagen verwalten</h2>
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Truppen</th>
+    </tr>
+    {% for template in templates%}
+    <tr>
+        <td>{{ template.name }}</td>
+        <td>
+            {% for unitname in unitnames %}
+            <span class="badge alert-success" title="{{unitname}}">{{template.units[unitname]}}<img src="{{ innocdn_url('/graphic/unit/unit_' + unitname + '.png') }}"></span>
+            {% endfor %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

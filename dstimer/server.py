@@ -27,6 +27,10 @@ app.jinja_env.globals.update(innocdn_url=innocdn_url, version=__version__, sids_
 def static_files(path):
     return send_from_directory("static", path)
 
+#def sort_unit_dict(dict):
+#    units = {"spear":0, "sword":1, "axe":2, "archer":3, "spy":4, "light":5, "marcher":6, "heavy":7, "ram":8, "catapult":9, "knight":10, "snob":11}
+
+
 @app.route("/")
 def index():
     return render_template("erklaerbaer.html")
@@ -100,3 +104,31 @@ def logs():
     with open(path) as file:
         logs = map(json.loads, reversed(file.read().splitlines()))
     return render_template("logs.html", logs=logs)
+@app.route("/templates")
+def action_templates():
+    path = os.path.join(os.path.expanduser("~"), ".dstimer", "templates")
+    templates = []
+    for filename in os.listdir(path):
+        if os.path.isfile(os.path.join(path, filename)):
+            with open(os.path.join(path, filename)) as fd:
+                units = json.load(fd)
+            template={}
+            template["name"]=filename
+            template["units"]=units
+            templates.append(template)
+
+    unitnames = ["spear", "sword", "axe", "archer", "spy", "light", "marcher", "heavy", "ram", "catapult", "knight", "snob"]
+    return render_template("templates.html", templates=templates, unitnames=unitnames)
+
+@app.route("/templates", methods=["POST"])
+def templates_post():
+    units = ["spear", "sword", "axe", "archer", "spy", "light", "marcher", "heavy", "ram", "catapult", "knight", "snob"]
+    if request.form["type"] == "create_template":
+        template_units = {}
+        for name in units:
+            template_units[name] = request.form[name]
+        newname = request.form["newname"]
+        path = os.path.join(os.path.expanduser("~"), ".dstimer", "templates", newname+".template")
+        with open(path, "w") as fd:
+            json.dump(template_units, fd, indent=2)
+    return redirect("/templates")
