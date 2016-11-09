@@ -3,6 +3,7 @@ import os
 import json
 import dateutil.parser
 from dstimer import import_action
+from dstimer import import_template
 from dstimer import import_keks
 from dstimer import __version__
 import dstimer.common as common
@@ -47,7 +48,7 @@ def schedule():
                 action["departure_time"]    = dateutil.parser.parse(action["departure_time"])
                 action["arrival_time"]      = dateutil.parser.parse(action["arrival_time"])
                 action["world"]             = action["domain"].partition(".")[0]
-                action["id"]                = file[file.find("_")+1:len(file)-4]
+                action["id"]                = file[file.rfind("_")+1:-4]
                 if action["player"] not in player:
                     player.append(action["player"])
                 actions.append(action)
@@ -113,7 +114,8 @@ def action_templates():
             with open(os.path.join(path, filename)) as fd:
                 units = json.load(fd)
             template={}
-            template["name"]=filename[:-9]
+            template["name"]=filename[:filename.rfind("_")]
+            template["id"]=filename[filename.rfind("_")+1:-9]
             template["units"]=units
             templates.append(template)
 
@@ -123,12 +125,18 @@ def action_templates():
 @app.route("/templates", methods=["POST"])
 def templates_post():
     units = ["spear", "sword", "axe", "archer", "spy", "light", "marcher", "heavy", "ram", "catapult", "knight", "snob"]
-    if request.form["type"] == "create_template":
+    type = request.form["type"]
+    if type == "create_template":
         template_units = {}
         for name in units:
             template_units[name] = request.form[name]
-        newname = request.form["newname"]
-        path = os.path.join(os.path.expanduser("~"), ".dstimer", "templates", newname+".template")
-        with open(path, "w") as fd:
-            json.dump(template_units, fd, indent=2)
-    return redirect("/templates")
+        template = {}
+        template["name"] = request.form["newname"]
+        template["units"] = template_units
+        import_template.import_as_json(template)
+        return redirect("/templates")
+    elif "delete_" in type:
+        id  = type[7:len(type)]
+        import_template.remove_by_id(id)
+        return redirect("/templates")
+    #return redirect("/templates")
