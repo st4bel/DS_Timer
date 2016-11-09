@@ -113,7 +113,7 @@ def action_templates():
             with open(os.path.join(path, filename)) as fd:
                 units = json.load(fd)
             template={}
-            template["name"]=filename
+            template["name"]=filename[:-9]
             template["units"]=units
             templates.append(template)
 
