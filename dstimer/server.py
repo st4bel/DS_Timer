@@ -94,6 +94,9 @@ def import_action_post():
         elif request.form["type"] == "keks":
             import_keks.import_from_text(text)
             check_and_save_sids()
+        elif request.form["type"] == "wb_template":
+            import_template.import_from_workbench(text)
+            return redirect("/templates")
         return redirect("/schedule", code=302)
     except Exception as e:
         flash(str(e))

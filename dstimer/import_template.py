@@ -11,8 +11,34 @@ import random, string
 from dstimer import common
 from dstimer import import_action
 
-def import_template_from_workbench():
-    todo=1
+def import_from_workbench(text):
+    tree = ET.fromstring(text)
+    template = {}
+    units = {}
+    for tree_template in tree:
+        template["name"] = tree_template.get("name")
+        for tree_unit in tree_template.find("attackElements"):
+            filled = False
+            if tree_unit.get("fix") != "0":
+                filled = True
+                if tree_unit.get("fixAmount") != "-1":
+                    units[tree_unit.get("unit")] = tree_unit.get("fixAmount")
+                else:
+                #dynamische Truppenangebe: Alle+-+100;
+                    text = tree_unit.get("dynAmount")
+                    text = text.replace("+","").replace("Alle","")
+                    units[tree_unit.get("unit")] = text
+        template["units"]=units;
+        if filled:
+            import_as_json(template)
+
+
+
+#<stdAttacks>
+#   <stdAttack name="Off" icon="2">
+#       <attackElements>
+#           <attackElement unit="spear" fixAmount="-1" dynAmount="Alle"/>
+
 
 def import_as_json(dict):
     if dict["name"] != "":
