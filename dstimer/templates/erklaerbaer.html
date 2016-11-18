@@ -200,8 +200,46 @@ Allgemein liest der DS-Timer kurz bevor er die Truppen verschickt (ca. eine Minu
 <br>
 
 
-<h3>Import von Angriffen mittels Workbench</h3>
-<i>kommt noch</i>
+<h2>Import von Angriffen mittels Workbench</h2>
+Hier eine kurze Anleitung zum Import von Befehlen aus dem Workbench-Angriffsplaner. Eine Anleitung zum installieren von Workbench (WB) selbst ist <a href="http://blog.ds-kalation.de/?p=50">hier</a> zu finden.<br>
+Nachdem ihr die Angriffe mithilfe des "Taktikplaner's" erstellt habt und sie in die Befehls-Übersicht übertragen habt, bietet euch Workbench die Möglichkeit, einige oder alle Befehle zu exportieren. Die exportierten WB-Befehle können nun auf die in folgender Anleitung beschriebene Weise in "DS-Timer-Befehle" umgewandelt werden:<br>
 
-<tiny>Zuletzt aktualisiert zur Version 0.5</tiny>
+<h3>Schritt 1: Export der WB-Befehle</h3>
+
+<ul>
+    <li>öffnet die "Befehle"-Übersicht von WB</li>
+    <li>wählt euren erstellten Angriffsplan aus (farbige Reiter am oberen Bildrand)</li>
+    <li>markiert die gewünschten Befehle</li>
+    <li>drückt am rechten Bildrand auf "Markierte Befehle auf mehrere Textdateien Aufteilen" (das Datei-Symbol mit dem grünen Pfeil)</li>
+    <li>im sich öffnenden Dialog wählt ihr ein geeigetes Zielverzeichnis, und tragt bei "Angriffe pro Datei" eine Zahl größer eurer Befehlszahl ein; (<i>kein</i> Häckchen bei "Erweiterte BB-Codes" setzen!)</li>
+</ul>
+
+Nun müsste sich im gewählten Zielverzeichnis ein Datei mit eurem Spielername befinden.
+
+<h3>Schritt 2: Erstellen von Truppenvorlagen</h3>
+
+Wenn ihr die exportierte Datei öffnet, sollte diese folgende Form haben (Hier nur ein exportierter Befehl):<br>
+<samp>
+    [b]Angriffsplan[/b]<br>
+    Anzahl der Angriffe: 1<br>
+    [table]<br>
+    [**]ID[||]Art[||]Einheit[||]Herkunft[||]Ziel[||]Abschickzeit[||]Versammlungsplatz[/**]<br>
+    [*]1[|]Angriff (Clean-Off)[|]Ramme[|][coord]584|416[/coord][|][coord]600|460[/coord][|]19.11.16 um 00:10:38[|][url="https://de100.die-staemme.de/game.php?village=1234&screen=place&mode=command&target=1235"]Versammlungsplatz[/url][/*]<br>
+    [/table]<br>
+</samp><br>
+Da bei dem WB-Export keine Truppen zahlen mit exportiert werden müssen für jede Befehlsart (Angriff, Fake, Unterstützung, selbst definiert..) eine Vorlage erstellt werden. Dazu geht ihr auf die <a href="/templates">Templates</a>-Seite.<br>
+Zu beachten ist an dieser Stelle nur, dass der Name der neuen Vorlage mit dem WB-Export-Name übereinstimmen muss. Aus oberem Beispiel müsste die neue Vorlage also <code>Clean-Off</code> heißen. Leider enstpricht dieser Name nicht dem Vorlagennamen, der einem in Workbench selbst angezeigt wird..<br>
+
+<h3>Schritt 3: Import der Befehle</h3>
+<ul>
+    <li>öffnet die exportierte .txt Datei aus Schritt 1 in einem beliebigen Texteditor</li>
+    <li>kopiert den gesamten Inhalt der Datei</li>
+    <li>geht auf die <a href="/wb">Workbench</a>-Seite</li>
+    <li>im großen Textfeld den kopierten Datei-Inhalt einfügen und darunter den Spielernamen einfügen</li>
+    <li>auf "WB-Angriffe importieren" klicken</li>
+</ul>
+Sollten in den Befehlen verwendete Vorlagen verwendet werden, die noch nicht erstellt wurden, oder eben falsch benannt wurden, wird ein entsprechender Fehler eingeblendet!<br>
+Ansonsten sollten nun alle Befehle der <a href="/schedule">Schedule</a>-Seite zu finden sein.
+
+
 {% endblock %}
