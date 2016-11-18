@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block title %}Import{% endblock %}
+{% block title %}Workbench - Import{% endblock %}
 {% block content %}
 
 {% with messages = get_flashed_messages() %}
@@ -15,11 +15,11 @@
 <form action="" method="post">
     <div class="form-group">
         <label for="text">Angriff oder Cookie einfügen:</label>
-        <textarea rows="20" id="text" name="text" class="form-control">{{ request.args.text }}</textarea>
+        <textarea rows="20" id="text" name="text" class="form-control">{{ request.args.text }}</textarea><br>
+        <label for="playername">Spielername (richtig schreiben..)</label>
+        <input id="playername" name="playername" type="text"><br><br>
     </div>
-    <button type="submit" name="type" value="action" class="btn btn-default">Angriff importieren</button>
-    <button type="submit" name="type" value="keks" class="btn btn-default">Keks importieren</button>
-    <button type="submit" name="type" value="wb_template" class="btn btn-default">WB-Vorlage importieren</button>
     <button type="submit" name="type" value="wb_action" class="btn btn-default">WB-Angriffe importieren</button>
+    <button type="submit" name="type" value="wb_template" class="btn btn-default">WB-Vorlage importieren</button>
 </form>
 {% endblock %}

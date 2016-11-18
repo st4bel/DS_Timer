@@ -94,13 +94,29 @@ def import_action_post():
         elif request.form["type"] == "keks":
             import_keks.import_from_text(text)
             check_and_save_sids()
-        elif request.form["type"] == "wb_template":
-            import_template.import_from_workbench(text)
-            return redirect("/templates")
         return redirect("/schedule", code=302)
     except Exception as e:
         flash(str(e))
         return redirect(url_for("import_action_get", text=text))
+
+@app.route("/wb")
+def wb_get():
+    return render_template("workbench_import.html")
+
+@app.route("/wb", methods=["POST"])
+def wb_post():
+    try:
+        text = request.form["text"]
+        playername = request.form["playername"]
+        if request.form["type"] == "wb_template":
+            import_template.import_from_workbench(text)
+            return redirect("/templates")
+        elif request.form["type"] == "wb_action":
+            import_action.import_wb_action(text,playername)
+        return redirect("/schedule", code=302)
+    except Exception as e:
+        flash(str(e))
+        return redirect(url_for("wb_get", text=text))
 
 @app.route("/logs")
 def logs():

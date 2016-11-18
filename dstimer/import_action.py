@@ -90,3 +90,51 @@ def import_from_text(text):
     file = os.path.join(directory, filename)
     with open(file, "w") as fd:
         json.dump(action, fd, indent=4)
+def import_wb_action(text,name):
+    #splitting text for [*]
+    s = text.split("[/**]")
+    actions_text = s[1].split("[/*]")
+    action={}
+    for action_text in actions_text[:-1]:
+        columns = action_text.split("[|]")
+        if "Angriff" in columns[1]:
+            action["type"]="attack"
+        else:
+            action["type"]="support"
+        action["source_coord"]={}
+        action["target_coord"]={}
+        action["source_coord"]["x"]=columns[3].split("|")[0].split("]")[1]
+        action["source_coord"]["y"]=columns[3].split("|")[1].split("[")[0]
+        action["target_coord"]["x"]=columns[4].split("|")[0].split("]")[1]
+        action["target_coord"]["y"]=columns[4].split("|")[1].split("[")[0]
+        action["domain"] = columns[6].split("/")[2]
+        params = columns[6].split('"')[1].split("?")[1].split("&")
+        a = {}
+        for param in params:
+            a[param.split("=")[0]]=param.split("=")[1]
+        action["source_id"] = int(a["village"])
+        action["target_id"] = int(a["target"])
+        date=columns[5].split(" um ")
+        date[0] = date[0].split(".")
+        action["departure_time"] = "20"+date[0][2]+"-"+date[0][1]+"-"+date[0][0]+"T"+date[1]
+        action["units"] = get_troups_from_template(columns[1].split("(")[1].split(")")[0])
+        action["player"]=name
+        autocomplete(action)
+        filename = dateutil.parser.parse(action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + random_id(6) + ".txt"
+
+        directory = os.path.join(common.get_root_folder(), "schedule")
+        file = os.path.join(directory, filename)
+        with open(file, "w") as fd:
+            json.dump(action, fd, indent=4)
+
+
+def get_troups_from_template(template_name):
+    path = os.path.join(os.path.expanduser("~"), ".dstimer", "templates")
+    for filename in os.listdir(path):
+        if os.path.isfile(os.path.join(path, filename)) and filename[:-16] == template_name:
+            with open(os.path.join(path, filename)) as fd:
+                units = json.load(fd)
+            return units
+    raise NameError('Vorlage "'+template_name+'" nicht vorhanden.')
+
+    #5[|]Angriff (Clean-Off)[|]Ramme[|][coord]446|290[/coord][|][coord]604|388[/coord][|]20.04.16 um 23:16:43.863[|][url="https://de118.die-staemme.de/game.php?village=49989&screen=place&mode=command&target=23476"]Versammlungsplatz[/url]
