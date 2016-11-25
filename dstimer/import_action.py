@@ -119,6 +119,8 @@ def import_wb_action(text,name):
         action["departure_time"] = "20"+date[0][2]+"-"+date[0][1]+"-"+date[0][0]+"T"+date[1]
         action["units"] = get_troups_from_template(columns[1].split("(")[1].split(")")[0])
         action["player"]=name
+        if "arrival_time" in action:
+            del action["arrival_time"] # no arrival time in workbench export
         autocomplete(action)
         filename = dateutil.parser.parse(action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + random_id(6) + ".txt"
 
