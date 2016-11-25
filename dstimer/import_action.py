@@ -79,6 +79,13 @@ def autocomplete(action):
 
 def random_id(length):
     return "".join(random.choice(string.ascii_lowercase) for i in range(length))
+def random_milliseconds(border):
+    ms = int("".join(random.choice(string.digits) for i in range(3)))
+    if ms<border:
+        ms=ms+2*border
+    elif ms>1000-border:
+        ms=ms-2*border
+    return str(ms)
 
 def import_from_text(text):
     action = json.loads(text)
@@ -116,7 +123,7 @@ def import_wb_action(text,name):
         action["target_id"] = int(a["target"])
         date=columns[5].split(" um ")
         date[0] = date[0].split(".")
-        action["departure_time"] = "20"+date[0][2]+"-"+date[0][1]+"-"+date[0][0]+"T"+date[1]
+        action["departure_time"] = "20"+date[0][2]+"-"+date[0][1]+"-"+date[0][0]+"T"+date[1]+"."+random_milliseconds(100)
         action["units"] = get_troups_from_template(columns[1].split("(")[1].split(")")[0])
         action["player"]=name
         if "arrival_time" in action:
