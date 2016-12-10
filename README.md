@@ -5,6 +5,10 @@
 
 ![Crow](dstimer/static/crow.png)
 
+## Using Releases for simple user
+
+Download the "dstimer_server.exe" of our latest [release](https://github.com/st4bel/DS_Timer/releases) and run it. Open the following address in your favorit browser: [127.0.0.1:5000](127.0.0.1:5000). Follow the instructions shown on the new page (up to now only in german).
+
 ## Download and Run
 
 ```
