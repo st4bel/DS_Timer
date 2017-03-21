@@ -67,11 +67,9 @@ def autocomplete(action):
             units_to_delete.append(unit)
     for unit in units_to_delete:
         del action["units"][unit]
-
     unit_info = get_cached_unit_info(action["domain"])
     duration = runtime(speed(action["units"], action["type"], unit_info),
         distance(action["source_coord"], action["target_coord"]))
-
     if "departure_time" not in action:
         action["departure_time"] = (dateutil.parser.parse(action["arrival_time"]) - duration).isoformat()
     if "arrival_time" not in action:
@@ -88,15 +86,20 @@ def random_milliseconds(border):
     return str(ms)
 
 def import_from_text(text):
-    action = json.loads(text)
-    autocomplete(action)
+    actions = json.loads(text)
+    try:  #handhabung von multi-input
+        bla=actions[0]
+    except:
+        actions=json.loads("["+text+"]")
+    for action in actions:
+        autocomplete(action)
 
-    filename = dateutil.parser.parse(action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + random_id(6) + ".txt"
+        filename = dateutil.parser.parse(action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + random_id(6) + ".txt"
 
-    directory = os.path.join(common.get_root_folder(), "schedule")
-    file = os.path.join(directory, filename)
-    with open(file, "w") as fd:
-        json.dump(action, fd, indent=4)
+        directory = os.path.join(common.get_root_folder(), "schedule")
+        file = os.path.join(directory, filename)
+        with open(file, "w") as fd:
+            json.dump(action, fd, indent=4)
 def import_wb_action(text,name):
     #splitting text for [*]
     s = text.split("[/**]")
@@ -123,7 +126,10 @@ def import_wb_action(text,name):
         action["target_id"] = int(a["target"])
         date=columns[5].split(" um ")
         date[0] = date[0].split(".")
-        action["departure_time"] = "20"+date[0][2]+"-"+date[0][1]+"-"+date[0][0]+"T"+date[1]+"."+random_milliseconds(100)
+        #action["departure_time"] = "20"+date[0][2]+"-"+date[0][1]+"-"+date[0][0]+"T"+date[1]+"."+random_milliseconds(100)
+        action["departure_time"] = "20"+date[0][2]+"-"+date[0][1]+"-"+date[0][0]+"T"+date[1]
+        if len(date[1].split('.'))==1: #falls keine millisekunden übergeben
+            action["departure_time"] += "."+random_milliseconds(100)
         action["units"] = get_troups_from_template(columns[1].split("(")[1].split(")")[0])
         action["player"]=name
         if "arrival_time" in action:

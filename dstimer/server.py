@@ -116,7 +116,8 @@ def wb_post():
         return redirect("/schedule", code=302)
     except Exception as e:
         flash(str(e))
-        return redirect(url_for("wb_get", text=text))
+        #return redirect(url_for("wb_get", text=text))
+        return redirect(url_for("wb_get"))
 
 @app.route("/logs")
 def logs():

@@ -33,7 +33,7 @@ similar.
 ## Example JSON
 
 ```json
-{
+[{
     "domain": "de132.die-staemme.de",
     "player": "Nickname",
     "type": "attack",
@@ -52,7 +52,9 @@ similar.
     "units": {
         "spear": 100
     }
-}
+},
+{...}
+]
 ```
 
 ## Credits
