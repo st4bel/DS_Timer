@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        DS_Timer_Export
 // @namespace   de.die-staemme
-// @version     0.1
+// @version     0.1.1
 // @description Export your Attack-Details for DS_Timer
 // @grant       GM_getValue
 // @grant       GM_setValue
@@ -12,7 +12,7 @@
 // ==/UserScript==
 
 var $ = typeof unsafeWindow != 'undefined' ? unsafeWindow.$ : window.$;
-var troopspead = {"spear":18,"sword":22,"axe":18,"archer":18,"spy":9,"light":10,"marcher":10,"heavy":11,"ram":30,"catapult":30,"snob":35};
+var troopspead = {"spear":18,"sword":22,"axe":18,"archer":18,"spy":9,"light":10,"marcher":10,"heavy":11,"ram":30,"catapult":30,"knight":10,"snob":35};
 
 $(function(){
 
@@ -253,23 +253,28 @@ $(function(){
         var label_arrival_departure =$("<span>")
             .click(function(){
                 if(storageGet("toogle_arriv_depart")=="depart"){
-                    label_arrival_departure.text("Ankunftszeit");
+                    label_arrival_departure.text("(Ankunftszeit)");
                     storageSet("toogle_arriv_depart","arriv");
                 }else{
-                    label_arrival_departure.text("Abschickzeit");
+                    label_arrival_departure.text("(Abschickzeit)");
                     storageSet("toogle_arriv_depart","depart");
                 }
             });
+        var label_force =$("<span>")
+            .text(" Truppen nicht prüfen? ");
+        var checkbox_force = $("<input>")
+            .prop("type","checkbox")
+            .attr("id","checkforce")
 
         if(storageGet("toogle_arriv_depart")=="arriv"){
-            label_arrival_departure.text("Ankunftszeit");
+            label_arrival_departure.text("(Ankunftszeit)");
         }else{
-            label_arrival_departure.text("Abschickzeit");
+            label_arrival_departure.text("(Abschickzeit)");
         }
 
         addRow(select_template,button_remove_template)
         addRow(input_name_template,button_store_new_template);
-        addRow($("<span>").append(input_time).append(label_arrival_departure),button_export);
+        addRow($("<span>").append(input_time).append(label_arrival_departure).append(label_force).append(checkbox_force),button_export);
         addRow2(input_export,"export");
 
         $('option[value="'+storageGet("current_template")+'"]',$("#select_template")).eq(0).prop('selected', true);
@@ -339,6 +344,7 @@ $(function(){
         ex_str.type             = type == "true" ? "attack" : "support";
         ex_str.units            = {};
         ex_str.units            = JSON.parse(JSON.stringify(troops.current));
+        ex_str.force            = $("#checkforce").prop("checked");
         //for(var unit in ex_str.units){
         //    ex_str.units[unit]  = parseInt(ex_str.units[unit]);
         //}
