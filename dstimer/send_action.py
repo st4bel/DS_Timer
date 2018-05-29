@@ -130,9 +130,21 @@ class SendActionThread(threading.Thread):
                     time.sleep((time_left / 2).total_seconds())
 
                 logger.info("Prepare job")
+                if self.action["force"]:
+                    #waiting till 100ms before departur.. reason: wait for troops to come back
+                    logger.info("Wait for 100ms before!")
+                    while real_departure - datetime.datetime.now() > datetime.timedelta(milliseconds=100):
+                        time_left = real_departure - datetime.datetime.now()
+                        if time_left.total_seconds() <= 0:
+                            break
+                        time.sleep((time_left / 2).total_seconds())
                 (actual_units, form, referer) = get_place_screen(session, domain, self.action["source_id"])
-                units = intelli_all(self.action["units"], actual_units)
-
+                #for protecting troops from retimes...
+                if self.action["force"]:
+                    #if force, then no check vs. actual_units
+                    units = self.action["units"]
+                else:
+                    units = intelli_all(self.action["units"], actual_units)
                 if units is None:
                     raise ValueError("Could not satisfy unit conditions. Expected: {0}, Actual {1}".format(
                         self.action["units"], actual_units))
@@ -154,7 +166,7 @@ class SendActionThread(threading.Thread):
                     if time_left.total_seconds() <= 0:
                         break
                     time.sleep((time_left / 2).total_seconds())
-
+                logger.info("Time left: "+str(real_departure - datetime.datetime.now()))
                 just_do_it(session, domain, action, data, referer)
                 logger.info("Finished job")
                 # Delete finished action file
