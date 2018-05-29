@@ -6,6 +6,7 @@ from dstimer import import_action
 from dstimer import import_template
 from dstimer import import_keks
 from dstimer import __version__
+from dstimer import delete_action
 import dstimer.common as common
 from dstimer.import_keks import check_and_save_sids
 from operator import itemgetter, attrgetter
@@ -74,12 +75,12 @@ def schedule_post():
     schedule_path   = os.path.join(os.path.expanduser("~"), ".dstimer", "schedule")
     trash_path      = os.path.join(os.path.expanduser("~"), ".dstimer", "trash")
     type = request.form["type"]
-    if "delete_" in type:
-        id  = type[7:len(type)]
-        for file in os.listdir(schedule_path):
-            if id in file:
-                os.rename(os.path.join(schedule_path, file), os.path.join(trash_path, file))
-                return redirect ("/schedule") #reload
+    if "delete__all" in type:
+        delete_action.delete_all()
+        return redirect ("/schedule")
+    elif "delete_" in type:
+        if delete_action.delete_single(id=type[7:len(type)]):
+            return redirect ("/schedule") #reload
 
 @app.route("/import")
 def import_action_get():

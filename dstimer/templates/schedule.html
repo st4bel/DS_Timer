@@ -14,7 +14,11 @@
             <th><a href="/schedule?player={{name}}&sort=source_coord&reverse={{rev}}">Start</a></th>
             <th><a href="/schedule?player={{name}}&sort=target_coord&reverse={{rev}}">Ziel</a></th>
             <th>Einheiten</th>
-            <th></th>
+            <th>
+              <form action="" method="post">
+                <button type="submit" name="type" value="delete__all" class="btn btn-default">Löschen</button>
+              </form>
+            </th>
         </tr>
         {% for action in actions %}
             {% if name == action.player %}
