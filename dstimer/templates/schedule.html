@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block title %}Schedule{% endblock %}
 {% block content %}
-    
+
     {% for name in player %}
     <h2>{{name}}</h2>
     <table class="table">
@@ -9,6 +9,7 @@
             <th><a href="/schedule?player={{name}}&sort=player&reverse={{rev}}">Spieler</a></th>
             <th><a href="/schedule?player={{name}}&sort=departure_time&reverse={{rev}}">Abschicken</a></th>
             <th><a href="/schedule?player={{name}}&sort=arrival_time&reverse={{rev}}">Ankunft</a></th>
+            <th></th>
             <th></th>
             <th><a href="/schedule?player={{name}}&sort=source_coord&reverse={{rev}}">Start</a></th>
             <th><a href="/schedule?player={{name}}&sort=target_coord&reverse={{rev}}">Ziel</a></th>
@@ -22,6 +23,7 @@
             <td>{{ action.departure_time }}</td>
             <td>{{ action.arrival_time }}</td>
             <td><img src="{{innocdn_url('/graphic/command/' + action.type + '.png')}}"></td>
+            <td>{% if action.force %}force!{% endif %}</td>
             <td>
                 <a href="https://{{action.domain}}/game.php?screen=map&x={{ action.source_coord.x }}&y={{ action.source_coord.y }}&beacon" rel="noreferrer">
                     <img src="{{ innocdn_url('/graphic/icons/map2.png') }}">
