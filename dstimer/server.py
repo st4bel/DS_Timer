@@ -81,6 +81,7 @@ def schedule_post():
     elif "delete_" in type:
         if delete_action.delete_single(id=type[7:len(type)]):
             return redirect ("/schedule") #reload
+        return "ok"
 
 @app.route("/import")
 def import_action_get():
