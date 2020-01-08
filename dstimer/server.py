@@ -162,3 +162,18 @@ def templates_post():
         import_template.remove_by_id(id)
         return redirect("/templates")
     #return redirect("/templates")
+
+@app.route("/show", methods=["get"])
+def show_planned_atts():
+    schedule_path = os.path.join(os.path.expanduser("~"), ".dstimer", "schedule")
+    source_id = request.args.get("source_id")
+    target_id = request.args.get("target_id")
+    actions = []
+    for file in os.listdir(schedule_path):
+        with open(os.path.join(schedule_path, file)) as fd:
+            action = json.load(fd)
+            if (source_id==str(action["source_id"]) or source_id==None) and (target_id==str(action["target_id"]) or target_id == None):
+                action["id"] = file[file.rfind("_")+1:-4]
+                actions.append(action)
+
+    return render_template("show.html",actions=actions)

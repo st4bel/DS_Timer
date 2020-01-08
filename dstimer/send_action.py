@@ -88,9 +88,14 @@ def parse_after_send_error(soup):
     return None
 
 def get_local_offset():
-    client = ntplib.NTPClient()
-    response = client.request("europe.pool.ntp.org", version=3)
-    return timedelta(seconds=response.offset)
+    try:
+        client = ntplib.NTPClient()
+        response = client.request("europe.pool.ntp.org", version=3)
+        return timedelta(seconds=response.offset)
+    except:
+        response.offset = 0.0
+        return timedelta(seconds = 0.0)
+    #return timedelta(seconds=response.offset)
 
 def get_ping(domain):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

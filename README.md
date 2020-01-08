@@ -53,7 +53,26 @@ similar.
         "spear": 100
     }
 },
-{...}
+{
+    "domain": "de132.die-staemme.de",
+    "player": "Nickname",
+    "type": "attack",
+    "arrival_time": "2016-10-12T17:30:00",
+    "departure_time": "2016-10-12T16:49:45",
+    "source_id": 1233,
+    "source_coord": {
+        "y": 230,
+        "x": 300
+    },
+    "target_id": 12341,
+    "target_coord": {
+        "x": 200,
+        "y": 120
+    },
+    "units": {
+        "spear": 100
+    }
+}
 ]
 ```
 
