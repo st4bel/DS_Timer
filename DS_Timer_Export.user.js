@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        DS_Timer_Export
 // @namespace   de.die-staemme
-// @version     0.1.1
+// @version     0.1.2
 // @description Export your Attack-Details for DS_Timer
 // @grant       GM_getValue
 // @grant       GM_setValue

@@ -93,6 +93,7 @@ def get_local_offset():
         response = client.request("europe.pool.ntp.org", version=3)
         return timedelta(seconds=response.offset)
     except:
+        logger.info("Can't connect to 'europe.pool.ntp.org'!")
         response.offset = 0.0
         return timedelta(seconds = 0.0)
     #return timedelta(seconds=response.offset)
@@ -134,7 +135,7 @@ class SendActionThread(threading.Thread):
                         break
                     time.sleep((time_left / 2).total_seconds())
 
-                logger.info("Prepare job")
+                logger.info("Prepare job. Forcing attack is "+str(self.action["force"])+"!")
                 if self.action["force"]:
                     #waiting till 100ms before departur.. reason: wait for troops to come back
                     logger.info("Wait for 100ms before!")
@@ -146,22 +147,24 @@ class SendActionThread(threading.Thread):
                 (actual_units, form, referer) = get_place_screen(session, domain, self.action["source_id"])
                 #for protecting troops from retimes...
                 if self.action["force"]:
-                    #if force, then no check vs. actual_units
+                    #if attack is forced, then no check vs. actual_units
                     units = self.action["units"]
                 else:
+                    logger.info("Checking for available units...")
                     units = intelli_all(self.action["units"], actual_units)
                 if units is None:
                     raise ValueError("Could not satisfy unit conditions. Expected: {0}, Actual {1}".format(
                         self.action["units"], actual_units))
 
                 # Check if speed of troops has changed
+                logger.info("Checking for change in unit speed...")
                 stats = dstimer.import_action.get_cached_unit_info(domain)
                 original_speed = dstimer.import_action.speed(self.action["units"], self.action["type"], stats)
                 current_speed = dstimer.import_action.speed(units, self.action["type"], stats)
                 if original_speed != current_speed:
                     raise ValueError("Unit speed changed from {0} to {1} with units in village {2}, user format {3} and calculated {4}".format(
                         original_speed, current_speed, actual_units, self.action["units"], units))
-
+                logger.info("Confirm.")
                 (action, data, referer) = get_confirm_screen(session, domain, form, units,
                     self.action["target_coord"]["x"], self.action["target_coord"]["y"], self.action["type"], referer)
 
