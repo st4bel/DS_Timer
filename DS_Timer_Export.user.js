@@ -121,7 +121,7 @@ $(function(){
 			.append(
 				$("<span>")
 				.append(
-					$("<img>").attr("src","https://dsde.innogamescdn.com/8.40.2/27945/graphic/unit/unit_"+name+".png")
+					$("<img>").attr("src","https://dsde.innogamescdn.com/asset/e9773236/graphic/unit/unit_"+name+".png")
 				)
 			)
 			.attr("id","AF_unitTableHead_"+name)

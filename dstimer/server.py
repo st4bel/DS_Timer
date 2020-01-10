@@ -14,7 +14,8 @@ app = Flask(__name__)
 app.secret_key = 'ds_timer'
 
 def innocdn_url(path):
-    return "https://dsde.innogamescdn.com/8.58/30847" + path
+#    return "https://dsde.innogamescdn.com/8.58/30847" + path
+    return "https://dsde.innogamescdn.com/asset/e9773236" + path
 
 def sids_status():
     try:
