@@ -118,7 +118,7 @@ class SendActionThread(threading.Thread):
         try:
             pending_path = os.path.join(common.get_root_folder(), "pending")
             failed_path = os.path.join(common.get_root_folder(), "failed")
-            keks_file = os.path.join(common.get_root_folder(), "keks", self.action["domain"], self.action["player"])
+            keks_file = os.path.join(common.get_root_folder(), "keks", self.action["domain"], "".join(i for i in self.action["player"] if i.isalnum()))
             with open(keks_file) as fd:
                 sid = fd.read()
             domain = self.action["domain"]
