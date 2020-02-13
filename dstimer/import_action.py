@@ -9,6 +9,7 @@ from datetime import timedelta
 import dateutil.parser
 import random, string
 from dstimer import common
+import numpy as np
 
 def distance(source, target):
     return math.sqrt(pow(target["x"] - source["x"], 2) + pow(target["y"] - source["y"], 2))
@@ -85,7 +86,7 @@ def random_milliseconds(border):
         ms=ms-2*border
     return str(ms)
 
-def import_from_text(text):
+def import_from_text(text, rand_mill=False):
     actions = json.loads(text)
     try:  #handhabung von multi-input
         bla=actions[0]
@@ -93,7 +94,10 @@ def import_from_text(text):
         actions=json.loads("["+text+"]")
     for action in actions:
         autocomplete(action)
-
+        if rand_mill:
+            mill = timedelta(seconds=np.random.rand()-0.5)
+            action["departure_time"] = (dateutil.parser.parse(action["departure_time"]) + mill).isoformat()
+            action["arrival_time"] = (dateutil.parser.parse(action["arrival_time"]) + mill).isoformat()
         filename = dateutil.parser.parse(action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + random_id(6) + ".txt"
 
         directory = os.path.join(common.get_root_folder(), "schedule")

@@ -93,7 +93,7 @@ def import_action_post():
     try:
         text = request.form["text"]
         if request.form["type"] == "action":
-            import_action.import_from_text(text)
+            import_action.import_from_text(text = text, rand_mill = request.form.get("rand_mill"))
         elif request.form["type"] == "keks":
             import_keks.import_from_text(text)
             check_and_save_sids()

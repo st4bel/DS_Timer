@@ -18,6 +18,8 @@
         <textarea rows="20" id="text" name="text" class="form-control">{{ request.args.text }}</textarea>
     </div>
     <button type="submit" name="type" value="action" class="btn btn-default">Angriff importieren</button>
+    <br>
+    <input type="checkbox" name="rand_mill"><label for="rand_mili"> Zufällige Millisekunden einsetzen</label><br>
     <button type="submit" name="type" value="keks" class="btn btn-default">Keks importieren</button>
 </form>
 {% endblock %}
