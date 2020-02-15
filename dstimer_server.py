@@ -32,9 +32,6 @@ if __name__ == "__main__":
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
-    #cert ='cacert.pem'
-    #os.environ['REQUESTS_CA_BUNDLE'] = os.path.join(os.getcwd(), cert)
-
     if args.open_browser:
         webbrowser.open("http://127.0.0.1:" + str(args.port), new=2)
 

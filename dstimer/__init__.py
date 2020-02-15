@@ -1,2 +1,2 @@
 # DS-Timer package
-__version__ = "0.4.7.1"
+__version__ = "0.4.6.5"

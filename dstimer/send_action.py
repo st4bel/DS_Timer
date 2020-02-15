@@ -29,7 +29,7 @@ def check_reponse(response):
 def get_place_screen(session, domain, village_id):
     params = dict(village=village_id, screen="place")
     headers = dict(referer="https://" + domain + "/game.php")
-    response = session.get("https://" + domain + "/game.php", params=params, headers=headers, verify=False)
+    response = session.get("https://" + domain + "/game.php", params=params, headers=headers)
     check_reponse(response)
     soup = BeautifulSoup(response.content, 'html.parser')
     form = soup.select("form#command-data-form")[0]
@@ -56,7 +56,7 @@ def get_confirm_screen(session, domain, form, units, target_x, target_y, type, r
 
     headers = dict(referer=referer)
     response = session.post("https://" + domain + "/game.php",
-        params=params, data=payload, headers=headers, verify=False)
+        params=params, data=payload, headers=headers)
     check_reponse(response)
 
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -74,7 +74,7 @@ def get_confirm_screen(session, domain, form, units, target_x, target_y, type, r
 
 def just_do_it(session, domain, action, data, referer):
     headers = dict(referer=referer)
-    response = session.post("https://" + domain + action, data=data, headers=headers, verify=False)
+    response = session.post("https://" + domain + action, data=data, headers=headers)
     check_reponse(response)
     soup = BeautifulSoup(response.content, 'html.parser')
     error = parse_after_send_error(soup)
