@@ -19,7 +19,7 @@ def player_from_keks(keks):
     cookies = dict(sid=keks["sid"])
     headers = {"user-agent": common.USER_AGENT}
     response = requests.get("https://" +  keks["domain"] + "/game.php",
-        cookies=cookies, headers=headers, verify=False)
+        cookies=cookies, headers=headers)#, verify=False)
     for line in response.content.decode("utf-8").splitlines():
         if line.strip().startswith("TribalWars.updateGameData("):
             game_data = json.loads(line[line.index("(")+1:line.rindex(")")])
