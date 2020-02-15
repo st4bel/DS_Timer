@@ -99,7 +99,7 @@ def import_action_post():
             check_and_save_sids()
         return redirect("/schedule", code=302)
     except Exception as e:
-        flash(str(e))
+        flash("{}: {}".format(type(e).__name__,e))
         return redirect(url_for("import_action_get", text=text))
 
 @app.route("/wb")
