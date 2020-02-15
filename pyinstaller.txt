@@ -1,0 +1,1 @@
+pyinstaller dstimer_server.spec
