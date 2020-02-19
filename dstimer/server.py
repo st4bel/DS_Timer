@@ -5,7 +5,7 @@ import dateutil.parser
 from dstimer import import_action
 from dstimer import import_template
 from dstimer import import_keks
-from dstimer import __version__
+from dstimer import __version__, __needUpdate__
 from dstimer import delete_action
 import dstimer.common as common
 from dstimer.import_keks import check_and_save_sids
@@ -24,7 +24,7 @@ def sids_status():
     except:
         return []
 
-app.jinja_env.globals.update(innocdn_url=innocdn_url, version=__version__, sids_status=sids_status)
+app.jinja_env.globals.update(innocdn_url=innocdn_url, version=__version__, sids_status=sids_status, update = __needUpdate__)
 
 @app.route("/static/<path:path>")
 def static_files(path):

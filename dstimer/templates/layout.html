@@ -35,7 +35,7 @@
             <li><a href="/templates">Templates</a></li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
-              <li><a href="https://github.com/st4bel/DS_Timer/releases">v{{ version }}</a></li>
+              <li><a href="https://github.com/st4bel/DS_Timer/releases/latest">{{ version }}</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -61,10 +61,14 @@
         </div>
         {% endif %}
         {% endwith %}
+        {% if update %}
+          <div class="alert alert-warning">
+            <strong>Update verfügbar! <a href="https://github.com/st4bel/DS_Timer/releases/latest">Hier</a></strong>
+          </div>
+        {% endif %}
 
         {% block content %}{% endblock %}
     </div>
-
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 </body>

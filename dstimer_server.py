@@ -6,6 +6,8 @@ import os, sys
 from pythonjsonlogger import jsonlogger
 import argparse
 import webbrowser
+#import requests
+#from version_parser import Version
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Attack Helper for Die Staemme")
@@ -31,9 +33,6 @@ if __name__ == "__main__":
     formatter = jsonlogger.JsonFormatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-
-    #cert ='cacert.pem'
-    #os.environ['REQUESTS_CA_BUNDLE'] = os.path.join(os.getcwd(), cert)
 
     if args.open_browser:
         webbrowser.open("http://127.0.0.1:" + str(args.port), new=2)

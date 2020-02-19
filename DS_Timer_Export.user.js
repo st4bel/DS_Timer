@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        DS_Timer_Export
 // @namespace   de.die-staemme
-// @version     0.1.2
+// @version     0.1.3
 // @description Export your Attack-Details for DS_Timer
 // @grant       GM_getValue
 // @grant       GM_setValue
@@ -350,7 +350,11 @@ $(function(){
         //}
 
         ex_str.domain           = location.host;
-        ex_str.player           = game_data.player.name;
+        ex_str.player           = game_data.player.name; // in UV gives player name not sitter name
+
+        ex_str.vacation         = getPageAttribute("t");
+        ex_str.sitter           = game_data.player.sitter;
+
         console.log(JSON.stringify(ex_str));
         $("#input_export").val(JSON.stringify(ex_str));
 
