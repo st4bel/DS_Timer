@@ -4,7 +4,8 @@ import os
 import re
 from dstimer import common
 from bs4 import BeautifulSoup
-
+import logging
+logger = logging.getLogger("dstimer")
 FORMAT = re.compile(r"\[([a-zA-Z\.\-0-9]+)\|([a-zA-Z0-9%:]+)\|([a-zA-Z0-9]{8})\]")
 
 def parse_keks(str):
@@ -15,7 +16,7 @@ def parse_keks(str):
     else:
         return None
 
-def player_from_keks(keks):
+def player_id_from_keks(keks):
     cookies = dict(sid=keks["sid"])
     headers = {"user-agent": common.USER_AGENT}
     response = requests.get("https://" +  keks["domain"] + "/game.php",
@@ -23,13 +24,12 @@ def player_from_keks(keks):
     for line in response.content.decode("utf-8").splitlines():
         if line.strip().startswith("TribalWars.updateGameData("):
             game_data = json.loads(line[line.index("(")+1:line.rindex(")")])
-            return game_data["player"]["name"]
+            return game_data["player"]["id"]
     return None
 
-def write_keks(keks, player):
+def write_keks(keks, id):
     directory = os.path.join(common.get_root_folder(), "keks", keks["domain"])
-    player_clean = "".join(i for i in player if i.isalnum())
-    file = os.path.join(directory, player_clean)
+    file = os.path.join(directory, id)
     os.makedirs(directory, exist_ok=True)
     with open(file, "w") as fd:
         fd.write(keks["sid"])
@@ -38,10 +38,10 @@ def import_from_text(text):
     keks = parse_keks(text)
     if keks is None:
         raise ValueError("Invalid keks: {0}".format(text))
-    player = player_from_keks(keks)
-    if player is None:
+    id = player_id_from_keks(keks)
+    if id is None:
         raise ValueError("Session is expired or invalid")
-    write_keks(keks, player)
+    write_keks(keks, id)
 
 def check_sids():
     schedule_path = os.path.join(common.get_root_folder(), "schedule")
@@ -50,12 +50,11 @@ def check_sids():
         if os.path.isfile(os.path.join(schedule_path, file)):
             with open(os.path.join(schedule_path, file)) as fd:
                 action = json.load(fd)
-            players_to_check.add((action["domain"], action["player"]))
+            players_to_check.add((action["domain"], action["player"], action["player_id"]))
 
     issues = []
-    for (domain, player) in players_to_check:
-        player_clean = "".join(i for i in player if i.isalnum())
-        keks_file = os.path.join(common.get_root_folder(), "keks", domain, player_clean)
+    for (domain, player, player_id) in players_to_check:
+        keks_file = os.path.join(common.get_root_folder(), "keks", domain, player_id)
         try:
             with open(keks_file) as fd:
                 sid = fd.read()
@@ -74,5 +73,6 @@ def check_sids():
 
 def check_and_save_sids():
     issues = check_sids()
+#    logger.info()
     with open(os.path.join(common.get_root_folder(), "status.txt"), "w") as fd:
         json.dump(issues, fd)

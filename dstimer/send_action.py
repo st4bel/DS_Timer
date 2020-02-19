@@ -26,24 +26,36 @@ def check_reponse(response):
     if response.url.endswith("/sid_wrong.php"):
         raise ValueError("Session is invalid")
 
-def get_place_screen(session, domain, village_id):
+def get_place_screen(session, domain, village_id, vacation):
     params = dict(village=village_id, screen="place")
-    headers = dict(referer="https://" + domain + "/game.php")
-    response = session.get("https://" + domain + "/game.php", params=params, headers=headers)#, verify=False)
+    logger.info(vacation)
+    if vacation != "0":
+        logger.info("vaca")
+        params["t"] = vacation
+        headers = dict(referer="https://" + domain + "/game.php?t="+vacation)
+    else:
+        headers = dict(referer="https://" + domain + "/game.php")
+    response = session.get("https://" + domain + "/game.php", params=params, headers=headers)
     check_reponse(response)
+    logger.info("post session get")
     soup = BeautifulSoup(response.content, 'html.parser')
+    logger.info("pre form")
     form = soup.select("form#command-data-form")[0]
+    logger.info("post soup")
     units = dict()
     for input in form.select("input[id^=unit_input_]"):
         units[input["name"]] = int(input.find_next_sibling("a").get_text()[1:-1])
+    logger.info("post units")
     data = dict()
     for input in form.select("input"):
         data[input["name"]] = input["value"]
+    logger.info("post place")
     return (units, data, response.url)
 
-def get_confirm_screen(session, domain, form, units, target_x, target_y, type, referer):
+def get_confirm_screen(session, domain, form, units, target_x, target_y, type, vacation, referer):
     params = {"village": form["source_village"], "screen": "place", "try": "confirm"}
-
+    if vacation != "0":
+        params["t"] = vacation
     payload = form.copy()
     if type == "attack":
         del payload["support"]
@@ -56,7 +68,7 @@ def get_confirm_screen(session, domain, form, units, target_x, target_y, type, r
 
     headers = dict(referer=referer)
     response = session.post("https://" + domain + "/game.php",
-        params=params, data=payload, headers=headers)#, verify=False)
+        params=params, data=payload, headers=headers)
     check_reponse(response)
 
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -118,7 +130,7 @@ class SendActionThread(threading.Thread):
         try:
             pending_path = os.path.join(common.get_root_folder(), "pending")
             failed_path = os.path.join(common.get_root_folder(), "failed")
-            keks_file = os.path.join(common.get_root_folder(), "keks", self.action["domain"], "".join(i for i in self.action["player"] if i.isalnum()))
+            keks_file = os.path.join(common.get_root_folder(), "keks", self.action["domain"], self.action["player_id"] if self.action["sitter"] == "0" else self.action["sitter"])
             with open(keks_file) as fd:
                 sid = fd.read()
             domain = self.action["domain"]
@@ -144,7 +156,7 @@ class SendActionThread(threading.Thread):
                         if time_left.total_seconds() <= 0:
                             break
                         time.sleep((time_left / 2).total_seconds())
-                (actual_units, form, referer) = get_place_screen(session, domain, self.action["source_id"])
+                (actual_units, form, referer) = get_place_screen(session, domain, self.action["source_id"], self.action["vacation"])
                 #for protecting troops from retimes...
                 if self.action["force"]:
                     #if attack is forced, then no check vs. actual_units
@@ -166,7 +178,7 @@ class SendActionThread(threading.Thread):
                         original_speed, current_speed, actual_units, self.action["units"], units))
                 logger.info("Confirm.")
                 (action, data, referer) = get_confirm_screen(session, domain, form, units,
-                    self.action["target_coord"]["x"], self.action["target_coord"]["y"], self.action["type"], referer)
+                    self.action["target_coord"]["x"], self.action["target_coord"]["y"], self.action["type"], self.action["vacation"] , referer)
 
                 logger.info("Wait for sending")
                 while real_departure - datetime.datetime.now() > datetime.timedelta(milliseconds=1):
@@ -229,7 +241,7 @@ class DaemonThread(threading.Thread):
             cycle()
             if check_sid_counter == 0:
                 check_and_save_sids()
-                check_sid_counter = random.randint(30, 90) # every 30 to 90 minutes
+                check_sid_counter =  5#random.randint(30, 90) # every 30 to 90 minutes
             else:
                 check_sid_counter -= 1
             time.sleep(60)
