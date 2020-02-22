@@ -24,12 +24,13 @@ def player_id_from_keks(keks):
     for line in response.content.decode("utf-8").splitlines():
         if line.strip().startswith("TribalWars.updateGameData("):
             game_data = json.loads(line[line.index("(")+1:line.rindex(")")])
-            return game_data["player"]["id"]
+            return (game_data["player"]["id"], game_data["player"]["name"])
     return None
 
-def write_keks(keks, id):
+def write_keks(keks, id, name):
     directory = os.path.join(common.get_root_folder(), "keks", keks["domain"])
-    file = os.path.join(directory, id)
+    filename = id+"_"+name
+    file = os.path.join(directory, filename)
     os.makedirs(directory, exist_ok=True)
     with open(file, "w") as fd:
         fd.write(keks["sid"])
@@ -38,10 +39,10 @@ def import_from_text(text):
     keks = parse_keks(text)
     if keks is None:
         raise ValueError("Invalid keks: {0}".format(text))
-    id = player_id_from_keks(keks)
+    (id, name) = player_id_from_keks(keks)
     if id is None:
         raise ValueError("Session is expired or invalid")
-    write_keks(keks, id)
+    write_keks(keks, id, name)
 
 def check_sids():
     schedule_path = os.path.join(common.get_root_folder(), "schedule")
@@ -54,7 +55,7 @@ def check_sids():
 
     issues = []
     for (domain, player, player_id) in players_to_check:
-        keks_file = os.path.join(common.get_root_folder(), "keks", domain, player_id)
+        keks_file = os.path.join(common.get_root_folder(), "keks", domain, player_id+"_"+player)
         try:
             with open(keks_file) as fd:
                 sid = fd.read()

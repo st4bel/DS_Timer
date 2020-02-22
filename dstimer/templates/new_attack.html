@@ -1,17 +1,51 @@
 {% extends "layout.html" %}
-{% block title %}Templates{% endblock %}
+{% block title %}New Attack{% endblock %}
 {% block header %}
-
+<script type="text/javascript">
+  function useTemplate(template)
+  {
+    {% for unit in unitnames %}
+      var unitField = document.getElementById("unit_input_{{ unit }}");
+      unitField.value = template.units["{{ unit }}"];
+    {% endfor %}
+  }
+</script>
 {% endblock %}
 {% block content %}
 
-<h2>Vorlage erstellen</h2>
+<h2>Angriff erstellen</h2>
+
+<h3>Truppen eingeben</h3>
 <div id="div_new_template">
     <form action="" method="post">
-        <div  align="left">
-            <label for="newname">Name</label>
-            <input id="newname" name="newname" type="text"><br><br>
-        </div>
+        <table class="table">
+            <tbody>
+                <tr>
+                    <th>Spieler/Server</th><th>Start Koord</th><th>Ziel Koord</th><th>Zeit</th><th>Abschickzeit?</th>
+                </tr>
+                <tr>
+                    <td>
+                      <select>
+                        {% for player in players %}
+                          <option value="{{ player.name }}">{{ player.name }}@{{ player.domain }}</option>
+                        {% endfor %}
+                      </select>
+                    </td>
+                    <td>
+                        <input name="source_x" id="source_x" type="text" style="width: 40px"><input name="source_y" id="source_y" type="text" style="width: 40px">
+                    </td>
+                    <td>
+                        <input name="target_x" id="target_x" type="text" style="width: 40px"><input name="target_y" id="target_y" type="text" style="width: 40px">
+                    </td>
+                    <td>
+                      <input name="time" type="datetime-local" step="0.25" id="time">
+                    <td>
+                    <td>
+                      <input name="departure" type="checkbox" id="departure">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
         <table>
             <tbody>
                 <tr><td valign="top">
@@ -47,11 +81,12 @@
                         </tbody></table>
                     </td>
                 </tr>
-            </tbody></table><br>
+            </tbody>
+        </table><br>
         <button type="submit" name="type" value="create_template" class="btn btn-default">Speichern</button>
     </form>
 </div>
-<h2>Vorlagen verwalten</h2>
+<h3>Vorlage verwenden</h3>
 <table class="table">
     <tr>
         <th>Name</th>
@@ -71,9 +106,9 @@
             </tr></table>
         </td>
         <td>
-            <form action="" method="post">
-                <button type="submit" name="type" value="delete_{{template.id}}" class="btn btn-default">Löschen</button>
-            </form>
+
+                <button onclick="useTemplate({{ template }})" name="type" value="use_{{template.id}}" class="btn btn-default">Verwenden</button>
+
         </td>
     </tr>
     {% endfor %}

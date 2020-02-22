@@ -129,8 +129,14 @@ class SendActionThread(threading.Thread):
     def run(self):
         try:
             pending_path = os.path.join(common.get_root_folder(), "pending")
-            failed_path = os.path.join(common.get_root_folder(), "failed")
-            keks_file = os.path.join(common.get_root_folder(), "keks", self.action["domain"], self.action["player_id"] if self.action["sitter"] == "0" else self.action["sitter"])
+            failed_path  = os.path.join(common.get_root_folder(), "failed")
+            keks_path    = os.path.join(common.get_root_folder(), "keks", self.action["domain"])
+            if self.action["sitter"] == "0":
+                keks_file = os.path.join(keks_path, self.action["player_id"]+"_"+self.action["player"])
+            else:
+                for filename in os.listdir(keks_path):
+                    if self.action["sitter"] in filename:
+                        keks_file = os.path.join(keks_path, filename)
             with open(keks_file) as fd:
                 sid = fd.read()
             domain = self.action["domain"]
@@ -241,7 +247,7 @@ class DaemonThread(threading.Thread):
             cycle()
             if check_sid_counter == 0:
                 check_and_save_sids()
-                check_sid_counter =  5#random.randint(30, 90) # every 30 to 90 minutes
+                check_sid_counter = random.randint(30, 90) # every 30 to 90 minutes
             else:
                 check_sid_counter -= 1
             time.sleep(60)

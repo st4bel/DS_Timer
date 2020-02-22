@@ -10,8 +10,11 @@ from dstimer import delete_action
 import dstimer.common as common
 from dstimer.import_keks import check_and_save_sids
 from operator import itemgetter, attrgetter
+import logging
 app = Flask(__name__)
 app.secret_key = 'ds_timer'
+
+logger = logging.getLogger("dstimer")
 
 def innocdn_url(path):
 #    return "https://dsde.innogamescdn.com/8.58/30847" + path
@@ -23,6 +26,23 @@ def sids_status():
             return json.load(fd)
     except:
         return []
+
+def get_templates():
+    path = os.path.join(os.path.expanduser("~"), ".dstimer", "templates")
+    templates = []
+    for filename in os.listdir(path):
+        if os.path.isfile(os.path.join(path, filename)):
+            with open(os.path.join(path, filename)) as fd:
+                units = json.load(fd)
+            template={}
+            template["name"]=filename[:filename.rfind("_")]
+            template["id"]=filename[filename.rfind("_")+1:-9]
+            template["units"]=units
+            templates.append(template)
+    return templates
+
+def get_unitnames():
+    return ["spear", "sword", "axe", "archer", "spy", "light", "marcher", "heavy", "ram", "catapult", "knight", "snob"]
 
 app.jinja_env.globals.update(innocdn_url=innocdn_url, version=__version__, sids_status=sids_status, update = __needUpdate__)
 
@@ -128,26 +148,14 @@ def logs():
     with open(path) as file:
         logs = map(json.loads, reversed(file.read().splitlines()))
     return render_template("logs.html", logs=logs)
+
 @app.route("/templates")
 def action_templates():
-    path = os.path.join(os.path.expanduser("~"), ".dstimer", "templates")
-    templates = []
-    for filename in os.listdir(path):
-        if os.path.isfile(os.path.join(path, filename)):
-            with open(os.path.join(path, filename)) as fd:
-                units = json.load(fd)
-            template={}
-            template["name"]=filename[:filename.rfind("_")]
-            template["id"]=filename[filename.rfind("_")+1:-9]
-            template["units"]=units
-            templates.append(template)
-
-    unitnames = ["spear", "sword", "axe", "archer", "spy", "light", "marcher", "heavy", "ram", "catapult", "knight", "snob"]
-    return render_template("templates.html", templates=templates, unitnames=unitnames)
+    return render_template("templates.html", templates = get_templates(), unitnames = get_unitnames())
 
 @app.route("/templates", methods=["POST"])
 def templates_post():
-    units = ["spear", "sword", "axe", "archer", "spy", "light", "marcher", "heavy", "ram", "catapult", "knight", "snob"]
+    units = get_unitnames()
     type = request.form["type"]
     if type == "create_template":
         template_units = {}
@@ -178,3 +186,30 @@ def show_planned_atts():
                 actions.append(action)
 
     return render_template("show.html",actions=actions)
+
+@app.route("/new_attack", methods=["GET"])
+def new_atts_get():
+    keks_path = os.path.join(common.get_root_folder(), "keks")
+    players = []
+    for folder in os.listdir(keks_path):
+        for file in os.listdir(os.path.join(keks_path, folder)):
+            s_file = file.split("_")
+            players.append({"domain" : folder, "id" : s_file[0], "name" : s_file[1]})
+    return render_template("new_attack.html", templates = get_templates(), unitnames = get_unitnames(), players=players)
+
+@app.route("/new_attack", methods=["POST"])
+def new_atts_post():
+    action = {}
+    action["source_coord"] = {"x" : request.form["source_x"], "y" : request.form["source_y"]}
+    action["target_coord"] = {"x" : request.form["target_x"], "y" : request.form["target_y"]}
+    unitnames = get_unitnames()
+    action["units"] = {}
+    for name in unitnames:
+        if request.form[name] != "":
+            action["units"][name] = request.form[name]
+    if request.form.get("departure"):
+        action["departure_time"] = request.form["time"]
+    else:
+        action["arrival_time"] = request.form["time"]
+    logger.info(json.dumps(action))
+    return redirect("/schedule")
