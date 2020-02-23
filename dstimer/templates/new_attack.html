@@ -2,13 +2,39 @@
 {% block title %}New Attack{% endblock %}
 {% block header %}
 <script type="text/javascript">
-  function useTemplate(template)
-  {
-    {% for unit in unitnames %}
-      var unitField = document.getElementById("unit_input_{{ unit }}");
-      unitField.value = template.units["{{ unit }}"];
-    {% endfor %}
+  function useTemplate(template, unitnames){
+    for(var i = 0; i < unitnames.length; i++){
+      var unitField = document.getElementById("unit_input_"+unitnames[i]);
+      unitField.value = template.units[unitnames[i]];
+    }
   }
+  function source_player_selected(){
+    var source_player = $("#source_player_select :selected").val();
+    if (source_player != ""){
+      load_source_villages(source_player);
+      load_players(source_player);
+    }
+  }
+  function load_source_villages(source_player){
+    $.get("/villages_of_player/"+source_player, function(villages) {
+      for (var i=0; i < villages.length;i++){
+        $("#source_village").append($("<option>").text(villages[i]["name"]).attr("value",villages[i]["id"]));
+      }
+    })
+  }
+  function load_players(source_player){
+    $.get("/load_players/"+source_player, function(players){
+      for (var i=0; i<players.length;i++){
+        $("#target_player_list").append($("<option>").attr("value", players[i]["name"]));
+      }
+    })
+  }
+  $(function() {
+    {% if N_O_P == 1%}
+      alert("hey");
+      source_player_selected()
+    {% endif %}
+  });
 </script>
 {% endblock %}
 {% block content %}
@@ -21,21 +47,24 @@
         <table class="table">
             <tbody>
                 <tr>
-                    <th>Spieler/Server</th><th>Start Koord</th><th>Ziel Koord</th><th>Zeit</th><th>Abschickzeit?</th>
+                    <th>Spieler/Server</th><th>Start Koord</th><th>Zeit</th><th>Abschickzeit?</th>
                 </tr>
                 <tr>
                     <td>
-                      <select>
+                      <select id="source_player_select", name="source_player_select", onchange="source_player_selected()">
+                        {% if N_O_P != 1%}
+                          <option value="" selected="selected">Spieler auswählen</option>
+                        {% endif %}
                         {% for player in players %}
-                          <option value="{{ player.name }}">{{ player.name }}@{{ player.domain }}</option>
+                          <option value="{{ player.name }}+{{ player.domain }}">{{ player.name }}@{{ player.domain }}</option>
                         {% endfor %}
                       </select>
                     </td>
                     <td>
-                        <input name="source_x" id="source_x" type="text" style="width: 40px"><input name="source_y" id="source_y" type="text" style="width: 40px">
-                    </td>
-                    <td>
-                        <input name="target_x" id="target_x" type="text" style="width: 40px"><input name="target_y" id="target_y" type="text" style="width: 40px">
+                        <input name="source_x" id="source_x" type="text" style="width: 40px"><input name="source_y" id="source_y" type="text" style="width: 40px"><br>
+                        <select id="source_village" name="source_village">
+                          <option value="" selected = "selected">Dorf auswählen</option>
+                        </select>
                     </td>
                     <td>
                       <input name="time" type="datetime-local" step="0.25" id="time">
@@ -45,7 +74,23 @@
                     </td>
                 </tr>
             </tbody>
-        </table>
+        </table><br>
+        <table class="table">
+          <tbody>
+            <tr>
+              <th>Ziel Spieler</th><th>Ziel Koord</th>
+            </tr>
+            <tr>
+              <td>
+                <input list="target_player_list" value="" id="target_player" />
+                <datalist id="target_player_list"></datalist>
+              </td>
+              <td>
+                  <input name="target_x" id="target_x" type="text" style="width: 40px"><input name="target_y" id="target_y" type="text" style="width: 40px">
+              </td>
+            </tr>
+          </tbody>
+        </table><br>
         <table>
             <tbody>
                 <tr><td valign="top">
@@ -107,7 +152,7 @@
         </td>
         <td>
 
-                <button onclick="useTemplate({{ template }})" name="type" value="use_{{template.id}}" class="btn btn-default">Verwenden</button>
+                <button onclick="useTemplate({{ template }},{{ unitnames }})" name="type" value="use_{{template.id}}" class="btn btn-default">Verwenden</button>
 
         </td>
     </tr>

@@ -1,0 +1,5 @@
+<select>
+  {% for village in villages %}
+    <option value="{{ village.id }}">{{ village.name }}@{{ village.coord.x }}{{ village.coord.y }}</option>
+  {% endfor %}
+</select>

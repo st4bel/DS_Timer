@@ -6,3 +6,4 @@ _Show
 test
 updategamedata*
 *.txt
+!requirements.txt

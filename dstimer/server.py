@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, flash, url_for, send_from_directory
+from flask.json import jsonify
 import os
 import json
 import dateutil.parser
@@ -7,6 +8,7 @@ from dstimer import import_template
 from dstimer import import_keks
 from dstimer import __version__, __needUpdate__
 from dstimer import delete_action
+from dstimer import world_data
 import dstimer.common as common
 from dstimer.import_keks import check_and_save_sids
 from operator import itemgetter, attrgetter
@@ -193,9 +195,9 @@ def new_atts_get():
     players = []
     for folder in os.listdir(keks_path):
         for file in os.listdir(os.path.join(keks_path, folder)):
-            s_file = file.split("_")
+            s_file = file.split("_", 1)
             players.append({"domain" : folder, "id" : s_file[0], "name" : s_file[1]})
-    return render_template("new_attack.html", templates = get_templates(), unitnames = get_unitnames(), players=players)
+    return render_template("new_attack.html", templates = get_templates(), unitnames = get_unitnames(), players=players, N_O_P = len(players))
 
 @app.route("/new_attack", methods=["POST"])
 def new_atts_post():
@@ -211,5 +213,18 @@ def new_atts_post():
         action["departure_time"] = request.form["time"]
     else:
         action["arrival_time"] = request.form["time"]
+    action["player"] = request.form.get("source_player_select")
     logger.info(json.dumps(action))
     return redirect("/schedule")
+
+@app.route("/villages_of_player/<source>")
+def villages_of_player(source):
+    s=source.split("+")
+    res = world_data.get_villages_of_player(s[1], player=s[0])
+    return jsonify(res)
+
+@app.route("/load_players/<source>")
+def load_players(source):
+    s=source.split("+")
+    res = world_data.get_players(s[1])
+    return jsonify(res)

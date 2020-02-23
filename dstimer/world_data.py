@@ -54,3 +54,11 @@ def unquote_name(name):
         s = urllib.parse.unquote(s)
         name = name + s +" "
     return name[:-1]
+
+def get_players(domain):
+    file = file = os.path.join(common.get_root_folder(), "world_data", domain, "player.txt")
+    data = readfile_pd(file)
+    players=[]
+    for dataset in data:
+        players.append({"id":str(dataset[0]),"name":unquote_name(dataset[1])})
+    return players
