@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36"
 
@@ -16,3 +17,7 @@ def create_folder_structure():
     folders = ["schedule", "expired", "cache", "keks", "logs", "pending", "failed","templates","trash","world_data"]
     for folder in folders:
         os.makedirs(os.path.join(root, folder), exist_ok=True)
+
+def reset_folders():
+    root = get_root_folder()
+    subprocess.Popen(r"explorer "+root)

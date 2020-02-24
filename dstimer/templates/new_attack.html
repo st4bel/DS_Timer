@@ -97,7 +97,7 @@
         <table class="table">
             <tbody>
                 <tr>
-                    <th>Spieler/Server</th><th>Start Koord</th><th>Zeit</th><th>Abschickzeit?</th>
+                    <th>Spieler/Server</th><th>Start Koord</th>
                 </tr>
                 <tr>
                     <td>
@@ -115,12 +115,6 @@
                         <select id="source_village" name="source_village" onchange="set_coords('source')">
                           <option value="" selected = "selected">Dorf auswählen</option>
                         </select>
-                    </td>
-                    <td>
-                      <input name="time" type="datetime-local" step="0.25" id="time">
-                    <td>
-                    <td>
-                      <input name="departure" type="checkbox" id="departure" checked>
                     </td>
                 </tr>
             </tbody>
@@ -181,11 +175,26 @@
                 </tr>
             </tbody>
         </table><br>
+        <table class="table" width="200">
+          <tbody>
+            <tr>
+              <th>Zeit</th><th>Abschickzeit?</th>
+            </tr>
+            <tr>
+              <td>
+                <input name="time" type="datetime-local" step="0.25" id="time" style="width: 160px">
+              <td>
+              <td>
+                <input name="departure" type="checkbox" id="departure" checked>
+              </td>
+            </tr>
+          </tbody>
+        </table>
         <button type="submit" name="type" value="attack" class="btn btn-default">Angreifen</button>
         <button type="submit" name="type" value="support" class="btn btn-default">Unterstützen</button>
     </form>
 </div>
-<h3>Vorlage verwenden</h3>
+<h3>Vorlage verwenden</h3> <a href="/templates">Vorlage erstellen</a>
 <table class="table">
     <tr>
         <th>Name</th>
@@ -212,5 +221,6 @@
     </tr>
     {% endfor %}
 </table>
+<small><a href="/options">Weltdaten aktualisieren</a></small>
 
 {% endblock %}

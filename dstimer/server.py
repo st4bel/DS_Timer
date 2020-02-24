@@ -9,6 +9,7 @@ from dstimer import import_keks
 from dstimer import __version__, __needUpdate__
 from dstimer import delete_action
 from dstimer import world_data
+from dstimer import common
 import dstimer.common as common
 from dstimer.import_keks import check_and_save_sids
 from operator import itemgetter, attrgetter
@@ -216,15 +217,13 @@ def new_atts_post():
     source_player = request.form.get("source_player_select").split("+")
     action["player_id"] = source_player[0]
     action["domain"] = source_player[1]
-    action["source_id"] = request.form.get("source_village") if request.form.get("source_village") != "" else world_data.get_village_id_from_coords(action["domain"],action["source_coord"]["x"], action["source_coord"]["y"])
-    action["target_id"] = request.form.get("target_village") if request.form.get("target_village") != "" else world_data.get_village_id_from_coords(action["domain"],action["target_coord"]["x"], action["target_coord"]["y"])
+    action["source_id"] = int(request.form.get("source_village") if request.form.get("source_village") != "" else world_data.get_village_id_from_coords(action["domain"],action["source_coord"]["x"], action["source_coord"]["y"]))
+    action["target_id"] = int(request.form.get("target_village") if request.form.get("target_village") != "" else world_data.get_village_id_from_coords(action["domain"],action["target_coord"]["x"], action["target_coord"]["y"]))
     action["type"] = request.form["type"]
-    action["player"] = world_data.get_player_id(action["domain"], action["player_id"])
+    action["player"] = world_data.get_player_name(action["domain"], action["player_id"])
     action["sitter"] = "0"
     action["vacation"] = "0"
     action["force"] = False
-
-    logger.info(json.dumps(action))
     import_action.import_from_ui(action)
     return redirect("/schedule")
 
@@ -237,3 +236,15 @@ def villages_of_player(domain, player_id):
 def load_players(domain):
     res = world_data.get_players(domain)
     return jsonify(res)
+
+@app.route("/options", methods=["GET"])
+def options_get():
+    return render_template("options.html")
+
+@app.route("/options", methods=["POST"])
+def options_post():
+    if request.form["type"] == "refresh-world-data":
+        world_data.refresh_world_data()
+    elif request.form["type"] == "reset-folders":
+        common.reset_folders()
+    return redirect("/options")

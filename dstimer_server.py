@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from dstimer import server, send_action, common
+from dstimer import server, send_action, common, world_data
 import logging
 from logging import handlers
 import os, sys
@@ -33,6 +33,8 @@ if __name__ == "__main__":
     formatter = jsonlogger.JsonFormatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
+    
+    world_data.refresh_world_data()
 
     if args.open_browser:
         webbrowser.open("http://127.0.0.1:" + str(args.port), new=2)

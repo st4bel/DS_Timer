@@ -14,6 +14,11 @@ def get_server_files(domain):
         filename = os.path.join(directory, name+".txt")
         open(filename, "wb").write(file.content)
 
+def refresh_world_data():
+    keks_path = os.path.join(common.get_root_folder(), "keks")
+    for domain in os.listdir(keks_path):
+        get_server_files(domain)
+
 def get_villages_of_player(domain, player = None, player_id=None):
     directory = os.path.join(common.get_root_folder(), "world_data", domain)
     os.makedirs(os.path.join(directory, "villages_of_players"), exist_ok=True)

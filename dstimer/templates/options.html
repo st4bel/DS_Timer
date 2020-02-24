@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block title %}Optionen{% endblock %}
+{% block header %}
+{% endblock %}
+{% block content %}
+<form class="" action="" method="post">
+  <h3>Weltdaten aktualisieren</h3>
+  <div class="">
+    Der Timer lädt anhand der importierten Kekse die Weltdaten der jeweiligen Server herunter. Sollten auf <a href="/new_attack">New Att</a> die Spieler und Dörfer nicht geladen werden, dann bitte folgenden Button drücken.
+  </div><br>
+  <button type="submit" name="type" value="refresh-world-data" class="btn btn-default">Weltdaten aktualisieren</button><br><br>
+  <h3>Ordnerstruktur zurücksetzen</h3>
+  <div class="">
+    Nach jedem Update sollte der Ordner, in dem alle Daten des Timers abgespeichert werden, zurückgesetzt werden. Dazu bitte einmal den Button drücken und im Explorer alle Ordner löschen. Danach den Timer neu starten!
+  </div><br>
+  <button type="submit" name="type" value="reset-folders" class="btn btn-default">Gespeicherte Daten öffnen</button><br>
+</form>
+{% endblock %}
