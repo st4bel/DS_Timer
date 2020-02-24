@@ -364,7 +364,7 @@ $(function(){
     }
     function timestrings(){
         var dates	= $("#serverDate").text().split("/");
-		var times 	= $("#serverTime").text().split(":");
+        var times = $("#serverTime").text().split(":");
         for(var i = 0; i<dates.length;i++){
             if(dates[i].length<2){
                 dates[i] = "0"+dates[i];

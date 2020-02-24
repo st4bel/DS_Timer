@@ -10,30 +10,80 @@
   }
   function source_player_selected(){
     var source_player = $("#source_player_select :selected").val();
+    var s = source_player.split("+")
     if (source_player != ""){
-      load_source_villages(source_player);
-      load_players(source_player);
+      load_source_villages(s[0], s[1]);
+      load_players(s[1]);
     }
   }
-  function load_source_villages(source_player){
-    $.get("/villages_of_player/"+source_player, function(villages) {
+  function load_source_villages(player_id, domain){
+    // TODO remove old villages
+    $.get("/villages_of_player/"+domain+"/"+player_id, function(villages) {
+      window.source_villages = villages
       for (var i=0; i < villages.length;i++){
         $("#source_village").append($("<option>").text(villages[i]["name"]).attr("value",villages[i]["id"]));
       }
     })
   }
-  function load_players(source_player){
-    $.get("/load_players/"+source_player, function(players){
+  function load_target_villages(){
+    var source_player = $("#source_player_select :selected").val();
+    var domain = source_player.split("+")[1];
+    var target_player = $("#target_player").val();
+    players = window.players;
+    for (var i = 0; i<players.length;i++){
+      if (players[i]["name"]==target_player){
+        target_player_id=players[i]["id"];
+        break;
+      }
+    }
+    $.get("/villages_of_player/"+domain+"/"+target_player_id, function(villages) {
+      window.target_villages = villages
+      for (var i=0; i < villages.length;i++){
+        $("#target_village").append($("<option>").text(villages[i]["name"]).attr("value",villages[i]["id"]));
+      }
+    })
+  }
+  function load_players(domain){
+    $.get("/load_players/"+domain, function(players){
+      window.players = players;
       for (var i=0; i<players.length;i++){
         $("#target_player_list").append($("<option>").attr("value", players[i]["name"]));
       }
     })
   }
+  function set_coords(s){
+    var village = $("#"+s+"_village").val();
+    var villages = window[s+"_villages"];
+    for (var i=0; i<villages.length;i++){
+      if (village == villages[i]["id"]) {
+        var x = villages[i]["coord"]["x"];
+        var y = villages[i]["coord"]["y"];
+      }
+    }
+    $("#"+s+"_x").val(x);
+    $("#"+s+"_y").val(y);
+  }
+  function get_village_from_coords(s){
+    var x = $("#"+s+"_x").val();
+    var y = $("#"+s+"_y").val();
+    var source_villages = window.source_villages;
+    for (var i=0; i<source_villages.length;i++){
+      if (x == source_villages[i]["coord"]["x"] && y == source_villages[i]["coord"]["y"]) {
+        $("#source_village").val(source_villages[i]["id"]);
+      }
+    }
+    // TODO target
+  }
+  function timestrings(){
+    var today = new Date();
+    return today.getFullYear()+"-"+(today.getMonth()+1)+"-"+today.getDate()+"T"+today.getHours()+":"+today.getMinutes()+":"+today.getSeconds()+".000"
+  }
   $(function() {
     {% if N_O_P == 1%}
-      alert("hey");
       source_player_selected()
     {% endif %}
+    var curtime = timestrings();
+    $("#time").val(curtime);
   });
 </script>
 {% endblock %}
@@ -56,13 +106,13 @@
                           <option value="" selected="selected">Spieler auswählen</option>
                         {% endif %}
                         {% for player in players %}
-                          <option value="{{ player.name }}+{{ player.domain }}">{{ player.name }}@{{ player.domain }}</option>
+                          <option value="{{ player.id }}+{{ player.domain }}">{{ player.name }}@{{ player.domain }}</option>
                         {% endfor %}
                       </select>
                     </td>
                     <td>
-                        <input name="source_x" id="source_x" type="text" style="width: 40px"><input name="source_y" id="source_y" type="text" style="width: 40px"><br>
-                        <select id="source_village" name="source_village">
+                        <input name="source_x" id="source_x" type="text" style="width: 40px" onchange="get_village_from_coords('source')"><input name="source_y" id="source_y" type="text" style="width: 40px" onchange="get_village_from_coords('source')"><br>
+                        <select id="source_village" name="source_village" onchange="set_coords('source')">
                           <option value="" selected = "selected">Dorf auswählen</option>
                         </select>
                     </td>
@@ -70,7 +120,7 @@
                       <input name="time" type="datetime-local" step="0.25" id="time">
                     <td>
                     <td>
-                      <input name="departure" type="checkbox" id="departure">
+                      <input name="departure" type="checkbox" id="departure" checked>
                     </td>
                 </tr>
             </tbody>
@@ -82,11 +132,14 @@
             </tr>
             <tr>
               <td>
-                <input list="target_player_list" value="" id="target_player" />
+                <input list="target_player_list" value="" id="target_player" onchange="load_target_villages()"/>
                 <datalist id="target_player_list"></datalist>
               </td>
               <td>
-                  <input name="target_x" id="target_x" type="text" style="width: 40px"><input name="target_y" id="target_y" type="text" style="width: 40px">
+                  <input name="target_x" id="target_x" type="text" style="width: 40px"><input name="target_y" id="target_y" type="text" style="width: 40px"><br>
+                  <select id="target_village" name="target_village" onchange="set_coords('target')">
+                    <option value="" selected = "selected">Dorf auswählen</option>
+                  </select>
               </td>
             </tr>
           </tbody>
@@ -128,7 +181,8 @@
                 </tr>
             </tbody>
         </table><br>
-        <button type="submit" name="type" value="create_template" class="btn btn-default">Speichern</button>
+        <button type="submit" name="type" value="attack" class="btn btn-default">Angreifen</button>
+        <button type="submit" name="type" value="support" class="btn btn-default">Unterstützen</button>
     </form>
 </div>
 <h3>Vorlage verwenden</h3>

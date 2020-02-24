@@ -213,18 +213,27 @@ def new_atts_post():
         action["departure_time"] = request.form["time"]
     else:
         action["arrival_time"] = request.form["time"]
-    action["player"] = request.form.get("source_player_select")
+    source_player = request.form.get("source_player_select").split("+")
+    action["player_id"] = source_player[0]
+    action["domain"] = source_player[1]
+    action["source_id"] = request.form.get("source_village") if request.form.get("source_village") != "" else world_data.get_village_id_from_coords(action["domain"],action["source_coord"]["x"], action["source_coord"]["y"])
+    action["target_id"] = request.form.get("target_village") if request.form.get("target_village") != "" else world_data.get_village_id_from_coords(action["domain"],action["target_coord"]["x"], action["target_coord"]["y"])
+    action["type"] = request.form["type"]
+    action["player"] = world_data.get_player_id(action["domain"], action["player_id"])
+    action["sitter"] = "0"
+    action["vacation"] = "0"
+    action["force"] = False
+
     logger.info(json.dumps(action))
+    import_action.import_from_ui(action)
     return redirect("/schedule")
 
-@app.route("/villages_of_player/<source>")
-def villages_of_player(source):
-    s=source.split("+")
-    res = world_data.get_villages_of_player(s[1], player=s[0])
+@app.route("/villages_of_player/<domain>/<player_id>")
+def villages_of_player(domain, player_id):
+    res = world_data.get_villages_of_player(domain, player_id=player_id)
     return jsonify(res)
 
-@app.route("/load_players/<source>")
-def load_players(source):
-    s=source.split("+")
-    res = world_data.get_players(s[1])
+@app.route("/load_players/<domain>")
+def load_players(domain):
+    res = world_data.get_players(domain)
     return jsonify(res)

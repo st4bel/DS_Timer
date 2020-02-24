@@ -1,8 +1,8 @@
 __pycache__
 build
 dist
-_o
-_Show
+*_o
+*_Show*
 test
 updategamedata*
 *.txt

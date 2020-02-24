@@ -35,6 +35,14 @@ def get_player_id(domain, playername): # SPACE turn into "+" Umlaute into
             return dataset[0]
     return None
 
+def get_player_name(domain, player_id):
+        file = os.path.join(common.get_root_folder(), "world_data", domain, "player.txt")
+        data = readfile_pd(file)
+        for dataset in data:
+            if player_id == str(dataset[0]):
+                return unquote_name(dataset[1]);
+        return None
+
 def readfile_pd(filename):
     data = pd.read_csv(filename, delimiter=",", error_bad_lines=False)
     return data.to_numpy()
@@ -56,9 +64,17 @@ def unquote_name(name):
     return name[:-1]
 
 def get_players(domain):
-    file = file = os.path.join(common.get_root_folder(), "world_data", domain, "player.txt")
+    file = os.path.join(common.get_root_folder(), "world_data", domain, "player.txt")
     data = readfile_pd(file)
     players=[]
     for dataset in data:
         players.append({"id":str(dataset[0]),"name":unquote_name(dataset[1])})
     return players
+
+def get_village_id_from_coords(domain,x,y):
+    file = os.path.join(common.get_root_folder(), "world_data", domain, "village.txt")
+    data = readfile_pd(file)
+    for dataset in data:
+        if x == str(dataset[2]) and y == str(dataset[3]):
+            return dataset[0]
+    return None
