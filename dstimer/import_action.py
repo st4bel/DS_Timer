@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 from datetime import timedelta
 import dateutil.parser
 import random, string
-from dstimer import common
+from dstimer import common, world_data
 import numpy as np
 
 def distance(source, target):
@@ -136,6 +136,10 @@ def import_wb_action(text,name):
             action["departure_time"] += "."+random_milliseconds(100)
         action["units"] = get_troups_from_template(columns[1].split("(")[1].split(")")[0])
         action["player"]=name
+        action["player_id"] = world_data.get_player_id(action["domain"],action["player"])
+        action["force"] = False
+        action["vacation"] = "0"
+        action["sitter"] = "0"
         if "arrival_time" in action:
             del action["arrival_time"] # no arrival time in workbench export
         autocomplete(action)
