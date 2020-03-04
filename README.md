@@ -83,5 +83,5 @@ Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from 
 
 [![Github Releases (by Release)](https://img.shields.io/github/downloads/st4bel/ds_timer/v0.4.8/total.svg)](https://github.com/st4bel/ds_timer/releases/tag/v0.4.8)
 [![Github Releases (by Release)](https://img.shields.io/github/downloads/st4bel/ds_timer/v0.4.6.5/total.svg)](https://github.com/st4bel/ds_timer/releases/tag/v0.4.6.5)
-[![Github Releases (by Release)](https://img.shields.io/github/downloads/st4bel/ds_timer/v0.4.6.4/total.svg)](https://github.com/st4bel/ds_timer/releases/tag/v0.4.6.4)
+[![Github Releases (by Release)](https://img.shields.io/github/downloads/st4bel/ds_timer/0.4.6.4/total.svg)](https://github.com/st4bel/ds_timer/releases/tag/0.4.6.4)
 [![Github Releases (by Release)](https://img.shields.io/github/downloads/st4bel/ds_timer/v0.4.6/total.svg)](https://github.com/st4bel/ds_timer/releases/tag/v0.4.6)
