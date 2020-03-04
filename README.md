@@ -80,3 +80,8 @@ similar.
 
 ## Credits
 Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>
+
+[![Github Releases (by Release)](https://img.shields.io/github/downloads/st4bel/ds_timer/v0.4.8/total.svg)](https://github.com/st4bel/ds_timer/releases/tag/v0.4.8)
+[![Github Releases (by Release)](https://img.shields.io/github/downloads/st4bel/ds_timer/v0.4.6.5/total.svg)](https://github.com/st4bel/ds_timer/releases/tag/v0.4.6.5)
+[![Github Releases (by Release)](https://img.shields.io/github/downloads/st4bel/ds_timer/v0.4.6.4/total.svg)](https://github.com/st4bel/ds_timer/releases/tag/v0.4.6.4)
+[![Github Releases (by Release)](https://img.shields.io/github/downloads/st4bel/ds_timer/v0.4.6/total.svg)](https://github.com/st4bel/ds_timer/releases/tag/v0.4.6)
