@@ -197,7 +197,7 @@ def new_atts_get():
     for folder in os.listdir(keks_path):
         for file in os.listdir(os.path.join(keks_path, folder)):
             s_file = file.split("_", 1)
-            players.append({"domain" : folder, "id" : s_file[0], "name" : s_file[1]})
+            players.append({"domain" : folder, "id" : s_file[0], "name" : common.filename_unescape(s_file[1])})
     return render_template("new_attack.html", templates = get_templates(), unitnames = get_unitnames(), players=players, N_O_P = len(players))
 
 @app.route("/new_attack", methods=["POST"])

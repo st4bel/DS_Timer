@@ -29,7 +29,8 @@ def player_id_from_keks(keks):
 
 def write_keks(keks, id, name):
     directory = os.path.join(common.get_root_folder(), "keks", keks["domain"])
-    filename = id+"_"+name
+    name_clean = common.filename_escape(name)
+    filename = id+"_"+name_clean
     file = os.path.join(directory, filename)
     os.makedirs(directory, exist_ok=True)
     with open(file, "w") as fd:
@@ -55,7 +56,8 @@ def check_sids():
 
     issues = []
     for (domain, player, player_id) in players_to_check:
-        keks_file = os.path.join(common.get_root_folder(), "keks", domain, player_id+"_"+player)
+        player_clean = "".join(i for i in player if i.isalnum())
+        keks_file = os.path.join(common.get_root_folder(), "keks", domain, player_id+"_"+common.filename_escape(player_clean))
         try:
             with open(keks_file) as fd:
                 sid = fd.read()

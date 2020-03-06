@@ -3,6 +3,15 @@ import subprocess
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36"
 
+escape_table = {
+    "?" : "&63#",
+    ":" : "&58#",
+    "*" : "&42#",
+    "|" : "&124#",
+    "." : "&46#"
+    #/\:*"<>|
+}
+
 def get_root_folder():
     return os.path.join(os.path.expanduser("~"), ".dstimer")
 
@@ -21,3 +30,12 @@ def create_folder_structure():
 def reset_folders():
     root = get_root_folder()
     subprocess.Popen(r"explorer "+root)
+
+
+def filename_escape(name):
+    return "".join(escape_table.get(c,c) for c in name)
+
+def filename_unescape(name):
+    for c in escape_table:
+        name = name.replace(escape_table[c], c)
+    return name

@@ -132,7 +132,7 @@ class SendActionThread(threading.Thread):
             failed_path  = os.path.join(common.get_root_folder(), "failed")
             keks_path    = os.path.join(common.get_root_folder(), "keks", self.action["domain"])
             if self.action["sitter"] == "0":
-                keks_file = os.path.join(keks_path, self.action["player_id"]+"_"+self.action["player"])
+                keks_file = os.path.join(keks_path, self.action["player_id"]+"_"+common.filename_escape(self.action["player"]))
             else:
                 for filename in os.listdir(keks_path):
                     if self.action["sitter"] in filename:
