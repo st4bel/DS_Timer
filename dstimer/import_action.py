@@ -9,7 +9,7 @@ from datetime import timedelta
 import dateutil.parser
 import random, string
 from dstimer import common, world_data
-import numpy as np
+#import numpy as np
 
 def distance(source, target):
     return math.sqrt(pow(target["x"] - source["x"], 2) + pow(target["y"] - source["y"], 2))
@@ -95,7 +95,7 @@ def import_from_text(text, rand_mill=False):
     for action in actions:
         autocomplete(action)
         if rand_mill:
-            mill = timedelta(seconds=np.random.rand()-0.5)
+            mill = timedelta(seconds=random.random()-0.5)
             action["departure_time"] = (dateutil.parser.parse(action["departure_time"]) + mill).isoformat()
             action["arrival_time"] = (dateutil.parser.parse(action["arrival_time"]) + mill).isoformat()
         filename = dateutil.parser.parse(action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + random_id(6) + ".txt"
@@ -153,7 +153,7 @@ def import_wb_action(text,name):
 def import_from_ui(action, rand_mill = False):
     autocomplete(action)
     if rand_mill:
-        mill = timedelta(seconds=np.random.rand()-0.5)
+        mill = timedelta(seconds=random.random()-0.5)
         action["departure_time"] = (dateutil.parser.parse(action["departure_time"]) + mill).isoformat()
         action["arrival_time"] = (dateutil.parser.parse(action["arrival_time"]) + mill).isoformat()
     filename = dateutil.parser.parse(action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + random_id(6) + ".txt"
