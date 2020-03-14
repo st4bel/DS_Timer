@@ -14,8 +14,10 @@ import dstimer.common as common
 from dstimer.import_keks import check_and_save_sids
 from operator import itemgetter, attrgetter
 import logging
+from flask_cors import CORS
 app = Flask(__name__)
 app.secret_key = 'ds_timer'
+CORS(app)
 
 logger = logging.getLogger("dstimer")
 
@@ -44,6 +46,23 @@ def get_templates():
             templates.append(template)
     return templates
 
+def get_scheduled_actions():
+    schedule_path = os.path.join(os.path.expanduser("~"), ".dstimer", "schedule")
+    actions = []
+    player = []
+    for file in os.listdir(schedule_path):
+        if os.path.isfile(os.path.join(schedule_path, file)):
+            with open(os.path.join(schedule_path, file)) as fd:
+                action = json.load(fd)
+                action["departure_time"]    = dateutil.parser.parse(action["departure_time"])
+                action["arrival_time"]      = dateutil.parser.parse(action["arrival_time"])
+                action["world"]             = action["domain"].partition(".")[0]
+                action["id"]                = file[file.rfind("_")+1:-4]
+                if action["player"] not in player:
+                    player.append(action["player"])
+                actions.append(action)
+    return player, actions
+
 def get_unitnames():
     return ["spear", "sword", "axe", "archer", "spy", "light", "marcher", "heavy", "ram", "catapult", "knight", "snob"]
 
@@ -63,20 +82,7 @@ def index():
 
 @app.route("/schedule")
 def schedule():
-    schedule_path = os.path.join(os.path.expanduser("~"), ".dstimer", "schedule")
-    actions = []
-    player = []
-    for file in os.listdir(schedule_path):
-        if os.path.isfile(os.path.join(schedule_path, file)):
-            with open(os.path.join(schedule_path, file)) as fd:
-                action = json.load(fd)
-                action["departure_time"]    = dateutil.parser.parse(action["departure_time"])
-                action["arrival_time"]      = dateutil.parser.parse(action["arrival_time"])
-                action["world"]             = action["domain"].partition(".")[0]
-                action["id"]                = file[file.rfind("_")+1:-4]
-                if action["player"] not in player:
-                    player.append(action["player"])
-                actions.append(action)
+    player, actions = get_scheduled_actions()
     args=""
     rev=""
     if "sort" in request.args:
@@ -175,20 +181,17 @@ def templates_post():
         return redirect("/templates")
     #return redirect("/templates")
 
-@app.route("/show", methods=["get"])
-def show_planned_atts():
-    schedule_path = os.path.join(os.path.expanduser("~"), ".dstimer", "schedule")
-    source_id = request.args.get("source_id")
-    target_id = request.args.get("target_id")
-    actions = []
-    for file in os.listdir(schedule_path):
-        with open(os.path.join(schedule_path, file)) as fd:
-            action = json.load(fd)
-            if (source_id==str(action["source_id"]) or source_id==None) and (target_id==str(action["target_id"]) or target_id == None):
-                action["id"] = file[file.rfind("_")+1:-4]
-                actions.append(action)
 
-    return render_template("show.html",actions=actions)
+@app.route("/show/<type>/<id>", methods=["GET"])
+def show(type, id):
+    player, actions = get_scheduled_actions()
+    filtered_actions = []
+    logger.info(type)
+    logger.info(id)
+    for action in actions:
+        if str(action[type]) == id:
+            filtered_actions.append(action)
+    return jsonify(filtered_actions)#render_template("show.html", actions = filtered_actions)
 
 @app.route("/new_attack", methods=["GET"])
 def new_atts_get():

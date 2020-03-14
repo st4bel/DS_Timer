@@ -27,11 +27,27 @@ $(function(){
         storage.setItem(storagePrefix+key,val);
         //GM_setValue(key,val);
     }
+
+    function get_actions() {
+      var target_id = getPageAttribute("id");
+      console.log('127.0.0.1:5000/show/target_id/'+target_id)
+      setTimeout(function(){
+        $.ajax({ url: 'http://127.0.0.1:5000/show/target_id/'+target_id,
+          success: function(response){
+            console.log("succes jay")
+            console.log(JSON.stringify(response));
+          }, error: function(response){
+            console.log('server error');
+          }
+        })
+      },1000);
+    }
+    get_actions();
     console.log("hey")
     init_UI();
     function init_UI(){
         var content_table = $("#content_value");
-        var frame = $("<iframe>").attr("src","http://127.0.0.1:5000/show?target_id="+getPageAttribute("id")).attr("id","iframe1");
+        var frame = $("<iframe>").attr("src","http://127.0.0.1:5000/show/target_id/"+getPageAttribute("id")).attr("id","iframe1");
         content_table.append(frame);
         var button_test = $("<button>").appendTo($("#linkContainer"))
         .click(function(){
