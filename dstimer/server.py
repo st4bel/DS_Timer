@@ -182,16 +182,17 @@ def templates_post():
     #return redirect("/templates")
 
 
-@app.route("/show/<type>/<id>", methods=["GET"])
-def show(type, id):
+@app.route("/show/<domain>/<type>/<id>", methods=["GET"]) #TODO domain
+def show(domain, type, id):
     player, actions = get_scheduled_actions()
     filtered_actions = []
     logger.info(type)
     logger.info(id)
     for action in actions:
-        if str(action[type]) == id:
+        if str(action[type]) == id and action["domain"] == domain:
             filtered_actions.append(action)
-    return jsonify(filtered_actions)#render_template("show.html", actions = filtered_actions)
+    return render_template("show.html", actions = filtered_actions)
+    #return jsonify(filtered_actions)
 
 @app.route("/new_attack", methods=["GET"])
 def new_atts_get():

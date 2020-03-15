@@ -30,25 +30,55 @@ $(function(){
 
     function get_actions() {
       var target_id = getPageAttribute("id");
-      console.log('127.0.0.1:5000/show/target_id/'+target_id)
-      setTimeout(function(){
-        $.ajax({ url: 'http://127.0.0.1:5000/show/target_id/'+target_id,
-          success: function(response){
-            console.log("succes jay")
-            console.log(JSON.stringify(response));
-          }, error: function(response){
-            console.log('server error');
-          }
-        })
-      },1000);
+      console.log('127.0.0.1:5000/show/'+getDomain()+'/target_id/'+target_id)
+
+      $.ajax({ url: 'http://127.0.0.1:5000/show/'+getDomain()+'/target_id/'+target_id,
+        success: function(response){
+          console.log(JSON.stringify(response));
+          init_UI(response)
+        }, error: function(response){
+          console.log('server error');
+        }
+      })
     }
     get_actions();
     console.log("hey")
-    init_UI();
-    function init_UI(){
-        var content_table = $("#content_value");
-        var frame = $("<iframe>").attr("src","http://127.0.0.1:5000/show/target_id/"+getPageAttribute("id")).attr("id","iframe1");
-        content_table.append(frame);
+    //init_UI();
+    function init_UI(response){
+        if (response.length == 0){ // Abbruch, wenn keine Angriffe geplant
+          console.log("keine geplanten Angriffe")
+          return
+        }
+        // create table for outgoings
+        if($("#commands_outgoings").length==0){
+          var note_table = $("#message").closest("table");
+          //$("<p>Test<p>").insertAfter(note_table);
+          var commands_outgoings = $("<div>")
+            .attr("id", "commands_outgoings")
+            .insertAfter(note_table);
+          var command_table = $("<table>").appendTo(commands_outgoings)
+            .attr("id", "command_table")
+            .attr("class", "vis").attr("style", "width:100%");
+          var command_header = $("<tr>").appendTo(command_table)
+            .append($("<th>").attr("width", "52%").html("Eigene Befehle"))
+            .append($("<th>").attr("width", "33%").html("Ankunft"))
+            .append($("<th>").attr("width", "15%").html("Ankunft in"));
+        } else {
+          var command_table = $("#commands_outgoings").find("table").first();
+        }
+        for (action of response){
+          var arrival_time = new Date(action["arrival_time"]);
+          var mseconds = expandNumberString(arrival_time.getMilliseconds(),3)
+          var arrival_time= parseTime(arrival_time);
+          $("<tr>").attr("class", "command-row").appendTo(command_table)
+            .append($("<td>").append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=overview").html(action["source_id"])))
+            .append($("<td>").html(arrival_time).append($("<span>").html(mseconds).attr("class", "grey small")))
+            .append($("<td>").append($("<span>").html("TODO").attr("class","grey small")))
+        }
+
+
+
+
         var button_test = $("<button>").appendTo($("#linkContainer"))
         .click(function(){
             alert($("#abcabc").text())
@@ -61,4 +91,49 @@ $(function(){
         var value = params.substring(params.indexOf(attribute+"=")+attribute.length+1,params.indexOf("&",params.indexOf(attribute+"=")) != -1 ? params.indexOf("&",params.indexOf(attribute+"=")) : params.length);
         return params.indexOf(attribute+"=")!=-1 ? value : "0";
     }
+    function getDomain(){
+      return window.location.hostname;
+    }
+    function parseTime(at){
+      // Date object to "heute um 22:43:54:442"; "morgen um 22:47:32:295"; am 19.03. um 15:03:32:295
+      var ct = currentTime();
+      at.setMinutes(at.getMinutes()+at.getTimezoneOffset()) // Sommer/Winterzeit
+      var tm = new Date(ct.getFullYear(), ct.getMonth(), ct.getDate() + 1); // morgen
+      var prefix = "";
+      if(ct.getFullYear()==at.getFullYear() && ct.getMonth() == at.getMonth() && ct.getDate() == at.getDate()){// gleicher tag
+        prefix = "heute um ";
+      } else if (tm.getFullYear()==at.getFullYear() && tm.getMonth() == at.getMonth() && tm.getDate() == at.getDate()){// morgen
+        prefix = "morgen um ";
+      } else { // > morgen
+        prefix = "am "+at.getDate()+"."+(at.getMonth()+1)+". um ";
+      }
+      return prefix + expandNumberString(at.getHours(),2)+":"+expandNumberString(at.getMinutes(),2)+":"+expandNumberString(at.getSeconds(),2)+":";
+    }
+    function currentTime(){
+      var date 	= $("#serverDate").text().split("/");
+		  var time 	= $("#serverTime").text().split(":");
+		  var d		= new Date(
+				parseInt(date[2]),
+				parseInt(date[1]),
+				parseInt(date[0]),
+				parseInt(time[0]),
+				parseInt(time[1]),
+				parseInt(time[2]),
+				0);
+		   return d;
+     }
+     function expandNumberString(number, expand_to){
+       output = number+"";
+       number = parseInt(number);
+       for (var i = 1 ; i < expand_to; i++){
+         var smallest = parseInt("1"+"0".repeat(i));
+         if (number < smallest){
+           output = "0"+output;
+         }
+       }
+       return output;
+     }
 });
+
+userscript.html:51:13
+[{"arrival_time":"Wed, 18 Mar 2020 22:57:18 GMT","departure_time":"Wed, 18 Mar 2020 19:34:28 GMT","domain":"de177.die-staemme.de","force":false,"id":"lzxivb","player":"the stabel","player_id":"10000276","sitter":"0","source_coord":{"x":487,"y":376},"source_id":15612,"target_coord":{"x":494,"y":382},"target_id":14331,"type":"attack","units":{"sword":"*"},"vacation":"0","world":"de177"},{"arrival_time":"Fri, 20 Mar 2020 21:05:48 GMT","departure_time":"Fri, 20 Mar 2020 18:19:51 GMT","domain":"de177.die-staemme.de","force":false,"id":"ztvath","player":"the stabel","player_id":"10000276","sitter":"0","source_coord":{"x":487,"y":376},"source_id":15612,"target_coord":{"x":494,"y":382},"target_id":14331,"type":"attack","units":{"spear":"*"},"vacation":"0","world":"de177"},{"arrival_time":"Fri, 20 Mar 2020 21:35:48 GMT","departure_time":"Fri, 20 Mar 2020 18:49:51 GMT","domain":"de177.die-staemme.de","force":false,"id":"yorhuo","player":"the stabel","player_id":"10000276","sitter":"0","source_coord":{"x":487,"y":376},"source_id":15612,"target_coord":{"x":494,"y":382},"target_id":14331,"type":"attack","units":{"spear":"*"},"vacation":"0","world":"de177"}]
