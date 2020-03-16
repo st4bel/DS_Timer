@@ -190,9 +190,9 @@ def show(domain, type, id):
     logger.info(id)
     for action in actions:
         if str(action[type]) == id and action["domain"] == domain:
+            action["milliseconds"] = int(action["arrival_time"].microsecond / 1000)
             filtered_actions.append(action)
-    return render_template("show.html", actions = filtered_actions)
-    #return jsonify(filtered_actions)
+    return jsonify(filtered_actions)
 
 @app.route("/new_attack", methods=["GET"])
 def new_atts_get():

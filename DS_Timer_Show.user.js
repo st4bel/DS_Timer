@@ -68,7 +68,7 @@ $(function(){
         }
         for (action of response){
           var arrival_time = new Date(action["arrival_time"]);
-          var mseconds = expandNumberString(arrival_time.getMilliseconds(),3)
+          var mseconds = expandNumberString(action["milliseconds"],3)
           var arrival_time= parseTime(arrival_time);
           $("<tr>").attr("class", "command-row").appendTo(command_table)
             .append($("<td>").append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=overview").html(action["source_id"])))
@@ -134,6 +134,3 @@ $(function(){
        return output;
      }
 });
-
-userscript.html:51:13
-[{"arrival_time":"Wed, 18 Mar 2020 22:57:18 GMT","departure_time":"Wed, 18 Mar 2020 19:34:28 GMT","domain":"de177.die-staemme.de","force":false,"id":"lzxivb","player":"the stabel","player_id":"10000276","sitter":"0","source_coord":{"x":487,"y":376},"source_id":15612,"target_coord":{"x":494,"y":382},"target_id":14331,"type":"attack","units":{"sword":"*"},"vacation":"0","world":"de177"},{"arrival_time":"Fri, 20 Mar 2020 21:05:48 GMT","departure_time":"Fri, 20 Mar 2020 18:19:51 GMT","domain":"de177.die-staemme.de","force":false,"id":"ztvath","player":"the stabel","player_id":"10000276","sitter":"0","source_coord":{"x":487,"y":376},"source_id":15612,"target_coord":{"x":494,"y":382},"target_id":14331,"type":"attack","units":{"spear":"*"},"vacation":"0","world":"de177"},{"arrival_time":"Fri, 20 Mar 2020 21:35:48 GMT","departure_time":"Fri, 20 Mar 2020 18:49:51 GMT","domain":"de177.die-staemme.de","force":false,"id":"yorhuo","player":"the stabel","player_id":"10000276","sitter":"0","source_coord":{"x":487,"y":376},"source_id":15612,"target_coord":{"x":494,"y":382},"target_id":14331,"type":"attack","units":{"spear":"*"},"vacation":"0","world":"de177"}]
