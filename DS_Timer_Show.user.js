@@ -45,6 +45,7 @@ $(function(){
     console.log("hey")
     //init_UI();
     function init_UI(response){
+      console.log("init_UI")
         if (response.length == 0){ // Abbruch, wenn keine Angriffe geplant
           console.log("keine geplanten Angriffe")
           return
@@ -63,21 +64,45 @@ $(function(){
             .append($("<th>").attr("width", "52%").html("Eigene Befehle"))
             .append($("<th>").attr("width", "33%").html("Ankunft"))
             .append($("<th>").attr("width", "15%").html("Ankunft in"));
+          var current_attacks = [];
         } else {
           var command_table = $("#commands_outgoings").find("table").first();
+          var current_attacks = [];
+          $(".command-row").each(function(){ //add data-endtime to command-row
+            $(this).attr("data-endtime",$("span[data-endtime]", $(this)).data("endtime")+$("span[class='grey small']", $(this)).text());
+            current_attacks.push(parseInt($(this).data("endtime")));
+          });
         }
-        for (action of response){
+        console.log(JSON.stringify(current_attacks))
+        for (action of response){ //create rows for schedules atts and insert according to existing atts
           var arrival_time = new Date(action["arrival_time"]);
+          arrival_time.setMilliseconds(action["milliseconds"]);
+          var arrival_timestamp = Date.parse(arrival_time);
           var mseconds = expandNumberString(action["milliseconds"],3)
-          var arrival_time= parseTime(arrival_time);
-          $("<tr>").attr("class", "command-row").appendTo(command_table)
+          var arrival_time_string = parseTime(arrival_time);
+          var position = -1;
+          for (var i = 0; i< current_attacks.length; i++) {
+            if (current_attacks[i] > arrival_timestamp){
+              position = i;
+              break;
+            }
+            if (i==current_attacks.length - 1){position = current_attacks.length}
+          }
+          current_attacks.splice(position == -1 ? 0: position, 0, arrival_timestamp);
+          console.log(JSON.stringify(current_attacks))
+          console.log("position: "+position)
+          var new_command_row = $("<tr>").attr("class", "command-row").attr("data-endtime", arrival_timestamp+"")
             .append($("<td>").append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=overview").html(action["source_id"])))
-            .append($("<td>").html(arrival_time).append($("<span>").html(mseconds).attr("class", "grey small")))
-            .append($("<td>").append($("<span>").html("TODO").attr("class","grey small")))
+            .append($("<td>").html(arrival_time_string).append($("<span>").html(mseconds).attr("class", "grey small")))
+            .append($("<td>").append($("<span>").html(getTimeDiffAsString(arrival_timestamp)+"").attr("data-endtime", arrival_timestamp+"").attr("class", "countdown-span")));
+          if (position == -1){//keine bereits existierenden /eingetragenen Angriff
+            new_command_row.appendTo(command_table);
+          } else if(position == 0){
+            new_command_row.insertBefore($(".command-row").first());
+          } else {
+            new_command_row.insertAfter($(".command-row[data-endtime ="+current_attacks[position-1]+"]"));
+          }
         }
-
-
-
 
         var button_test = $("<button>").appendTo($("#linkContainer"))
         .click(function(){
@@ -109,12 +134,22 @@ $(function(){
       }
       return prefix + expandNumberString(at.getHours(),2)+":"+expandNumberString(at.getMinutes(),2)+":"+expandNumberString(at.getSeconds(),2)+":";
     }
+    function getTimeDiffAsString(timestamp){
+      var ct = Date.parse(currentTime());
+
+      var difference = parseInt((timestamp - ct) / 1000);
+      var seconds    = difference % 60;
+      difference     = (difference - difference % 60) / 60; //now in minutes
+      var minutes    = difference % 60;
+      var hours      = (difference - difference % 60) / 60;
+      return hours+":"+expandNumberString(minutes,2)+":"+expandNumberString(seconds,2);
+    }
     function currentTime(){
       var date 	= $("#serverDate").text().split("/");
 		  var time 	= $("#serverTime").text().split(":");
 		  var d		= new Date(
 				parseInt(date[2]),
-				parseInt(date[1]),
+				parseInt(date[1]-1),
 				parseInt(date[0]),
 				parseInt(time[0]),
 				parseInt(time[1]),
