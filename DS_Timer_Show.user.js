@@ -11,7 +11,6 @@
 // @copyright   2019+, Raznarek, stabel
 // ==/UserScript==
 
-//Testcommit
 var $ = typeof unsafeWindow != 'undefined' ? unsafeWindow.$ : window.$;
 
 var unit_asset = "https://dsde.innogamescdn.com/asset/c6122a3/graphic/unit/unit_";
@@ -69,18 +68,28 @@ $(function(){
       console.log("keine geplanten Angriffe")
       return
     }
+    var current_attacks = [];
     // create table for outgoings
     if (page == "overview_villages") {
       if ($("#commands_table").length == 0) {
-        var commands_table = $("<table>").attr("id", "commands_table").attr("class", "vis overview_table")
-        var commands_table_header = $("<tr>").appendTo(commands_table)
+        var command_table = $("<table>").attr("id", "commands_table").attr("class", "vis overview_table")
+        var command_table_header = $("<tr>").appendTo(command_table)
           .append($("<th>").text("Befehle ("+response.length+")"))
           .append($("<th>").text("Herkunftsdorf"))
           .append($("<th>").text("Ankunft"))
           .append($("<th>").append($("<img>").attr("src", unit_asset+"spear")))
         for (unit of units) {
-          commands_table_header.append($("<th>").attr("style", "text-align:center").append($("<img>").attr("src", unit_asset+unit)));
+          commands_table_header.append($("<th>").attr("style", "text-align:center").append($("<img>").attr("src", unit_asset+unit+".png")));
         }
+
+      } else {
+        var command_table = $("#commands_table");
+        $(".row_ax").each(function(){
+          var time_string = $("td:eq(2)", $(this)).text();
+          var timestamp = unparseTime(time_string);
+          $(this).attr("data-endtime", timestamp)
+          current_attacks.push(timestamp)
+        });
       }
     } else if (page == "overview" || page == "info_village") {
       if($("#commands_outgoings").length==0){
@@ -103,34 +112,53 @@ $(function(){
             .appendTo($("#leftcolumn"))
             .append(commands_outgoings)
         }
-        var current_attacks = [];
       } else {
         var command_table = $("#commands_outgoings").find("table").first();
-        var current_attacks = [];
         $(".command-row").each(function(){ //add data-endtime to command-row
           $(this).attr("data-endtime",$("span[data-endtime]", $(this)).data("endtime")+$("span[class='grey small']", $(this)).text());
           current_attacks.push(parseInt($(this).data("endtime")));
         });
       }
-      console.log(JSON.stringify(current_attacks))
-      for (action of response){ //create rows for schedules atts and insert according to existing atts
-        var arrival_time = new Date(action["arrival_time"]);
-        arrival_time.setMilliseconds(action["milliseconds"]);
-        var arrival_timestamp = Date.parse(arrival_time);
-        var mseconds = expandNumberString(action["milliseconds"],3)
-        var arrival_time_string = parseTime(arrival_time);
-        var position = -1;
-        for (var i = 0; i< current_attacks.length; i++) {
-          if (current_attacks[i] > arrival_timestamp){
-            position = i;
-            break;
-          }
-          if (i==current_attacks.length - 1){position = current_attacks.length}
+    }
+    console.log(JSON.stringify(current_attacks))
+    for (var action of response){ //create rows for schedules atts and insert according to existing atts
+      var arrival_time = new Date(action["arrival_time"]);
+      arrival_time.setMilliseconds(action["milliseconds"]);
+      var arrival_timestamp = Date.parse(arrival_time);
+      var mseconds = expandNumberString(action["milliseconds"],3)
+      var arrival_time_string = parseTime(arrival_time);
+      var position = -1;
+      for (var i = 0; i< current_attacks.length; i++) {
+        if (current_attacks[i] > arrival_timestamp){
+          position = i;
+          break;
         }
-        current_attacks.splice(position == -1 ? 0: position, 0, arrival_timestamp);
-        console.log(JSON.stringify(current_attacks))
-        console.log("position: "+position)
-        var new_command_row = $("<tr>").attr("class", "command-row").attr("data-endtime", arrival_timestamp+"")
+        if (i==current_attacks.length - 1){position = current_attacks.length}
+      }
+      current_attacks.splice(position == -1 ? 0: position, 0, arrival_timestamp);
+      console.log(JSON.stringify(current_attacks))
+      console.log("position: "+position)
+      if (page=="overview_villages") {
+        var new_command_row = $("<tr>").attr("class", "nowrap  selected  row_ax").attr("data-endtime", arrival_timestamp)
+          .append($("<td>").append($("<a>").attr("href", "/game.php?village="+action["target_id"]+"&screen=overview").html(action["target_id"])))
+          .append($("<td>").append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=overview").html(action["source_id"])))
+          .append($("<td>").html(arrival_time_string).append($("<span>").html(mseconds).attr("class", "grey small")));
+        for (var unit of units){
+          var troops = 0;
+          if (unit in action["units"] && action["units"][unit] != "") {
+            troops = action["units"][unit];
+          }
+          new_command_row.append($("<td>").attr("class", "unit-item"+(troops == 0 ? " hidden" : "")).html(troops))
+        }
+        if (position == -1){//keine bereits existierenden /eingetragenen Angriff
+          new_command_row.appendTo(command_table);
+        } else if(position == 0){
+          new_command_row.insertBefore($(".row_ax").first());
+        } else {
+          new_command_row.insertAfter($(".row_ax[data-endtime ="+current_attacks[position-1]+"]"));
+        }
+      } else if (page == "overview" || page == "info_village") {
+        var new_command_row = $("<tr>").attr("class", "command-row").attr("data-endtime", arrival_timestamp)
           .append($("<td>").append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=overview").html(action["source_id"])))
           .append($("<td>").html(arrival_time_string).append($("<span>").html(mseconds).attr("class", "grey small")))
           .append($("<td>").append($("<span>").html(getTimeDiffAsString(arrival_timestamp)+"").attr("data-endtime", arrival_timestamp+"").attr("class", "countdown-span")));
@@ -172,6 +200,24 @@ $(function(){
       prefix = "am "+at.getDate()+"."+(at.getMonth()+1)+". um ";
     }
     return prefix + expandNumberString(at.getHours(),2)+":"+expandNumberString(at.getMinutes(),2)+":"+expandNumberString(at.getSeconds(),2)+":";
+  }
+  function unparseTime(string) {
+    // heute um 22:43:54:442, etc zu timestamp
+    var ct = currentTime();
+    var s = string.replace(/\t/g, "").split(" ");
+    //setting Date
+    if (string.includes("heute")){
+      var time = new Date(ct.getFullYear(), ct.getMonth(), ct.getDate())
+    }else if (string.includes("morgen")) {
+      var time = new Date(ct.getFullYear(), ct.getMonth(), ct.getDate() + 1)
+    }else{
+      var time = new Date(ct.getFullYear(), s[1].split(".")[1] - 1, s[1].split(".")[0])
+    }
+    //setting Time
+    time.setHours(s[s.length - 1].split(":")[0]);
+    time.setMinutes(s[s.length - 1].split(":")[1]);
+    time.setSeconds(s[s.length - 1].split(":")[2]);
+    return Date.parse(time)+parseInt(s[s.length - 1].split(":")[3]); //dont know how to add milliseconds to Date object...
   }
   function getTimeDiffAsString(timestamp){
     var ct = Date.parse(currentTime());
