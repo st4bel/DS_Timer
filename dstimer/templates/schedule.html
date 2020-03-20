@@ -1,5 +1,27 @@
 {% extends "layout.html" %}
 {% block title %}Schedule{% endblock %}
+{% block header %}
+<script type="text/javascript">
+  function createEditInterface(id){
+    var row = $("#row_"+id);
+    $("td.departure_time", row).append($("<br>")).append($("<input>").attr("name", "departure_time").attr("type", "datetime-local").attr("style", "width: 160px").val(function(){
+      var text = $("td.departure_time", row).text();
+      if (text.split(".").length>1) {
+        return text.substring(0, text.length-3);
+      }
+      return text
+    }));
+    $("td.arrival_time", row).append($("<br>")).append($("<input>").attr("name", "arrival_time").attr("type", "datetime-local").attr("style", "width: 160px").val(function(){
+      var text = $("td.arrival_time", row).text();
+      if (text.split(".").length>1) {
+        return text.substring(0, text.length-3);
+      }
+      return text
+    }));
+    
+  }
+</script>
+{% endblock %}
 {% block content %}
 
     {% for name in player %}
@@ -22,13 +44,13 @@
         </tr>
         {% for action in actions %}
             {% if name == action.player %}
-        <tr>
+        <tr id="row_{{action.id}}">
             <td><a href="https://{{ action.domain }}/game.php" rel="noreferrer"><span class="badge">{{action.world }}</span></a> {{ action.player }}</td>
-            <td>{{ action.departure_time }}</td>
-            <td>{{ action.arrival_time }}</td>
+            <td class="departure_time">{{ action.departure_time }}</td>
+            <td class="arrival_time">{{ action.arrival_time }}</td>
             <td><img src="{{innocdn_url('/graphic/command/' + action.type + '.png')}}"></td>
-            <td>{% if action.force %}force!{% endif %}</td>
-            <td>
+            <td class="force">{% if action.force %}force!{% endif %}</td>
+            <td class="source">
                 <a href="https://{{action.domain}}/game.php?screen=map&x={{ action.source_coord.x }}&y={{ action.source_coord.y }}&beacon" rel="noreferrer">
                     <img src="{{ innocdn_url('/graphic/icons/map2.png') }}">
                 </a>
@@ -36,7 +58,7 @@
                     {{ action.source_coord.x }}|{{ action.source_coord.y }}
                 </a>
             </td>
-            <td>
+            <td class="target">
                 <a href="https://{{action.domain}}/game.php?screen=map&x={{ action.target_coord.x }}&y={{ action.target_coord.y }}&beacon" rel="noreferrer">
                     <img src="{{ innocdn_url('/graphic/icons/map2.png') }}">
                 </a>
@@ -44,7 +66,7 @@
                     {{ action.target_coord.x }}|{{ action.target_coord.y }}
                 </a>
             </td>
-            <td>
+            <td class="units">
                 {% for unit, amount in action.units|dictsort %}
                     <span class="badge alert-success" title="{{unit}}">{{ amount }} <img src="{{ innocdn_url('/graphic/unit/unit_' + unit + '.png') }}"></span>
                 {% endfor %}
@@ -53,6 +75,7 @@
                 <form action="" method="post">
                     <button type="submit" name="type" value="delete_{{action.id}}" class="btn btn-default">Löschen</button>
                 </form>
+                <button onclick="createEditInterface('{{ action.id }}')" type="submit" name="type" value="edit_{{action.id}}" class="btn btn-default">Edit</button>
             </td>
         </tr>
            {% endif %}

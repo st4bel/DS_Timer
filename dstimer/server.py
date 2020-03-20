@@ -105,12 +105,12 @@ def schedule_post():
     schedule_path   = os.path.join(os.path.expanduser("~"), ".dstimer", "schedule")
     trash_path      = os.path.join(os.path.expanduser("~"), ".dstimer", "trash")
     type = request.form["type"]
-    if "delete__all" in type:
+    if "delete__all" == type:
         delete_action.delete_all()
-        return redirect ("/schedule")
+        return redirect("/schedule")
     elif "delete_" in type:
         if delete_action.delete_single(id=type[7:len(type)]):
-            return redirect ("/schedule") #reload
+            return redirect("/schedule") #reload
         return "ok"
 
 @app.route("/import")
