@@ -7,3 +7,4 @@ updategamedata*
 *.txt
 !requirements.txt
 beispielseiten
+*.lnk

@@ -32,6 +32,14 @@ def get_villages_of_player(domain, player = None, player_id=None):
             villages.append({"id":str(dataset[0]), "name":unquote_name(dataset[1]), "coord": {"x":str(dataset[2]),"y":str(dataset[3])}, "player_id": str(dataset[4]), "points" : str(dataset[5])})
     return villages
 
+def get_village_owner(domain, village_id):
+    file = os.path.join(common.get_root_folder(), "world_data", domain, "village.txt")
+    data = readfile_norm(file)
+    for dataset in data:
+        if int(dataset[0]) == int(village_id):
+            return dataset[4]
+    return None
+
 def get_player_id(domain, playername): # SPACE turn into "+" Umlaute into
     file = os.path.join(common.get_root_folder(), "world_data", domain, "player.txt")
     data = readfile_norm(file)
@@ -90,4 +98,13 @@ def get_village_id_from_coords(domain,x,y):
     for dataset in data:
         if x == str(dataset[2]) and y == str(dataset[3]):
             return dataset[0]
+    return None
+
+def get_village_name_from_id(domain,id):
+    file = os.path.join(common.get_root_folder(), "world_data", domain, "village.txt")
+    data = readfile_norm(file)
+    id = int(id)
+    for dataset in data:
+        if id == int(dataset[0]):
+            return unquote_name(dataset[1])
     return None

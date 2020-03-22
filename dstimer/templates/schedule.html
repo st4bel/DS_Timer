@@ -18,7 +18,7 @@
       }
       return text
     }));
-    
+
   }
 </script>
 {% endblock %}
@@ -55,7 +55,7 @@
                     <img src="{{ innocdn_url('/graphic/icons/map2.png') }}">
                 </a>
                 <a href="https://{{action.domain}}/game.php?screen=info_village&id={{action.source_id}}" rel="noreferrer">
-                    {{ action.source_coord.x }}|{{ action.source_coord.y }}
+                    {{ action.source_village_name }} {{ action.source_coord.x }}|{{ action.source_coord.y }}
                 </a>
             </td>
             <td class="target">
@@ -63,7 +63,7 @@
                     <img src="{{ innocdn_url('/graphic/icons/map2.png') }}">
                 </a>
                 <a href="https://{{action.domain}}/game.php?screen=info_village&id={{action.target_id}}" rel="noreferrer">
-                    {{ action.target_coord.x }}|{{ action.target_coord.y }}
+                    {{ action.target_village_name }} {{ action.target_coord.x }}|{{ action.target_coord.y }}
                 </a>
             </td>
             <td class="units">
@@ -74,8 +74,11 @@
             <td>
                 <form action="" method="post">
                     <button type="submit" name="type" value="delete_{{action.id}}" class="btn btn-default">Löschen</button>
+                    <button type="submit" name="type" value="edit_{{action.id}}" class="btn btn-default">Edit</button>
                 </form>
+                <!--
                 <button onclick="createEditInterface('{{ action.id }}')" type="submit" name="type" value="edit_{{action.id}}" class="btn btn-default">Edit</button>
+                -->
             </td>
         </tr>
            {% endif %}

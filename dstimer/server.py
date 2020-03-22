@@ -54,10 +54,12 @@ def get_scheduled_actions():
         if os.path.isfile(os.path.join(schedule_path, file)):
             with open(os.path.join(schedule_path, file)) as fd:
                 action = json.load(fd)
-                action["departure_time"]    = dateutil.parser.parse(action["departure_time"])
-                action["arrival_time"]      = dateutil.parser.parse(action["arrival_time"])
-                action["world"]             = action["domain"].partition(".")[0]
-                action["id"]                = file[file.rfind("_")+1:-4]
+                action["departure_time"]        = dateutil.parser.parse(action["departure_time"])
+                action["arrival_time"]          = dateutil.parser.parse(action["arrival_time"])
+                action["world"]                 = action["domain"].partition(".")[0]
+                action["id"]                    = file[file.rfind("_")+1:-4]
+                action["source_village_name"]   = world_data.get_village_name_from_id(action["domain"], action["source_id"])
+                action["target_village_name"]   = world_data.get_village_name_from_id(action["domain"], action["target_id"])
                 if action["player"] not in player:
                     player.append(action["player"])
                 actions.append(action)
@@ -112,6 +114,8 @@ def schedule_post():
         if delete_action.delete_single(id=type[7:len(type)]):
             return redirect("/schedule") #reload
         return "ok"
+    elif "edit_" in type:
+        return redirect("/edit_action/"+type.split("_")[1])
 
 @app.route("/import")
 def import_action_get():
@@ -230,6 +234,23 @@ def new_atts_post():
     action["force"] = False
     import_action.import_from_ui(action)
     return redirect("/schedule")
+
+@app.route("/edit_action/<id>", methods=["GET"])
+def edit_action_get(id):
+    player, actions = get_scheduled_actions()
+    action = {}
+    for a in actions:
+        if id == a["id"]:
+            action = a
+            action["target_player"] = world_data.get_player_name(action["domain"], world_data.get_village_owner(action["domain"], action["target_id"]))
+            break
+    keks_path = os.path.join(common.get_root_folder(), "keks")
+    players = []
+    for folder in os.listdir(keks_path):
+        for file in os.listdir(os.path.join(keks_path, folder)):
+            s_file = file.split("_", 1)
+            players.append({"domain" : folder, "id" : s_file[0], "name" : common.filename_unescape(s_file[1])})
+    return render_template("edit_action.html", players = players, action = action, unitnames = get_unitnames(), templates = get_templates())
 
 @app.route("/villages_of_player/<domain>/<player_id>")
 def villages_of_player(domain, player_id):
