@@ -150,15 +150,20 @@ def import_wb_action(text,name):
         with open(file, "w") as fd:
             json.dump(action, fd, indent=4)
 
-def import_from_ui(action, rand_mill = False):
+def import_from_ui(action, rand_mill = False, id = None):
     autocomplete(action)
     if rand_mill:
         mill = timedelta(seconds=random.random()-0.5)
         action["departure_time"] = (dateutil.parser.parse(action["departure_time"]) + mill).isoformat()
         action["arrival_time"] = (dateutil.parser.parse(action["arrival_time"]) + mill).isoformat()
-    filename = dateutil.parser.parse(action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + random_id(6) + ".txt"
+    filename = dateutil.parser.parse(action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + (id if id else random_id(6)) + ".txt"
 
     directory = os.path.join(common.get_root_folder(), "schedule")
+    if id:
+        for file in os.listdir(directory):
+            if os.path.isfile(os.path.join(directory, file)) and id in file:
+                os.remove(os.path.join(directory, file))
+                break
     file = os.path.join(directory, filename)
     with open(file, "w") as fd:
         json.dump(action, fd, indent=4)

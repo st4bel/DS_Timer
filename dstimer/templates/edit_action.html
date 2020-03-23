@@ -20,6 +20,7 @@
     var source_player = $("#source_player_select :selected").val();
     var s = source_player.split("+")
     if (source_player != ""){
+      load_source_villages(s[0], s[1]);
       load_players(s[1]);
     }
   }
@@ -68,6 +69,7 @@
     })
   }
   function set_coords(s){
+    console.log("set coords: "+s)
     var village = $("#"+s+"_village").val();
     var villages = window[s+"_villages"];
     for (var i=0; i<villages.length;i++){
@@ -114,11 +116,21 @@
     }
     return json;
   }
+  function loadTime(){
+    if (document.getElementById("departure").checked) {
+      var type = "departure";
+    } else {
+      var type = "arrival"
+    }
+    var time = $("#"+type+"_time_help").text();
+    $("#time").val(time.replace(" ", "T"))
+  }
   $(function() {
     source_player_selected();
     var units = parse_python_dict($("#units_help").text());
     var unitnames = parse_python_array($("#unitnames_help").text());
-    loadUnits(units, unitnames)
+    loadUnits(units, unitnames);
+    loadTime();
     //$("#units_help_button").click()
   });
 </script>
@@ -225,15 +237,17 @@
             <tr>
               <td>
                 <input name="time" type="datetime-local" step="0.25" id="time" style="width: 160px">
+                <span id="departure_time_help" style="display:none;">{{action.departure_time}}</span>
+                <span id="arrival_time_help" style="display:none;">{{action.arrival_time}}</span>
               <td>
               <td>
-                <input name="departure" type="checkbox" id="departure" checked>
+                <input name="departure" type="checkbox" onclick="loadTime()" id="departure" checked>
               </td>
             </tr>
           </tbody>
         </table>
-        <button type="submit" name="type" value="attack" class="btn btn-default">Angreifen</button>
-        <button type="submit" name="type" value="support" class="btn btn-default">Unterstützen</button>
+        <button type="submit" name="type" value="{{action.type}}" class="btn btn-default">Ändern</button>
+        <button type="submit" name="type" value="abbort" class="btn btn-default">Abbrechen</button>
     </form>
 </div>
 <h3>Vorlage verwenden</h3> <a href="/templates">Vorlage erstellen</a>

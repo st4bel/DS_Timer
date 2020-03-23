@@ -252,6 +252,36 @@ def edit_action_get(id):
             players.append({"domain" : folder, "id" : s_file[0], "name" : common.filename_unescape(s_file[1])})
     return render_template("edit_action.html", players = players, action = action, unitnames = get_unitnames(), templates = get_templates())
 
+@app.route("/edit_action/<id>", methods=["POST"])
+def edit_action_post(id):
+    if request.form["type"] == "abbort":
+        return redirect("/schedule")
+    action = {}
+    action["source_coord"] = {"x" : request.form["source_x"], "y" : request.form["source_y"]}
+    action["target_coord"] = {"x" : request.form["target_x"], "y" : request.form["target_y"]}
+    unitnames = get_unitnames()
+    action["units"] = {}
+    for name in unitnames:
+        if request.form[name] != "":
+            action["units"][name] = request.form[name]
+    if request.form.get("departure"):
+        action["departure_time"] = request.form["time"]
+    else:
+        action["arrival_time"] = request.form["time"]
+    source_player = request.form.get("source_player_select").split("+")
+    action["player_id"] = source_player[0]
+    action["domain"] = source_player[1]
+    action["source_id"] = int(request.form.get("source_village") if request.form.get("source_village") != "" else world_data.get_village_id_from_coords(action["domain"],action["source_coord"]["x"], action["source_coord"]["y"]))
+    action["target_id"] = int(request.form.get("target_village") if request.form.get("target_village") != "" else world_data.get_village_id_from_coords(action["domain"],action["target_coord"]["x"], action["target_coord"]["y"]))
+    action["type"] = request.form["type"]
+    action["player"] = world_data.get_player_name(action["domain"], action["player_id"])
+    action["sitter"] = "0"
+    action["vacation"] = "0"
+    action["force"] = False
+    logger.info(id)
+    import_action.import_from_ui(action, id = id)
+    return redirect("/schedule")
+
 @app.route("/villages_of_player/<domain>/<player_id>")
 def villages_of_player(domain, player_id):
     res = world_data.get_villages_of_player(domain, player_id=player_id)
