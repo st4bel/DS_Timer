@@ -68,7 +68,7 @@ def get_scheduled_actions():
 def get_unitnames():
     return ["spear", "sword", "axe", "archer", "spy", "light", "marcher", "heavy", "ram", "catapult", "knight", "snob"]
 
-app.jinja_env.globals.update(innocdn_url=innocdn_url, version=__version__, sids_status=sids_status, update = __needUpdate__)
+app.jinja_env.globals.update(innocdn_url=innocdn_url, version=__version__, sids_status=sids_status, update = __needUpdate__, options = common.read_options())
 
 @app.route("/static/<path:path>")
 def static_files(path):
@@ -130,6 +130,7 @@ def import_action_post():
         elif request.form["type"] == "keks":
             import_keks.import_from_text(text)
             check_and_save_sids()
+            world_data.refresh_world_data()
         return redirect("/schedule", code=302)
     except Exception as e:
         flash("{}: {}".format(type(e).__name__,e))
@@ -302,4 +303,9 @@ def options_post():
         world_data.refresh_world_data()
     elif request.form["type"] == "reset-folders":
         common.reset_folders()
+    elif request.form["type"] == "donate_toogle":
+        options = common.read_options()
+        options["show_donate"] = not options["show_donate"]
+        common.write_options(options)
+        app.jinja_env.globals.update(options = options)
     return redirect("/options")

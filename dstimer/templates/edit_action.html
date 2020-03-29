@@ -30,7 +30,7 @@
       window.source_villages = villages;
       for (var i=0; i < villages.length;i++){
         if ($("option[value='"+villages[i]["id"]+"']", $("#source_village")).length == 0){
-          $("#source_village").append($("<option>").text(villages[i]["name"]).attr("value",villages[i]["id"]));
+          $("#source_village").append($("<option>").text(villages[i]["name"]+"@"+villages[i]["coord"]["x"]+"|"+villages[i]["coord"]["y"]).attr("value",villages[i]["id"]));
         }
       }
       set_coords('source');
@@ -52,7 +52,9 @@
       $.get("/villages_of_player/"+domain+"/"+target_player_id, function(villages) {
         window.target_villages = villages
         for (var i=0; i < villages.length;i++){
-          $("#target_village").append($("<option>").text(villages[i]["name"]).attr("value",villages[i]["id"]));
+          if ($("option[value='"+villages[i]["id"]+"']", $("#target_village")).length == 0){
+            $("#target_village").append($("<option>").text(villages[i]["name"]+"@"+villages[i]["coord"]["x"]+"|"+villages[i]["coord"]["y"]).attr("value",villages[i]["id"]));
+          }
         }
         set_coords('target');
       })
@@ -162,7 +164,7 @@
                         <input name="source_x" id="source_x" type="text" style="width: 40px" onchange="get_village_from_coords('source')"><input name="source_y" id="source_y" type="text" style="width: 40px" onchange="get_village_from_coords('source')"><br>
                         <select id="source_village" name="source_village" onchange="set_coords('source')">
                           <option value="">Dorf auswählen</option>
-                          <option value="{{action.source_id}}" selected="selected">{{action.source_village_name}}</option>
+                          <option value="{{action.source_id}}" selected="selected">{{action.source_village_name}}@{{action.source_coord.x}}|{{action.source_coord.y}}</option>
                         </select>
                     </td>
                 </tr>
@@ -183,7 +185,7 @@
                   <input name="target_x" id="target_x" type="text" style="width: 40px"><input name="target_y" id="target_y" type="text" style="width: 40px"><br>
                   <select id="target_village" name="target_village" onchange="set_coords('target')">
                     <option value="">Dorf auswählen</option>
-                    <option value="{{action.target_id}}" selected = "selected">{{action.target_village_name}}</option>
+                    <option value="{{action.target_id}}" selected = "selected">{{action.target_village_name}}@{{action.target_coord.x}}|{{action.target_coord.y}}</option>
                   </select>
               </td>
             </tr>

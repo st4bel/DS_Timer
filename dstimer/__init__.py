@@ -4,6 +4,8 @@ from version_parser import Version
 
 __version__ = "v0.5.1"
 
+__stdOptions__ = {"show_donate": True, "version": __version__}
+
 try:
     request_release = requests.get("https://api.github.com/repos/st4bel/DS_Timer/releases/latest")
     json_release    = request_release.json()

@@ -21,7 +21,8 @@
     $.get("/villages_of_player/"+domain+"/"+player_id, function(villages) {
       window.source_villages = villages
       for (var i=0; i < villages.length;i++){
-        $("#source_village").append($("<option>").text(villages[i]["name"]).attr("value",villages[i]["id"]));
+        console.log(villages[i]["name"]+"@"+villages[i]["coord"]["x"]+"|"+villages[i]["coord"]["y"])
+        $("#source_village").append($("<option>").text(villages[i]["name"]+"@"+villages[i]["coord"]["x"]+"|"+villages[i]["coord"]["y"]).attr("value",villages[i]["id"]));
       }
     })
   }
@@ -39,7 +40,7 @@
     $.get("/villages_of_player/"+domain+"/"+target_player_id, function(villages) {
       window.target_villages = villages
       for (var i=0; i < villages.length;i++){
-        $("#target_village").append($("<option>").text(villages[i]["name"]).attr("value",villages[i]["id"]));
+        $("#target_village").append($("<option>").text(villages[i]["name"]+"@"+villages[i]["coord"]["x"]+"|"+villages[i]["coord"]["y"]).attr("value",villages[i]["id"]));
       }
     })
   }
