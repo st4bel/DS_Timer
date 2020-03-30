@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        DS_Timer_Show
 // @namespace   de.die-staemme
-// @version     0.2
+// @version     0.2.1
 // @description Export your Attack-Details for DS_Timer
 // @grant       GM_getValue
 // @grant       GM_setValue
@@ -140,8 +140,15 @@ $(function(){
       console.log("position: "+position)
       if (page=="overview_villages") {
         var new_command_row = $("<tr>").attr("class", "nowrap  selected  row_ax").attr("data-endtime", arrival_timestamp)
-          .append($("<td>").append($("<a>").attr("href", "/game.php?village="+action["target_id"]+"&screen=overview").html(action["target_id"])))
-          .append($("<td>").append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=overview").html(action["source_id"])))
+        var target_td = $("<td>").appendTo(new_command_row)
+              .append($("<span>").append($("<img>").attr("src", "https://dsde.innogamescdn.com/asset/b8e610d/graphic/command/"+action["type"]+(action["type"] == "attack" ? "_"+action["size"] : "")+".png")))
+        appendUnitSymbols(action["units"], target_td)
+        target_td.append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=info_village&id="+action["target_id"]).html(" "+action["target_village_name"]+" ("+action["target_coord"]["x"]+"|"+action["target_coord"]["y"]+")"))
+
+        new_command_row.append(
+            $("<td>")
+              .append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=overview").html(" "+action["source_village_name"]+" ("+action["source_coord"]["x"]+"|"+action["source_coord"]["y"]+")"))
+          )
           .append($("<td>").html(arrival_time_string).append($("<span>").html(mseconds).attr("class", "grey small")));
         for (var unit of units){
           var troops = 0;
@@ -159,8 +166,20 @@ $(function(){
         }
       } else if (page == "overview" || page == "info_village") {
         var new_command_row = $("<tr>").attr("class", "command-row").attr("data-endtime", arrival_timestamp)
-          .append($("<td>").append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=overview").html(action["source_id"])))
-          .append($("<td>").html(arrival_time_string).append($("<span>").html(mseconds).attr("class", "grey small")))
+        if (page == "overview") {
+          new_command_row.append(
+            $("<td>") //+(action["type"] == "attack" ? "_"+action["size"] : "")
+              .append($("<img>").attr("src", "https://dsde.innogamescdn.com/asset/b8e610d/graphic/command/"+action["type"]+(action["type"] == "attack" ? "_"+action["size"] : "")+".png"))
+              .append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=info_village&id="+action["target_id"]).html((action["type"] == "attack" ? " Angriff auf " : " Unterstützung für ")+action["source_village_name"]+" ("+action["target_coord"]["x"]+"|"+action["target_coord"]["y"]+")"))
+          )
+        }else{
+          new_command_row.append(
+            $("<td>")
+              .append($("<img>").attr("src", "https://dsde.innogamescdn.com/asset/b8e610d/graphic/command/"+action["type"]+(action["type"] == "attack" ? "_"+action["size"] : "")+".png"))
+              .append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=overview").html(" "+action["source_village_name"]))
+          )
+        }
+        new_command_row.append($("<td>").html(arrival_time_string).append($("<span>").html(mseconds).attr("class", "grey small")))
           .append($("<td>").append($("<span>").html(getTimeDiffAsString(arrival_timestamp)+"").attr("data-endtime", arrival_timestamp+"").attr("class", "countdown-span")));
         if (position == -1){//keine bereits existierenden /eingetragenen Angriff
           new_command_row.appendTo(command_table);
@@ -251,5 +270,22 @@ $(function(){
        }
      }
      return output;
+   }
+   function appendUnitSymbols(units, td_handler){
+     if ("spy" in units) {
+       td_handler.append(
+         $("<span>").append($("<img>").attr("src", "https://dsde.innogamescdn.com/asset/b8e610d/graphic/command/spy.png"))
+       )
+     }
+     if ("knight" in units) {
+       td_handler.append(
+         $("<span>").append($("<img>").attr("src", "https://dsde.innogamescdn.com/asset/b8e610d/graphic/command/knight.png"))
+       )
+     }
+     if ("snob" in units) {
+       td_handler.append(
+         $("<span>").append($("<img>").attr("src", "https://dsde.innogamescdn.com/asset/b8e610d/graphic/command/snob.png"))
+       )
+     }
    }
 });

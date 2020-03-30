@@ -177,4 +177,16 @@ def get_troups_from_template(template_name):
             return units
     raise NameError('Vorlage "'+template_name+'" nicht vorhanden.')
 
+def get_attack_size(units):
+    bh = 0
+    for unit in common.unitnames:
+        if unit in units:
+            bh += common.unit_bh[unit] * int(units[unit])
+    if bh <= 1000:
+        return "small"
+    elif bh > 1000 and bh <= 5000:
+        return "medium"
+    else:
+        return "big"
+
     #5[|]Angriff (Clean-Off)[|]Ramme[|][coord]446|290[/coord][|][coord]604|388[/coord][|]20.04.16 um 23:16:43.863[|][url="https://de118.die-staemme.de/game.php?village=49989&screen=place&mode=command&target=23476"]Versammlungsplatz[/url]

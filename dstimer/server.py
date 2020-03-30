@@ -60,6 +60,7 @@ def get_scheduled_actions():
                 action["id"]                    = file[file.rfind("_")+1:-4]
                 action["source_village_name"]   = world_data.get_village_name_from_id(action["domain"], action["source_id"])
                 action["target_village_name"]   = world_data.get_village_name_from_id(action["domain"], action["target_id"])
+                action["size"]                  = import_action.get_attack_size(action["units"])
                 if action["player"] not in player:
                     player.append(action["player"])
                 actions.append(action)

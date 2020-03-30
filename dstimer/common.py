@@ -15,6 +15,9 @@ escape_table = {
     #/\:*"<>|
 }
 
+unitnames = ["spear", "sword", "axe", "archer", "spy", "light", "marcher", "heavy", "ram", "catapult", "knight", "snob"]
+unit_bh = {"spear" : 1, "sword" : 1, "axe" : 1, "archer" : 1, "spy" : 2, "light" : 4, "marcher" : 5, "heavy" : 6, "ram" : 5, "catapult" : 8, "knight" : 10, "snob" : 100}
+
 def get_root_folder():
     return os.path.join(os.path.expanduser("~"), ".dstimer")
 
