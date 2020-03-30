@@ -56,16 +56,13 @@ def get_player_name(domain, player_id):
                 return unquote_name(dataset[1]);
         return None
 
-#def readfile_pd(filename):
-#    data = pd.read_csv(filename, delimiter=",", error_bad_lines=False)
-#    return data.to_numpy()
-
 def readfile_norm(filename):
     data = []
-    with open(filename) as f:
-        for line in f:
-            dataset = [elt.strip() for elt in line.split(',')]
-            data.append(dataset)
+    if os.path.exists(filename):
+        with open(filename) as f:
+            for line in f:
+                dataset = [elt.strip() for elt in line.split(',')]
+                data.append(dataset)
     return data
 
 def quote_name(name):
