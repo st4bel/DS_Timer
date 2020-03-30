@@ -13,6 +13,7 @@
 
 var $ = typeof unsafeWindow != 'undefined' ? unsafeWindow.$ : window.$;
 
+var std_server_address = "http://127.0.0.1:5000/";
 var unit_asset = "https://dsde.innogamescdn.com/asset/c6122a3/graphic/unit/unit_";
 var command_asset = "https://dsde.innogamescdn.com/asset/b8e610d/graphic/command/";
 var graphic_asset = "https://dsde.innogamescdn.com/asset/b8e610d/graphic/";
@@ -31,8 +32,8 @@ $(function(){
     storage.setItem(storagePrefix+key,val);
     //GM_setValue(key,val);
   }
+  var server_address = storageGet("server_address", std_server_address);
   function get_actions() {
-    //console.log('127.0.0.1:5000/show/'+getDomain()+'/target_id/'+target_id)
     var page = getPageAttribute("screen");
     if (page == "info_village") {
       var id = getPageAttribute("id");
@@ -51,7 +52,7 @@ $(function(){
     } else {
       return;
     }
-    $.ajax({ url: 'http://127.0.0.1:5000/show/'+getDomain()+'/'+type+'/'+id,
+    $.ajax({ url: server_address+'show/'+getDomain()+'/'+type+'/'+id,
       success: function(response){
         console.log(JSON.stringify(response));
         init_UI(response)
@@ -74,14 +75,13 @@ $(function(){
     // create table for outgoings
     if (page == "overview_villages") {
       if ($("#commands_table").length == 0) {
-        var command_table = $("<table>").attr("id", "commands_table").attr("class", "vis overview_table")
+        var command_table = $("<table>").attr("id", "commands_table").attr("class", "vis overview_table").appendTo($("#paged_view_content"))
         var command_table_header = $("<tr>").appendTo(command_table)
           .append($("<th>").text("Befehle ("+response.length+")"))
           .append($("<th>").text("Herkunftsdorf"))
           .append($("<th>").text("Ankunft"))
-          .append($("<th>").append($("<img>").attr("src", unit_asset+"spear")))
         for (unit of units) {
-          commands_table_header.append($("<th>").attr("style", "text-align:center").append($("<img>").attr("src", unit_asset+unit+".png")));
+          command_table_header.append($("<th>").attr("style", "text-align:center").append($("<img>").attr("src", unit_asset+unit+".png")));
         }
 
       } else {
@@ -147,10 +147,10 @@ $(function(){
         appendUnitSymbols(action["units"], target_td)
         target_td.append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=info_village&id="+action["target_id"]).html(" "+action["target_village_name"]+" ("+action["target_coord"]["x"]+"|"+action["target_coord"]["y"]+") "))
           .append($("<a>").attr("action_id", action["id"]).attr("href", "#").append($("<img>").attr("src", graphic_asset+"edit.png")).click(function(){
-            window.open('http://127.0.0.1:5000/edit_action/'+$(this).attr("action_id"), "_blank");
+            window.open(server_address+'edit_action/'+$(this).attr("action_id"), "_blank");
           }))
           .append($("<a>").attr("action_id", action["id"]).attr("href", "#").append($("<img>").attr("src", graphic_asset+"delete.png")).click(function(){
-            $.ajax({ url: 'http://127.0.0.1:5000/delete_action/'+$(this).attr("action_id"),
+            $.ajax({ url: server_address+'delete_action/'+$(this).attr("action_id"),
               success: function(response){
                 console.log(response);
                 location.reload();
@@ -192,10 +192,10 @@ $(function(){
           target_td.append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=overview").html(" "+action["source_village_name"]))
         }
         target_td.append($("<a>").attr("action_id", action["id"]).attr("href", "#").append($("<img>").attr("src", graphic_asset+"edit.png")).click(function(){
-            window.open('http://127.0.0.1:5000/edit_action/'+$(this).attr("action_id"), "_blank");
+            window.open(server_address+'edit_action/'+$(this).attr("action_id"), "_blank");
           }))
           .append($("<a>").attr("action_id", action["id"]).attr("href", "#").append($("<img>").attr("src", graphic_asset+"delete.png")).click(function(){
-            $.ajax({ url: 'http://127.0.0.1:5000/delete_action/'+$(this).attr("action_id"),
+            $.ajax({ url: server_address+'delete_action/'+$(this).attr("action_id"),
               success: function(response){
                 console.log(response);
                 location.reload();
