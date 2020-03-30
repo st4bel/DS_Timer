@@ -40,12 +40,16 @@
     var source_player = $("#source_player_select :selected").val();
     var domain = source_player.split("+")[1];
     var target_player = $("#target_player").val();
-    players = window.players;
-    target_player_id = undefined;
-    for (var i = 0; i<players.length;i++){
-      if (players[i]["name"]==target_player){
-        target_player_id=players[i]["id"];
-        break;
+    if (target_player == "None") {
+      target_player_id = "0";
+    }else{
+      players = window.players;
+      target_player_id = undefined;
+      for (var i = 0; i<players.length;i++){
+        if (players[i]["name"]==target_player){
+          target_player_id=players[i]["id"];
+          break;
+        }
       }
     }
     if (target_player_id){
