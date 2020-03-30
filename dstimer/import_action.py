@@ -9,6 +9,7 @@ from datetime import timedelta
 import dateutil.parser
 import random, string
 from dstimer import common, world_data
+from dstimer.intelli_unit import get_bh_all
 #import numpy as np
 
 def distance(source, target):
@@ -178,15 +179,14 @@ def get_troups_from_template(template_name):
     raise NameError('Vorlage "'+template_name+'" nicht vorhanden.')
 
 def get_attack_size(units):
-    bh = 0
-    for unit in common.unitnames:
-        if unit in units:
-            bh += common.unit_bh[unit] * int(units[unit])
+    bh = get_bh_all(units)
+    if not bh:
+        return ""
     if bh <= 1000:
-        return "small"
+        return "_small"
     elif bh > 1000 and bh <= 5000:
-        return "medium"
+        return "_medium"
     else:
-        return "big"
+        return "_big"
 
     #5[|]Angriff (Clean-Off)[|]Ramme[|][coord]446|290[/coord][|][coord]604|388[/coord][|]20.04.16 um 23:16:43.863[|][url="https://de118.die-staemme.de/game.php?village=49989&screen=place&mode=command&target=23476"]Versammlungsplatz[/url]

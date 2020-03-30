@@ -1,4 +1,5 @@
 import re
+from dstimer.common import unit_bh
 
 def intelli_single(format, actual):
     format = str(format).strip()
@@ -55,3 +56,42 @@ def intelli_all(format_obj, actual_obj):
         else:
             result[unit] = x
     return result
+
+def get_bh_all(format_obj):
+    bh = 0
+    for unit in format_obj:
+        x = get_bh_single(format_obj[unit])
+        if x is None:
+            return None
+        else:
+            bh += x * unit_bh[unit]
+    return bh
+
+def get_bh_single(format):
+    format = str(format)
+    # Format: number
+    match = re.fullmatch(r"[0-9]+", format)
+    if match is not None:
+        return int(format)
+    # Format: *
+    if format == "*":
+        return None
+    # Format: >=x
+    match = re.fullmatch(r">=([0-9]+)", format)
+    if match is not None:
+        requested = int(match.group(1))
+        return requested
+    # Format: =x
+    match = re.fullmatch(r"=([0-9]+)", format)
+    if match is not None:
+        requested = int(match.group(1))
+        return requested
+    # Format: -x
+    match = re.fullmatch(r"-([0-9]+)", format)
+    if match is not None:
+        return None
+    # Combined format: x, >= y or -x, >= y
+    if "," in format:
+        return None
+    # Error
+    raise ValueError("Unknown format: {0}".format(format))

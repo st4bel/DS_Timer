@@ -14,7 +14,8 @@
 var $ = typeof unsafeWindow != 'undefined' ? unsafeWindow.$ : window.$;
 
 var unit_asset = "https://dsde.innogamescdn.com/asset/c6122a3/graphic/unit/unit_";
-var command_asset = "https://dsde.innogamescdn.com/asset/b8e610d/graphic/command/"
+var command_asset = "https://dsde.innogamescdn.com/asset/b8e610d/graphic/command/";
+var graphic_asset = "https://dsde.innogamescdn.com/asset/b8e610d/graphic/";
 var units = ["spear", "sword", "axe", "archer", "spy", "light", "marcher", "heavy", "ram", "catapult", "knight", "snob"];
 
 $(function(){
@@ -142,10 +143,22 @@ $(function(){
       if (page=="overview_villages") {
         var new_command_row = $("<tr>").attr("class", "nowrap  selected  row_ax").attr("data-endtime", arrival_timestamp)
         var target_td = $("<td>").appendTo(new_command_row)
-              .append($("<span>").append($("<img>").attr("src", command_asset+action["type"]+(action["type"] == "attack" ? "_"+action["size"] : "")+".png")))
+              .append($("<span>").append($("<img>").attr("src", command_asset+action["type"]+(action["type"] == "attack" ? action["size"] : "")+".png")))
         appendUnitSymbols(action["units"], target_td)
-        target_td.append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=info_village&id="+action["target_id"]).html(" "+action["target_village_name"]+" ("+action["target_coord"]["x"]+"|"+action["target_coord"]["y"]+")"))
-
+        target_td.append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=info_village&id="+action["target_id"]).html(" "+action["target_village_name"]+" ("+action["target_coord"]["x"]+"|"+action["target_coord"]["y"]+") "))
+          .append($("<a>").attr("action_id", action["id"]).attr("href", "#").append($("<img>").attr("src", graphic_asset+"edit.png")).click(function(){
+            window.open('http://127.0.0.1:5000/edit_action/'+$(this).attr("action_id"), "_blank");
+          }))
+          .append($("<a>").attr("action_id", action["id"]).attr("href", "#").append($("<img>").attr("src", graphic_asset+"delete.png")).click(function(){
+            $.ajax({ url: 'http://127.0.0.1:5000/delete_action/'+$(this).attr("action_id"),
+              success: function(response){
+                console.log(response);
+                location.reload();
+              }, error: function(response){
+                console.log('server error');
+              }
+            })
+          }))
         new_command_row.append(
             $("<td>")
               .append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=overview").html(" "+action["source_village_name"]+" ("+action["source_coord"]["x"]+"|"+action["source_coord"]["y"]+")"))
@@ -169,15 +182,28 @@ $(function(){
         var new_command_row = $("<tr>").attr("class", "command-row").attr("data-endtime", arrival_timestamp)
         if (page == "overview") {
           var target_td = $("<td>").appendTo(new_command_row) //+(action["type"] == "attack" ? "_"+action["size"] : "")
-            .append($("<img>").attr("src", command_asset+action["type"]+(action["type"] == "attack" ? "_"+action["size"] : "")+".png"))
+            .append($("<img>").attr("src", command_asset+action["type"]+(action["type"] == "attack" ? action["size"] : "")+".png"))
           appendUnitSymbols(action["units"], target_td)
           target_td.append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=info_village&id="+action["target_id"]).html((action["type"] == "attack" ? " Angriff auf " : " Unterstützung für ")+action["source_village_name"]+" ("+action["target_coord"]["x"]+"|"+action["target_coord"]["y"]+")"))
         }else{
-          var source_td = $("<td>").appendTo(new_command_row)
-            .append($("<img>").attr("src", command_asset+action["type"]+(action["type"] == "attack" ? "_"+action["size"] : "")+".png"))
-          appendUnitSymbols(action["units"], source_td)
-          source_td.append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=overview").html(" "+action["source_village_name"]))
+          var target_td = $("<td>").appendTo(new_command_row)
+            .append($("<img>").attr("src", command_asset+action["type"]+(action["type"] == "attack" ? action["size"] : "")+".png"))
+          appendUnitSymbols(action["units"], target_td)
+          target_td.append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=overview").html(" "+action["source_village_name"]))
         }
+        target_td.append($("<a>").attr("action_id", action["id"]).attr("href", "#").append($("<img>").attr("src", graphic_asset+"edit.png")).click(function(){
+            window.open('http://127.0.0.1:5000/edit_action/'+$(this).attr("action_id"), "_blank");
+          }))
+          .append($("<a>").attr("action_id", action["id"]).attr("href", "#").append($("<img>").attr("src", graphic_asset+"delete.png")).click(function(){
+            $.ajax({ url: 'http://127.0.0.1:5000/delete_action/'+$(this).attr("action_id"),
+              success: function(response){
+                console.log(response);
+                location.reload();
+              }, error: function(response){
+                console.log('server error');
+              }
+            })
+          }))
         new_command_row.append($("<td>").html(arrival_time_string).append($("<span>").html(mseconds).attr("class", "grey small")))
           .append($("<td>").append($("<span>").html(getTimeDiffAsString(arrival_timestamp)+"").attr("data-endtime", arrival_timestamp+"").attr("class", "countdown-span")));
         if (position == -1){//keine bereits existierenden /eingetragenen Angriff

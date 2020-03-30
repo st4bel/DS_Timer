@@ -294,6 +294,11 @@ def load_players(domain):
     res = world_data.get_players(domain)
     return jsonify(res)
 
+@app.route("/delete_action/<id>")
+def delete_single_action(id):
+    if delete_action.delete_single(id):
+        return "1"
+
 @app.route("/options", methods=["GET"])
 def options_get():
     return render_template("options.html")
