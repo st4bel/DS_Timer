@@ -2,7 +2,7 @@
 import requests
 from version_parser import Version
 
-__version__ = "v0.5.1"
+__version__ = "v0.6.0"
 
 __stdOptions__ = {"show_donate": True, "version": __version__}
 
