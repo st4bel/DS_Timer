@@ -48,7 +48,13 @@
             <td><a href="https://{{ action.domain }}/game.php" rel="noreferrer"><span class="badge">{{action.world }}</span></a> {{ action.player }}</td>
             <td class="departure_time">{{ action.departure_time }}</td>
             <td class="arrival_time">{{ action.arrival_time }}</td>
-            <td><img src="{{innocdn_url('/graphic/command/' + action.type + '.png')}}"></td>
+            <td>
+              {% if action.type == "attack" %}
+              <img src="{{innocdn_url('/graphic/command/' + action.type + action.size + '.png')}}">
+              {% else %}
+              <img src="{{innocdn_url('/graphic/command/' + action.type + '.png')}}">
+              {% endif %}
+            </td>
             <td class="force">{% if action.force %}force!{% endif %}</td>
             <td class="source">
                 <a href="https://{{action.domain}}/game.php?screen=map&x={{ action.source_coord.x }}&y={{ action.source_coord.y }}&beacon" rel="noreferrer">
