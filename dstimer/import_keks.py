@@ -5,6 +5,8 @@ import re
 from dstimer import common
 from bs4 import BeautifulSoup
 import logging
+from dstimer import world_data
+
 logger = logging.getLogger("dstimer")
 FORMAT = re.compile(r"\[([a-zA-Z\.\-0-9]+)\|([a-zA-Z0-9%:]+)\|([a-zA-Z0-9]{8})\]")
 
@@ -44,6 +46,7 @@ def import_from_text(text):
     if id is None:
         raise ValueError("Session is expired or invalid")
     write_keks(keks, id, name)
+    world_data.refresh_world_data()
 
 def check_sids():
     schedule_path = os.path.join(common.get_root_folder(), "schedule")
