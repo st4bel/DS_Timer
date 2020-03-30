@@ -167,17 +167,15 @@ $(function(){
       } else if (page == "overview" || page == "info_village") {
         var new_command_row = $("<tr>").attr("class", "command-row").attr("data-endtime", arrival_timestamp)
         if (page == "overview") {
-          new_command_row.append(
-            $("<td>") //+(action["type"] == "attack" ? "_"+action["size"] : "")
-              .append($("<img>").attr("src", "https://dsde.innogamescdn.com/asset/b8e610d/graphic/command/"+action["type"]+(action["type"] == "attack" ? "_"+action["size"] : "")+".png"))
-              .append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=info_village&id="+action["target_id"]).html((action["type"] == "attack" ? " Angriff auf " : " Unterstützung für ")+action["source_village_name"]+" ("+action["target_coord"]["x"]+"|"+action["target_coord"]["y"]+")"))
-          )
+          var target_td = $("<td>").appendTo(new_command_row) //+(action["type"] == "attack" ? "_"+action["size"] : "")
+            .append($("<img>").attr("src", "https://dsde.innogamescdn.com/asset/b8e610d/graphic/command/"+action["type"]+(action["type"] == "attack" ? "_"+action["size"] : "")+".png"))
+          appendUnitSymbols(action["units"], target_td)
+          target_td.append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=info_village&id="+action["target_id"]).html((action["type"] == "attack" ? " Angriff auf " : " Unterstützung für ")+action["source_village_name"]+" ("+action["target_coord"]["x"]+"|"+action["target_coord"]["y"]+")"))
         }else{
-          new_command_row.append(
-            $("<td>")
-              .append($("<img>").attr("src", "https://dsde.innogamescdn.com/asset/b8e610d/graphic/command/"+action["type"]+(action["type"] == "attack" ? "_"+action["size"] : "")+".png"))
-              .append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=overview").html(" "+action["source_village_name"]))
-          )
+          var source_td = $("<td>").appendTo(new_command_row)
+            .append($("<img>").attr("src", "https://dsde.innogamescdn.com/asset/b8e610d/graphic/command/"+action["type"]+(action["type"] == "attack" ? "_"+action["size"] : "")+".png"))
+          appendUnitSymbols(action["units"], source_td)
+          source_td.append($("<a>").attr("href", "/game.php?village="+action["source_id"]+"&screen=overview").html(" "+action["source_village_name"]))
         }
         new_command_row.append($("<td>").html(arrival_time_string).append($("<span>").html(mseconds).attr("class", "grey small")))
           .append($("<td>").append($("<span>").html(getTimeDiffAsString(arrival_timestamp)+"").attr("data-endtime", arrival_timestamp+"").attr("class", "countdown-span")));
