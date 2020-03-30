@@ -13,6 +13,9 @@
 
 var $ = typeof unsafeWindow != 'undefined' ? unsafeWindow.$ : window.$;
 
+var _version = "0.2.1"
+var _UpdateLink = "https://github.com/st4bel/DS_Timer/releases";
+
 var std_server_address = "http://127.0.0.1:5000/";
 var unit_asset = "https://dsde.innogamescdn.com/asset/c6122a3/graphic/unit/unit_";
 var command_asset = "https://dsde.innogamescdn.com/asset/b8e610d/graphic/command/";
@@ -32,7 +35,8 @@ $(function(){
     storage.setItem(storagePrefix+key,val);
     //GM_setValue(key,val);
   }
-  var server_address = storageGet("server_address", std_server_address);
+  storageSet("server_address", storageGet("server_address", std_server_address))
+  var server_address = storageGet("server_address");
   function get_actions() {
     var page = getPageAttribute("screen");
     if (page == "info_village") {
@@ -62,8 +66,89 @@ $(function(){
     })
   }
   get_actions();
-  console.log("hey")
-  //init_UI();
+  init_option_UI();
+  function init_option_UI() {
+    //create UI_link
+    var overview_menu = $("#overview_menu");
+    var option_link = $("<a>")
+      .attr("href","#")
+      .attr("id","option_link")
+      .text("DS-Timer")
+      .click(function(){
+        toggleSettingsVisibility();
+      });
+    $("#menu_row").prepend($("<td>").attr("class","menu-item").append(option_link));
+
+    //options popup
+    var settingsDivVisible = false;
+    var overlay=$("<div>")
+      .css({
+        "position":"fixed",
+        "z-index":"99999",
+        "top":"0",
+        "left":"0",
+        "right":"0",
+        "bottom":"0",
+        "background-color":"rgba(255,255,255,0.6)",
+        "display":"none"
+      })
+      .appendTo($("body"));
+    var settingsDiv=$("<div>")
+      .css({
+        "position":"fixed",
+        "z-index":"100000",
+        "left":"50px",
+        "top":"50px",
+        "width":"500px",
+        "height":"200px",
+        "background-color":"white",
+        "border":"1px solid black",
+        "border-radius":"5px",
+        "display":"none",
+        "padding":"10px"
+      })
+      .appendTo($("body"));
+    function toggleSettingsVisibility() {
+      if(settingsDivVisible) {
+        overlay.hide();
+        settingsDiv.hide();
+      } else {
+        overlay.show();
+        settingsDiv.show();
+      }
+
+      settingsDivVisible=!settingsDivVisible;
+    }
+    //Head
+    $("<h2>").text("Einstellungen DS_Timer_Show").appendTo(settingsDiv);
+    $("<span>").text("Version: "+_version+" ").appendTo(settingsDiv);
+    $("<button>").text("Update").click(function(){
+      window.open(_UpdateLink,'_blank');
+    }).appendTo(settingsDiv);
+    //Body
+    var settingsTable=$("<table>").appendTo(settingsDiv);
+    function addRow(desc,content){
+      $("<tr>")
+        .append($("<td>").append(desc))
+        .append($("<td>").append(content))
+        .appendTo(settingsTable);
+    }
+    var server_address_input = $("<input>")
+      .attr("type","text")
+      .val(storageGet("server_address"))
+      .on("input",function(){
+        storageSet("server_address",$(this).val());
+      });
+
+    addRow(
+      $("<span>").text("URL des DS-Timers (Standard: '"+std_server_address+"'): "),
+      server_address_input
+    );
+    $("<button>").text("Schließen").click(function(){
+          toggleSettingsVisibility();
+      }).appendTo(settingsDiv);
+  }
+
   function init_UI(response){
     console.log("init_UI")
     var page = getPageAttribute("screen");
@@ -215,12 +300,6 @@ $(function(){
         }
       }
     }
-    var button_test = $("<button>").appendTo($("#linkContainer"))
-      .click(function(){
-        alert($("#abcabc").text())
-      }).text("DSTIMER")
-      .attr("class","btn")
-      .attr("id","undso")
   }
   function getPageAttribute(attribute){
     var params = document.location.search;
