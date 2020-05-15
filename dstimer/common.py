@@ -63,3 +63,7 @@ def write_options(options=__stdOptions__):
             json.dump(options, fd)
     except:
         return
+
+def send_stats(stats):
+
+    return

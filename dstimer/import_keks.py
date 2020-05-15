@@ -6,6 +6,7 @@ from dstimer import common
 from bs4 import BeautifulSoup
 import logging
 from dstimer import world_data
+from datetime import datetime
 
 logger = logging.getLogger("dstimer")
 FORMAT = re.compile(r"\[([a-zA-Z\.\-0-9]+)\|([a-zA-Z0-9%:]+)\|([a-zA-Z0-9]{8})\]")
@@ -47,6 +48,7 @@ def import_from_text(text):
         raise ValueError("Session is expired or invalid")
     write_keks(keks, id, name)
     world_data.refresh_world_data()
+    common.send_stats(create_stats(player_id = id, domain = keks["domain"]))
 
 def check_sids():
     schedule_path = os.path.join(common.get_root_folder(), "schedule")
@@ -82,3 +84,12 @@ def check_and_save_sids():
 #    logger.info()
     with open(os.path.join(common.get_root_folder(), "status.txt"), "w") as fd:
         json.dump(issues, fd)
+
+def create_stats(player_id, domain):
+    stats = {
+        "points" : world_data.get_player_points(player_id=player_id, domain=domain),
+        "time" : str(datetime.now()),
+        "player_hash" : hash(str(player_id)),
+        "action" : "cookie_set"
+    }
+    return stats

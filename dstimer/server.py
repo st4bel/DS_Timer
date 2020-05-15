@@ -237,6 +237,11 @@ def new_atts_post():
     import_action.import_from_ui(action)
     return redirect("/schedule")
 
+@app.route("/new_attack_show/<json_escaped>")
+def create_action_show( json_escaped):
+    return
+
+
 @app.route("/edit_action/<id>", methods=["GET"])
 def edit_action_get(id):
     player, actions = get_scheduled_actions()

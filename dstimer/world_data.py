@@ -105,3 +105,11 @@ def get_village_name_from_id(domain,id):
         if id == int(dataset[0]):
             return unquote_name(dataset[1])
     return None
+
+def get_player_points(player_id, domain):
+    file = os.path.join(common.get_root_folder(), "world_data", domain, "player.txt")
+    data = readfile_norm(file)
+    for dataset in data:
+        if int(player_id) == int(dataset[0]):
+            return int(dataset[5])
+    

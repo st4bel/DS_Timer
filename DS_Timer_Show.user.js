@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        DS_Timer_Show
 // @namespace   de.die-staemme
-// @version     0.2.1
+// @version     0.2.1-dev
 // @description Export your Attack-Details for DS_Timer
 // @grant       GM_getValue
 // @grant       GM_setValue
@@ -13,7 +13,7 @@
 
 var $ = typeof unsafeWindow != 'undefined' ? unsafeWindow.$ : window.$;
 
-var _version = "0.2.1"
+var _version = "0.2.1-dev"
 var _UpdateLink = "https://github.com/st4bel/DS_Timer/releases";
 
 var std_server_address = "http://127.0.0.1:5000/";
@@ -37,6 +37,12 @@ $(function(){
   }
   storageSet("server_address", storageGet("server_address", std_server_address))
   var server_address = storageGet("server_address");
+  get_actions();
+  if (getPageAttribute("screen") == "overview_villages" && $("td.selected", $("#overview_menu")).text() == "Eintreffend "){
+    init_counter_UI();
+  }
+  init_option_UI();
+
   function get_actions() {
     var page = getPageAttribute("screen");
     if (page == "info_village") {
@@ -59,15 +65,15 @@ $(function(){
     $.ajax({ url: server_address+'show/'+getDomain()+'/'+type+'/'+id,
       success: function(response){
         console.log(JSON.stringify(response));
-        init_UI(response)
+        init_planned_actions_UI(response)
       }, error: function(response){
         console.log('server error');
       }
     })
   }
-  get_actions();
-  init_option_UI();
+
   function init_option_UI() {
+    console.log("init_option_UI");
     //create UI_link
     var overview_menu = $("#overview_menu");
     var option_link = $("<a>")
@@ -147,10 +153,27 @@ $(function(){
     $("<button>").text("Schließen").click(function(){
           toggleSettingsVisibility();
       }).appendTo(settingsDiv);
+    $("<a>").attr("href", std_server_address).text("test").appendTo(settingsDiv)
   }
 
-  function init_UI(response){
-    console.log("init_UI")
+  function init_counter_UI(){
+    console.log("init_counter_UI");
+    if ($("#incomings_table").length == 0) {
+      console.log("no incommings found")
+      return
+    }
+    var incommings_table = $("#incomings_table");
+    var rows = $("tr.nowrap", incommings_table).slice();
+    for (var current = 0; current < rows.length; current++){
+      console.log("hier "+current)
+      var row = rows[current];
+      var td = $("td", row).last()
+      $("<a>").attr("href", "#").attr("class","small").text(" timer").appendTo(td);
+    }
+  }
+
+  function init_planned_actions_UI(response){
+    console.log("init_planned_actions_UI");
     var page = getPageAttribute("screen");
     if (response.length == 0){ // Abbruch, wenn keine Angriffe geplant
       console.log("keine geplanten Angriffe")
@@ -168,7 +191,6 @@ $(function(){
         for (unit of units) {
           command_table_header.append($("<th>").attr("style", "text-align:center").append($("<img>").attr("src", unit_asset+unit+".png")));
         }
-
       } else {
         var command_table = $("#commands_table");
         $(".row_ax").each(function(){
