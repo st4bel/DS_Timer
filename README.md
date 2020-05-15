@@ -36,44 +36,28 @@ similar.
 
 ```json
 [{
+    "departure_time": "2020-04-30T23:54:13.000",
     "domain": "de132.die-staemme.de",
-    "player": "Nickname",
-    "type": "attack",
-    "arrival_time": "2016-10-12T17:30:00",
-    "departure_time": "2016-10-12T16:49:45",
-    "source_id": 1234,
-    "source_coord": {
-        "y": 200,
-        "x": 300
+    "force": false,
+    "units": {
+        "spy": "10"
     },
+    "vacation": "0",
     "target_id": 12345,
-    "target_coord": {
-        "x": 200,
-        "y": 100
-    },
-    "units": {
-        "spear": 100
-    }
-},
-{
-    "domain": "de132.die-staemme.de",
-    "player": "Nickname",
     "type": "attack",
-    "arrival_time": "2016-10-12T17:30:00",
-    "departure_time": "2016-10-12T16:49:45",
-    "source_id": 1233,
     "source_coord": {
-        "y": 230,
-        "x": 300
+        "y": 376,
+        "x": 487
     },
-    "target_id": 12341,
+    "player_id": "1000456649",
+    "player": "st4bel",
     "target_coord": {
-        "x": 200,
-        "y": 120
+        "y": 375,
+        "x": 489
     },
-    "units": {
-        "spear": 100
-    }
+    "source_id": 12346,
+    "sitter": "0",
+    "arrival_time": "2020-05-01T00:14:20"
 }
 ]
 ```
