@@ -106,7 +106,7 @@ def get_local_offset():
         return timedelta(seconds=response.offset)
     except:
         logger.info("Can't connect to 'europe.pool.ntp.org'!")
-        response.offset = 0.0
+        #response.offset = 0.0
         return timedelta(seconds = 0.0)
     #return timedelta(seconds=response.offset)
 
