@@ -3,7 +3,7 @@ import subprocess
 from dstimer import __stdOptions__, __key__
 import json
 from dstimer import world_data
-import numpy as np
+import math
 from datetime import datetime
 import requests
 import hashlib
@@ -73,7 +73,7 @@ def write_options(options=__stdOptions__):
 
 def create_stats(player_id, domain):
     points = world_data.get_player_points(player_id=player_id, domain=domain)
-    points = np.floor(points/np.power(10,np.floor(np.log10(points))))*np.power(10,np.floor(np.log10(points)))
+    points = math.floor(points/math.pow(10,math.floor(math.log10(points))))*math.pow(10,math.floor(math.log10(points)))
     h = hashlib.sha256()
     h.update(bytes(player_id+__key__, "utf-8"))
     stats = {
