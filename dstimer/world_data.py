@@ -56,12 +56,12 @@ def get_player_name(domain, player_id):
                 return unquote_name(dataset[1]);
         return None
 
-def readfile_norm(filename):
+def readfile_norm(filename, delimiter=","):
     data = []
     if os.path.exists(filename):
         with open(filename) as f:
             for line in f:
-                dataset = [elt.strip() for elt in line.split(',')]
+                dataset = [elt.strip() for elt in line.split(delimiter)]
                 data.append(dataset)
     return data
 

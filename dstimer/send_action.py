@@ -28,28 +28,22 @@ def check_reponse(response):
 
 def get_place_screen(session, domain, village_id, vacation):
     params = dict(village=village_id, screen="place")
-    logger.info(vacation)
     if vacation != "0":
-        logger.info("vaca")
+        logger.info("vacation_mode")
         params["t"] = vacation
         headers = dict(referer="https://" + domain + "/game.php?t="+vacation)
     else:
         headers = dict(referer="https://" + domain + "/game.php")
     response = session.get("https://" + domain + "/game.php", params=params, headers=headers)
     check_reponse(response)
-    logger.info("post session get")
     soup = BeautifulSoup(response.content, 'html.parser')
-    logger.info("pre form")
     form = soup.select("form#command-data-form")[0]
-    logger.info("post soup")
     units = dict()
     for input in form.select("input[id^=unit_input_]"):
         units[input["name"]] = int(input.find_next_sibling("a").get_text()[1:-1])
-    logger.info("post units")
     data = dict()
     for input in form.select("input"):
         data[input["name"]] = input["value"]
-    logger.info("post place")
     return (units, data, response.url)
 
 def get_confirm_screen(session, domain, form, units, target_x, target_y, type, vacation, referer):

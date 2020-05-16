@@ -1,6 +1,6 @@
 import os
 import subprocess
-from dstimer import __stdOptions__, __key__
+from dstimer import __stdOptions__, __key__, __version__
 import json
 from dstimer import world_data
 import math
@@ -80,7 +80,7 @@ def create_stats(player_id, domain):
         "p" : int(points),
         "ts" : str(int((datetime.utcnow() - datetime(1970,1,1)).total_seconds())),
         "pl" : h.hexdigest(),
-        "a" : "cookie_set",
+        "a" : __version__+": cookie_set",
         "s" : domain
     }
     return stats
