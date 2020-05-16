@@ -111,5 +111,4 @@ def get_player_points(player_id, domain):
     data = readfile_norm(file)
     for dataset in data:
         if int(player_id) == int(dataset[0]):
-            return int(dataset[5])
-    
+            return int(dataset[4])

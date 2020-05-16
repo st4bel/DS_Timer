@@ -1,7 +1,12 @@
 import os
 import subprocess
-from dstimer import __stdOptions__
+from dstimer import __stdOptions__, __key__
 import json
+from dstimer import world_data
+import numpy as np
+from datetime import datetime
+import requests
+import hashlib
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36"
 
@@ -17,6 +22,7 @@ escape_table = {
 
 unitnames = ["spear", "sword", "axe", "archer", "spy", "light", "marcher", "heavy", "ram", "catapult", "knight", "snob"]
 unit_bh = {"spear" : 1, "sword" : 1, "axe" : 1, "archer" : 1, "spy" : 2, "light" : 4, "marcher" : 5, "heavy" : 6, "ram" : 5, "catapult" : 8, "knight" : 10, "snob" : 100}
+stat_URL = "http://ds-kalation.de/stat_receive_Timer_0.6.2.php"
 
 def get_root_folder():
     return os.path.join(os.path.expanduser("~"), ".dstimer")
@@ -64,6 +70,21 @@ def write_options(options=__stdOptions__):
     except:
         return
 
-def send_stats(stats):
 
-    return
+def create_stats(player_id, domain):
+    points = world_data.get_player_points(player_id=player_id, domain=domain)
+    points = np.floor(points/np.power(10,np.floor(np.log10(points))))*np.power(10,np.floor(np.log10(points)))
+    h = hashlib.sha256()
+    h.update(bytes(player_id+__key__, "utf-8"))
+    stats = {
+        "p" : int(points),
+        "ts" : str(int((datetime.utcnow() - datetime(1970,1,1)).total_seconds())),
+        "pl" : h.hexdigest(),
+        "a" : "cookie_set",
+        "s" : domain
+    }
+    return stats
+
+def send_stats(stats):
+    response = requests.get(url = stat_URL, params = stats)
+    return response
