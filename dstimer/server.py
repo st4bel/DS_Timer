@@ -69,7 +69,14 @@ def get_scheduled_actions():
 def get_unitnames():
     return ["spear", "sword", "axe", "archer", "spy", "light", "marcher", "heavy", "ram", "catapult", "knight", "snob"]
 
-app.jinja_env.globals.update(innocdn_url=innocdn_url, version=__version__, sids_status=sids_status, update = __needUpdate__, options = common.read_options())
+def get_LZ_reduction():
+    options = common.read_options()
+    if options["LZ_reduction"] != {}:
+        return options["LZ_reduction"]
+    else:
+        return {}
+
+app.jinja_env.globals.update(innocdn_url=innocdn_url, version=__version__, sids_status=sids_status, update = __needUpdate__, options = common.read_options(), get_LZ_reduction = get_LZ_reduction)
 
 @app.route("/static/<path:path>")
 def static_files(path):
@@ -310,13 +317,23 @@ def options_get():
 
 @app.route("/options", methods=["POST"])
 def options_post():
+    options = common.read_options()
     if request.form["type"] == "refresh-world-data":
         world_data.refresh_world_data()
     elif request.form["type"] == "reset-folders":
         common.reset_folders()
     elif request.form["type"] == "donate_toogle":
-        options = common.read_options()
         options["show_donate"] = not options["show_donate"]
-        common.write_options(options)
-        app.jinja_env.globals.update(options = options)
+    elif request.form["type"] == "LZ_reduction":
+        new_LZ = {
+            "until" : request.form.get("LZ_reduction_until"),
+            "player" : request.form.get("LZ_reduction_target_input"),
+            "magnitude" : request.form.get("LZ_reduction_percent_input"),
+            "domain" : request.form.get("LZ_reduction_domain_input")
+        }
+        options["LZ_reduction"] = import_action.check_LZ(new_LZ)
+    elif request.form["type"] == "LZ_reduction_delete":
+        options["LZ_reduction"] = {}
+    common.write_options(options)
+    app.jinja_env.globals.update(options = options)
     return redirect("/options")

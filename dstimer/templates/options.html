@@ -8,7 +8,7 @@
   }
   $(function() {
     var curtime = timestrings();
-    $("#LZ-reduction-until").val(curtime);
+    $("#LZ_reduction_until").val(curtime);
   });
 </script>
 {% endblock %}
@@ -31,19 +31,24 @@
   </div><br>
   <table>
     <tr>
-      <td>Verkürzung in procent:</td>
-      <td><input type="text" id="LZ-reduction-percent-input"></td>
+      <td>Verkürzung in Prozent:</td>
+      <td><input type="text" id="LZ_reduction_percent_input" name="LZ_reduction_percent_input"></td>
     </tr>
     <tr>
       <td>Gültig für Spieler:</td>
-      <td><input type="text" id="LZ-reduction-target-input"></td>
+      <td><input type="text" id="LZ_reduction_target_input" name="LZ_reduction_target_input"></td>
+    </tr>
+    <tr>
+      <td>Server:</td>
+      <td><input type="text" id="LZ_reduction_domain_input" name="LZ_reduction_domain_input" value="de100.die-staemme.de"></td>
     </tr>
     <tr>
       <td>Gültig bis:</td>
-      <td><input name="time" type="datetime-local" step="0.25" id="LZ-reduction-until" style="width: 160px"></td>
+      <td><input name="LZ_reduction_until" type="datetime-local" step="0.25" id="LZ_reduction_until" style="width: 160px"></td>
     </tr>
   </table>
-  <button type="submit" name="type" value="LZ-reduction" class="btn btn-default">Übernehmen</button><br>
+  <button type="submit" name="type" value="LZ_reduction" class="btn btn-default">Übernehmen</button><br>
+  <button type="submit" name="type" value="LZ_reduction_delete" class="btn btn-default">Löschen</button><br>
   <br>
   <h3>Spendenbutton anzeigen/ausblenden</h3>
   <div class="">

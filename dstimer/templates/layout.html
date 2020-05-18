@@ -79,7 +79,19 @@
             <strong>Update verfügbar! <a href="https://github.com/st4bel/DS_Timer/releases/latest">Hier</a></strong>
           </div>
         {% endif %}
-
+        {% with LZ_reduction = get_LZ_reduction() %}
+        {% if LZ_reduction != {} %}
+        <div class="alert alert-warning">
+          <strong>Laufzeitverkürzung aktiv:</strong>
+          <ul>
+            <li>
+              <span class="badge">{{ LZ_reduction.domain.partition(".")[0] }}</span>
+              <span>Prozent: {{ LZ_reduction.magnitude }}%, Spieler: {% if LZ_reduction.player == "" %}Alle{% else %}{{ LZ_reduction.player }}{% endif %}, Endet: {{ LZ_reduction.until }}</span>
+            </li>
+          </ul>
+        </div>
+        {% endif %}
+        {% endwith %}
         {% block content %}{% endblock %}
     </div>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>

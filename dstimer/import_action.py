@@ -189,4 +189,18 @@ def get_attack_size(units):
     else:
         return "_big"
 
-    #5[|]Angriff (Clean-Off)[|]Ramme[|][coord]446|290[/coord][|][coord]604|388[/coord][|]20.04.16 um 23:16:43.863[|][url="https://de118.die-staemme.de/game.php?village=49989&screen=place&mode=command&target=23476"]Versammlungsplatz[/url]
+def check_LZ(LZ):
+    if LZ["player"] != "":
+        player_id = world_data.get_player_id(domain = LZ["domain"], playername = LZ["player"])
+        if player_id == None:
+            return {}
+        LZ["player_id"] = player_id
+    else:
+        LZ["player_id"] = 0
+    try:
+        magnitude = int(LZ["magnitude"])
+        if magnitude < 0 or magnitude > 50:
+            return {}
+    except:
+        return {}
+    return LZ

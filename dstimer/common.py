@@ -7,6 +7,7 @@ import math
 from datetime import datetime
 import requests
 import hashlib
+from version_parser import Version
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36"
 
@@ -59,6 +60,9 @@ def read_options():
             write_options()
         with open(file) as fd:
             options = json.load(fd)
+        if Version(__version__) > Version(options["version"]):
+            write_options()
+            return __stdOptions__
         return options
     except:
         return __stdOptions__
