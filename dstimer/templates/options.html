@@ -1,6 +1,16 @@
 {% extends "layout.html" %}
 {% block title %}Optionen{% endblock %}
 {% block header %}
+<script type="text/javascript">
+  function timestrings(){
+    var today = new Date();
+    return today.getFullYear()+"-"+(today.getMonth()+1)+"-"+today.getDate()+"T"+today.getHours()+":"+today.getMinutes()+":"+today.getSeconds()+".000"
+  }
+  $(function() {
+    var curtime = timestrings();
+    $("#LZ-reduction-until").val(curtime);
+  });
+</script>
 {% endblock %}
 {% block content %}
 <form class="" action="" method="post">
@@ -14,6 +24,26 @@
     Nach jedem Update sollte der Ordner, in dem alle Daten des Timers abgespeichert werden, zurückgesetzt werden. Dazu bitte einmal den Button drücken, Timer schließen und im Explorer alle Ordner löschen. Danach den Timer neu starten!
   </div><br>
   <button type="submit" name="type" value="reset-folders" class="btn btn-default">Gespeicherte Daten öffnen</button><br>
+  <br>
+  <h3>Laufzeitverkürzung</h3>
+  <div class="">
+    Sollte die Laufzeit von Unterstützungen aufgrund von Boni wie z.B. Banner der Bedrängniss verkürzt sein, kann das hier eingestellt werden. Sollten alle Ziele von der Verkürzung betroffen sein, bitte "Gültig für Spieler" leer lassen.
+  </div><br>
+  <table>
+    <tr>
+      <td>Verkürzung in procent:</td>
+      <td><input type="text" id="LZ-reduction-percent-input"></td>
+    </tr>
+    <tr>
+      <td>Gültig für Spieler:</td>
+      <td><input type="text" id="LZ-reduction-target-input"></td>
+    </tr>
+    <tr>
+      <td>Gültig bis:</td>
+      <td><input name="time" type="datetime-local" step="0.25" id="LZ-reduction-until" style="width: 160px"></td>
+    </tr>
+  </table>
+  <button type="submit" name="type" value="LZ-reduction" class="btn btn-default">Übernehmen</button><br>
   <br>
   <h3>Spendenbutton anzeigen/ausblenden</h3>
   <div class="">
