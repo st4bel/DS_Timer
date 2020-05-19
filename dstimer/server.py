@@ -23,7 +23,7 @@ logger = logging.getLogger("dstimer")
 
 def innocdn_url(path):
 #    return "https://dsde.innogamescdn.com/8.58/30847" + path
-    return "https://dsde.innogamescdn.com/asset/e9773236" + path
+    return "https://dsde.innogamescdn.com/asset/3cc5e90" + path
 
 def sids_status():
     try:
@@ -72,7 +72,7 @@ def get_unitnames():
 def get_LZ_reduction():
     options = common.read_options()
     if options["LZ_reduction"] != {}:
-        return options["LZ_reduction"]
+        return import_action.check_LZ(options["LZ_reduction"])
     else:
         return {}
 

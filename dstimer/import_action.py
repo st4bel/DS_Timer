@@ -5,7 +5,7 @@ import os
 import math
 import requests
 import xml.etree.ElementTree as ET
-from datetime import timedelta
+from datetime import timedelta, datetime
 import dateutil.parser
 import random, string
 from dstimer import common, world_data
@@ -56,6 +56,25 @@ def get_cached_unit_info(domain):
             json.dump(unit_info, fd)
         return unit_info
 
+def get_LZ_factor(action):
+    LZ = common.read_options()["LZ_reduction"]
+    if action["type"] != "support" or LZ == {}:
+        return 1
+    if LZ["domain"] != action["domain"]:
+        return 1
+    if LZ["player"] != "" and int(LZ["player_id"]) != int(world_data.get_village_owner(action["domain"], action["target_id"])):
+        return 1#
+    if "arrival_time" not in action:
+        if dateutil.parser.parse(action["departure_time"]) > dateutil.parser.parse(LZ["until"]):
+            return 1
+    if "departure_time" not in action:
+        duration = runtime(speed(action["units"], action["type"], get_cached_unit_info(action["domain"]))/(1+int(LZ["magnitude"])/100),
+            distance(action["source_coord"], action["target_coord"]))
+        departure_time = dateutil.parser.parse(action["arrival_time"]) - duration
+        if departure_time > dateutil.parser.parse(LZ["until"]):
+            return 1
+    return 1 + int(LZ["magnitude"])/100
+
 def autocomplete(action):
     """Add missing information about an action like departure time"""
     action["source_coord"]["x"] = int(action["source_coord"]["x"])
@@ -70,7 +89,7 @@ def autocomplete(action):
     for unit in units_to_delete:
         del action["units"][unit]
     unit_info = get_cached_unit_info(action["domain"])
-    duration = runtime(speed(action["units"], action["type"], unit_info),
+    duration = runtime(speed(action["units"], action["type"], unit_info)/get_LZ_factor(action),
         distance(action["source_coord"], action["target_coord"]))
     if "departure_time" not in action:
         action["departure_time"] = (dateutil.parser.parse(action["arrival_time"]) - duration).isoformat()
@@ -197,6 +216,8 @@ def check_LZ(LZ):
         LZ["player_id"] = player_id
     else:
         LZ["player_id"] = 0
+    if datetime.now() > dateutil.parser.parse(LZ["until"]):
+        return {}
     try:
         magnitude = int(LZ["magnitude"])
         if magnitude < 0 or magnitude > 50:
