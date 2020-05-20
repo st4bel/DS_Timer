@@ -2,7 +2,7 @@
 import requests
 from version_parser import Version
 
-__version__ = "v0.6.2"
+__version__ = "v0.7.0-dev"
 
 __key__ = "insert key here lol"
 __stdOptions__ = {"show_donate": True, "version": __version__, "LZ_reduction" : {}}

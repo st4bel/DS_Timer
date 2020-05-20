@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        DS_Timer_Export
 // @namespace   de.die-staemme
-// @version     0.1.4
+// @version     0.1.5-dev
 // @description Export your Attack-Details for DS_Timer
 // @grant       GM_getValue
 // @grant       GM_setValue
@@ -355,7 +355,7 @@ $(function(){
         ex_str.vacation         = getPageAttribute("t");
         ex_str.sitter           = game_data.player.sitter;
         ex_str.player_id        = game_data.player.id;
-
+        ex_str.multiple_attacks = "";
         console.log(JSON.stringify(ex_str));
         $("#input_export").val(JSON.stringify(ex_str));
 
