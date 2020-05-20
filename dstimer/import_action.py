@@ -95,6 +95,8 @@ def autocomplete(action):
         action["departure_time"] = (dateutil.parser.parse(action["arrival_time"]) - duration).isoformat()
     if "arrival_time" not in action:
         action["arrival_time"] = (dateutil.parser.parse(action["departure_time"]) + duration).isoformat()
+    if "next_attack" not in action:
+        action["next_attack"] = False
 
 def random_id(length):
     return "".join(random.choice(string.ascii_lowercase) for i in range(length))
@@ -172,21 +174,26 @@ def import_wb_action(text,name):
 
 def import_from_ui(action, rand_mill = False, id = None):
     autocomplete(action)
-    if rand_mill:
-        mill = timedelta(seconds=random.random()-0.5)
-        action["departure_time"] = (dateutil.parser.parse(action["departure_time"]) + mill).isoformat()
-        action["arrival_time"] = (dateutil.parser.parse(action["arrival_time"]) + mill).isoformat()
-    filename = dateutil.parser.parse(action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + (id if id else random_id(6)) + ".txt"
-
-    directory = os.path.join(common.get_root_folder(), "schedule")
+    if action["type"] == "multiple_attacks":
+        directory = os.path.join(common.get_root_folder(), "temp_action")
+    else:
+        directory = os.path.join(common.get_root_folder(), "schedule")
     if id:
         for file in os.listdir(directory):
             if os.path.isfile(os.path.join(directory, file)) and id in file:
                 os.remove(os.path.join(directory, file))
                 break
+    else:
+        id = random_id(6)
+    if rand_mill:
+        mill = timedelta(seconds=random.random()-0.5)
+        action["departure_time"] = (dateutil.parser.parse(action["departure_time"]) + mill).isoformat()
+        action["arrival_time"] = (dateutil.parser.parse(action["arrival_time"]) + mill).isoformat()
+    filename = dateutil.parser.parse(action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + id + ".txt"
     file = os.path.join(directory, filename)
     with open(file, "w") as fd:
         json.dump(action, fd, indent=4)
+    return id
 
 def get_troups_from_template(template_name):
     path = os.path.join(os.path.expanduser("~"), ".dstimer", "templates")

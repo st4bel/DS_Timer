@@ -46,8 +46,8 @@ def get_templates():
             templates.append(template)
     return templates
 
-def get_scheduled_actions():
-    schedule_path = os.path.join(os.path.expanduser("~"), ".dstimer", "schedule")
+def get_scheduled_actions(folder = "schedule"):
+    schedule_path = os.path.join(os.path.expanduser("~"), ".dstimer", folder)
     actions = []
     player = []
     for file in os.listdir(schedule_path):
@@ -241,8 +241,18 @@ def new_atts_post():
     action["sitter"] = "0"
     action["vacation"] = "0"
     action["force"] = False
-    import_action.import_from_ui(action)
-    return redirect("/schedule")
+    id = import_action.import_from_ui(action)
+    return redirect("/schedule") if action["type"] != "multiple_attacks" else redirect("/add_attacks/"+id)
+
+@app.route("/add_attacks/<id>")
+def add_attacks(id):
+    player, actions = get_scheduled_actions("temp_action")
+    for a in actions:
+        if id == a["id"]:
+            action = a
+            action["target_player"] = world_data.get_player_name(action["domain"], world_data.get_village_owner(action["domain"], action["target_id"]))
+            break
+    return render_template("add_attacks.html", templates = get_templates(), unitnames = get_unitnames(), action = action)
 
 @app.route("/new_attack_show/<json_escaped>")
 def create_action_show( json_escaped):
