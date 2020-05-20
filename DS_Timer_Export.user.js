@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        DS_Timer_Export
 // @namespace   de.die-staemme
-// @version     0.1.5-dev
+// @version     0.1.4
 // @description Export your Attack-Details for DS_Timer
 // @grant       GM_getValue
 // @grant       GM_setValue
@@ -10,8 +10,6 @@
 // @include     https://*.die-staemme.de/game.php?*screen=place&try=confirm*
 // @copyright   2016+, Raznarek, stabel
 // ==/UserScript==
-
-// for DS_Timer Version 0.7.x or lower
 
 var $ = typeof unsafeWindow != 'undefined' ? unsafeWindow.$ : window.$;
 var troopspead = {"spear":18,"sword":22,"axe":18,"archer":18,"spy":9,"light":10,"marcher":10,"heavy":11,"ram":30,"catapult":30,"knight":10,"snob":35};
@@ -328,6 +326,14 @@ $(function(){
         ex_str.target_coord.x   = parseInt(coord_string.split("|")[0]);
         ex_str.target_coord.y   = parseInt(coord_string.split("|")[1]);
 
+        /*ex_str.attack_time      = {};
+        datetime                = $("#export_time").val().split("T");
+        var date                = datetime[0].split("-");
+        var time                = datetime[1].split(":");
+        time[3]                 = time[2].split(".")[1];
+        time[2]                 = time[2].split(".")[0];
+        ex_str.attack_time.time = time;
+        ex_str.attack_time.date = date;*/
         if(storageGet("toogle_arriv_depart")=="arriv"){
             ex_str.arrival_time     = $("#export_time").val();
         }else{
@@ -339,6 +345,9 @@ $(function(){
         ex_str.units            = {};
         ex_str.units            = JSON.parse(JSON.stringify(troops.current));
         ex_str.force            = $("#checkforce").prop("checked");
+        //for(var unit in ex_str.units){
+        //    ex_str.units[unit]  = parseInt(ex_str.units[unit]);
+        //}
 
         ex_str.domain           = location.host;
         ex_str.player           = game_data.player.name; // in UV gives player name not sitter name
@@ -346,7 +355,6 @@ $(function(){
         ex_str.vacation         = getPageAttribute("t");
         ex_str.sitter           = game_data.player.sitter;
         ex_str.player_id        = game_data.player.id;
-        ex_str.multiple_attacks = "";
 
         console.log(JSON.stringify(ex_str));
         $("#input_export").val(JSON.stringify(ex_str));
