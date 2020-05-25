@@ -2,14 +2,61 @@
 {% block title %}Add Attacks{% endblock %}
 {% block header %}
 <script type="text/javascript">
-  $(function() {
+  function addRow(){
+    var outer_table = $("#outer_table");
+    var counter = $(".row").length + 1;
+    var troop_container = $("<td>").attr("class", "troop_container")
+      .append($("<table>").append($("<tr>")));
+    var options_container = $("<td>").attr("class", "options_container");
+    var row = $("<tr>").attr("id", "row_"+counter).attr("class", "row")
+      .append($("<td>").append($("<span>").html("<b>"+counter+"</b>")))
+      .append(troop_container)
+      .append(options_container)
+      .appendTo(outer_table);
+    var troop_row = $("tr", troop_container)
+    {% for unitname in unitnames %}
+    troop_row.append(
+      $("<td>").append(
+        $("<img>").attr("src", "{{ innocdn_url('/graphic/unit/unit_'+unitname+'.png') }}")
+      )
+      .append(
+        $("<input>").attr("id", "unit_input_{{ unitname }}").attr("type", "text").attr("style", "width: 40px")
+      )
+    )
+    {% endfor %}
 
+  }
+  $(function() {
+    addRow();
   });
 </script>
 {% endblock %}
 {% block content %}
-
 <h2>Angriffe hinzufügen</h2>
+<table class="table" id="outer_table">
+    <tr>
+        <th>Nummer</th>
+        <th>Truppen</th>
+        <th>Aktionen</th>
+    </tr>
+    <tr class="row" id="row_0">
+        <td><b>1</b></td>
+        <td>
+            <table><tr>
+            {% for unitname in unitnames %}
+                <td width="70px" align="right">
+                    <span class="badge alert-success" title="{{unitname}}">{{action.units[unitname]}}<img src="{{ innocdn_url('/graphic/unit/unit_' + unitname + '.png') }}"></span>
+                </td>
+            {% endfor %}
+            </tr></table>
+        </td>
+        <td>
 
+                <span>ok</span>
+
+        </td>
+    </tr>
+
+</table>
 
 {% endblock %}
