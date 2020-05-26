@@ -32,6 +32,38 @@
 </script>
 {% endblock %}
 {% block content %}
+<table>
+  <tr>
+    <td><b>Startdorf:</b></td>
+    <td>
+      <a href="https://{{action.domain}}/game.php?screen=map&x={{ action.source_coord.x }}&y={{ action.source_coord.y }}&beacon" rel="noreferrer">
+          <img src="{{ innocdn_url('/graphic/icons/map2.png') }}">
+      </a>
+      <a href="https://{{action.domain}}/game.php?screen=info_village&id={{action.source_id}}" rel="noreferrer">
+          {{ action.source_village_name }} {{ action.source_coord.x }}|{{ action.source_coord.y }}
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td><b>Zieldorf:</b></td>
+    <td>
+      <a href="https://{{action.domain}}/game.php?screen=map&x={{ action.target_coord.x }}&y={{ action.target_coord.y }}&beacon" rel="noreferrer">
+          <img src="{{ innocdn_url('/graphic/icons/map2.png') }}">
+      </a>
+      <a href="https://{{action.domain}}/game.php?screen=info_village&id={{action.target_id}}" rel="noreferrer">
+          {{ action.target_village_name }} {{ action.target_coord.x }}|{{ action.target_coord.y }}
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td><b>Abschickzeit:</b></td>
+    <td>{{ action.departure_time }}</td>
+  </tr>
+  <tr>
+    <td><b>Ankunftszeit:</b></td>
+    <td>{{ action.arrival_time }}</td>
+  </tr>
+</table>
 <h2>Angriffe hinzufügen</h2>
 <table class="table" id="outer_table">
     <tr>
