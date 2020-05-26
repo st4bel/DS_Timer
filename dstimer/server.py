@@ -254,6 +254,15 @@ def add_attacks(id):
             break
     return render_template("add_attacks.html", templates = get_templates(), unitnames = get_unitnames(), action = action)
 
+@app.route("/add_attacks/<id>", methods=["POST"])
+def add_attacks_post(id):
+    player, actions = get_scheduled_actions("temp_action")
+    for a in actions:
+        if id == a["id"]:
+            action_0 = a
+            break
+
+
 @app.route("/new_attack_show/<json_escaped>")
 def create_action_show( json_escaped):
     return
