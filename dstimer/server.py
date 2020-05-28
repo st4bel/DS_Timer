@@ -199,8 +199,6 @@ def templates_post():
 def show(domain, type, id):
     player, actions = get_scheduled_actions()
     filtered_actions = []
-    logger.info(type)
-    logger.info(id)
     for action in actions:
         if str(action[type]) == id and action["domain"] == domain:
             action["milliseconds"] = int(action["arrival_time"].microsecond / 1000)
@@ -256,11 +254,29 @@ def add_attacks(id):
 
 @app.route("/add_attacks/<id>", methods=["POST"])
 def add_attacks_post(id):
+    NoA = int(request.form["type"])
     player, actions = get_scheduled_actions("temp_action")
     for a in actions:
         if id == a["id"]:
-            action_0 = a
+            action[0] = a
             break
+    speed = import_action.speed(action[0]["units"], "", import_action.get_cached_unit_info(action[0]["domain"]))
+    action[0]["type"] = "attack"
+    for i in range(1, NoA+1):
+        a = action[0]
+        a["units"] = {}
+        for name in get_unitnames():
+            if request.form[name+"_"+i] != "":
+                a["units"][name] = request.form[name+"_"+i]
+        if speed != import_action.speed(action[i]["units"], "", import_action.get_cached_unit_info(action[i]["domain"])):
+            logger.info("change in unitspeed after adding attack")
+            return redirect("/add_attacks/"+id)
+        a["type"] = "attack"
+        action[i] = a
+    for i in range(1, NoA+1):
+        action[NoA-i]["next_attack"] = import_action.import_from_ui(action[NoA+1-i])
+    import_action.import_from_ui(action[0])
+
 
 
 @app.route("/new_attack_show/<json_escaped>")

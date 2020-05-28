@@ -14,12 +14,13 @@
           $("<img>").attr("src", "{{ innocdn_url('/graphic/unit/unit_'+unitname+'.png') }}")
         )
         .append(
-          $("<input>").attr("id", "unit_input_{{ unitname }}_"+counter).attr("type", "text").attr("style", "width: 40px")
+          $("<input>").attr("id", "unit_input_{{ unitname }}_"+counter).attr("type", "text").attr("style", "width: 40px").attr("name", "{{ unitname }}_"+counter);
         )
       )
     {% endfor %}
       .append(options_container)
       .insertAfter($(".row", outer_table).last());
+    $("#submit_button").val(parseInt($("#submit_button").val())+1)
   }
   $(function() {
     addRow();
@@ -80,6 +81,6 @@
     </tr>
   </table>
   <a href="javascript:addRow()">Weiteren Angriff hinzufügen</a><br>
-  <button type="submit" name="type" value="add_attacks">Angriffe Übernehmen</button>
+  <button type="submit" name="type" value="0" id="submit_button">Angriffe Übernehmen</button>
 </form>
 {% endblock %}
