@@ -369,6 +369,8 @@ def options_post():
         options["LZ_reduction"] = import_action.check_LZ(new_LZ)
     elif request.form["type"] == "LZ_reduction_delete":
         options["LZ_reduction"] = {}
+    elif request.form["type"] == "min_time_diff":
+        options["min_time_diff"] = int(request.form.get("min_time_diff"))
     common.write_options(options)
     app.jinja_env.globals.update(options = options)
     return redirect("/options")
