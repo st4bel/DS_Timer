@@ -263,6 +263,7 @@ def add_attacks_post(id):
             del a["arrival_time"]
             action.append(a)
             break
+    min_time_diff = common.read_options()["min_time_diff"]
     speed = import_action.speed(action[0]["units"], "", import_action.get_cached_unit_info(action[0]["domain"]))
     action[0]["type"] = "attack"
     for i in range(1, NoA+1):
@@ -275,6 +276,8 @@ def add_attacks_post(id):
         if speed != import_action.speed(a["units"], "", import_action.get_cached_unit_info(a["domain"])):
             logger.info("change in unitspeed after adding attack")
             return redirect("/add_attacks/"+id)
+        departure = a["departure_time"].split(".")
+        a["departure_time"] = departure[0]+"."+str(int(departure[1])+(1000*i*min_time_diff))
         a["type"] = "attack"
         action.append(a)
     for i in range(1, NoA+1):
