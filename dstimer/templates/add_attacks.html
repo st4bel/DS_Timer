@@ -14,7 +14,7 @@
           $("<img>").attr("src", "{{ innocdn_url('/graphic/unit/unit_'+unitname+'.png') }}")
         )
         .append(
-          $("<input>").attr("id", "unit_input_{{ unitname }}_"+counter).attr("type", "text").attr("style", "width: 40px").attr("name", "{{ unitname }}_"+counter);
+          $("<input>").attr("id", "unit_input_{{ unitname }}_"+counter).attr("type", "text").attr("style", "width: 40px").attr("name", "{{ unitname }}_"+counter)
         )
       )
     {% endfor %}

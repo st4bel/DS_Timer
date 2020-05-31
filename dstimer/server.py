@@ -256,27 +256,32 @@ def add_attacks(id):
 def add_attacks_post(id):
     NoA = int(request.form["type"])
     player, actions = get_scheduled_actions("temp_action")
+    action = []
     for a in actions:
         if id == a["id"]:
-            action[0] = a
+            a["departure_time"] = str(a["departure_time"]).replace(" ", "T")
+            del a["arrival_time"]
+            action.append(a)
             break
     speed = import_action.speed(action[0]["units"], "", import_action.get_cached_unit_info(action[0]["domain"]))
     action[0]["type"] = "attack"
     for i in range(1, NoA+1):
-        a = action[0]
+        a = action[0].copy()
         a["units"] = {}
         for name in get_unitnames():
-            if request.form[name+"_"+i] != "":
-                a["units"][name] = request.form[name+"_"+i]
-        if speed != import_action.speed(action[i]["units"], "", import_action.get_cached_unit_info(action[i]["domain"])):
+            n = name+"_"+str(i)
+            if request.form[n] != "":
+                a["units"][name] = request.form[n]
+        if speed != import_action.speed(a["units"], "", import_action.get_cached_unit_info(a["domain"])):
             logger.info("change in unitspeed after adding attack")
             return redirect("/add_attacks/"+id)
         a["type"] = "attack"
-        action[i] = a
+        action.append(a)
     for i in range(1, NoA+1):
         action[NoA-i]["next_attack"] = import_action.import_from_ui(action[NoA+1-i])
     import_action.import_from_ui(action[0])
-
+    delete_action.delete_single(id, "temp_action")
+    return redirect("/schedule")
 
 
 @app.route("/new_attack_show/<json_escaped>")
