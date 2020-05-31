@@ -277,8 +277,9 @@ def add_attacks_post(id):
             logger.info("change in unitspeed after adding attack")
             return redirect("/add_attacks/"+id)
         departure = a["departure_time"].split(".")
+        if len(departure) == 1:
+            departure.append(0)
         a["departure_time"] = departure[0]+"."+str(int(departure[1])+(1000*i*min_time_diff))
-        a["type"] = "attack"
         action.append(a)
     for i in range(1, NoA+1):
         action[NoA-i]["next_attack"] = import_action.import_from_ui(action[NoA+1-i])
