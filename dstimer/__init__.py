@@ -2,10 +2,10 @@
 import requests
 from version_parser import Version
 
-__version__ = "v0.7.0-dev"
+__version__ = "v0.6.3-dev"
 
 __key__ = "insert key here lol"
-__stdOptions__ = {"show_donate": True, "version": __version__, "LZ_reduction" : {}}
+__stdOptions__ = {"show_donate": True, "version": __version__, "LZ_reduction" : {}, "min_time_diff" : 150}
 
 try:
     request_release = requests.get("https://api.github.com/repos/st4bel/DS_Timer/releases/latest")
