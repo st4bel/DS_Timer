@@ -204,11 +204,17 @@ def cycle():
 
     offset = None
     ping = {}
+    train_ignore = []
 
     for file in os.listdir(schedule_path):
         if os.path.isfile(os.path.join(schedule_path, file)):
+            if file.split("_")[1].split(".")[0] in train_ignore:
+                continue
             with open(os.path.join(schedule_path, file)) as fd:
                 action = json.load(fd)
+            # train
+            if action["next_attack"]:
+                train_ignore.append(action["id"])
             departure = dateutil.parser.parse(action["departure_time"])
             if departure < now:
                 logger.error("Action scheduled for {0} is expired. Will not send.".format(departure))
