@@ -208,17 +208,19 @@ def cycle():
 
     for file in os.listdir(schedule_path):
         if os.path.isfile(os.path.join(schedule_path, file)):
-            logger.info(file.split("_")[1].split(".")[0])
+            #logger.info("train_ignore start: ")
+            #logger.info(train_ignore)
+            #logger.info("file_id: "+file.split("_")[1].split(".")[0])
             if file.split("_")[1].split(".")[0] in train_ignore:
-                logger.info("skipping")
+                #logger.info("skipping")
                 continue
-            else:
-                logger.info("not skipping")
+            #else:
+                #logger.info("not skipping")
             with open(os.path.join(schedule_path, file)) as fd:
                 action = json.load(fd)
             # train
             if action["next_attack"]:
-                train_ignore.append(action["id"])
+                train_ignore.append(action["next_attack"])
             departure = dateutil.parser.parse(action["departure_time"])
             if departure < now:
                 logger.error("Action scheduled for {0} is expired. Will not send.".format(departure))
@@ -239,7 +241,9 @@ def cycle():
                 logger.info("Schedule action for {0}".format(departure))
                 thread = SendActionThread(action, offset, ping[domain], file)
                 thread.start()
-                logger.info(train_ignore)
+            #logger.info("train_ignore end: ")
+            #logger.info(train_ignore)
+
 
 class DaemonThread(threading.Thread):
     def __init__(self):
