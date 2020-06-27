@@ -211,16 +211,16 @@ def cycle():
             #logger.info("train_ignore start: ")
             #logger.info(train_ignore)
             #logger.info("file_id: "+file.split("_")[1].split(".")[0])
-            if file.split("_")[1].split(".")[0] in train_ignore:
-                #logger.info("skipping")
-                continue
-            #else:
-                #logger.info("not skipping")
             with open(os.path.join(schedule_path, file)) as fd:
                 action = json.load(fd)
             # train
             if action["next_attack"]:
                 train_ignore.append(action["next_attack"])
+            if file.split("_")[1].split(".")[0] in train_ignore:
+                #logger.info("skipping")
+                continue
+            #else:
+                #logger.info("not skipping")
             departure = dateutil.parser.parse(action["departure_time"])
             if departure < now:
                 logger.error("Action scheduled for {0} is expired. Will not send.".format(departure))
@@ -229,6 +229,16 @@ def cycle():
             elif departure - now < datetime.timedelta(seconds=90):
                 # Move action file to pending folder
                 os.rename(os.path.join(schedule_path, file), os.path.join(pending_path, file))
+                # Moving all scheduled actions of a train to pending folder
+                next_attack = action["next_attack"]
+                while next_attack:
+                    for file in os.listdir(schedule_path):
+                        if os.path.isfile(os.path.join(schedule_path, file)) and next_attack in file:
+                            with open(os.path.join(schedule_path, file)) as fd:
+                                a = json.load(fd)
+                            os.rename(os.path.join(schedule_path, file), os.path.join(pending_path, file))
+                            next_attack = a["next_attack"]
+                            break
                 # Request Offset & Ping
                 domain = action["domain"]
                 if offset is None:
