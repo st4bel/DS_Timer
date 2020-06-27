@@ -208,8 +208,12 @@ def cycle():
 
     for file in os.listdir(schedule_path):
         if os.path.isfile(os.path.join(schedule_path, file)):
+            logger.info(file.split("_")[1].split(".")[0])
             if file.split("_")[1].split(".")[0] in train_ignore:
+                logger.info("skipping")
                 continue
+            else:
+                logger.info("not skipping")
             with open(os.path.join(schedule_path, file)) as fd:
                 action = json.load(fd)
             # train
@@ -235,6 +239,7 @@ def cycle():
                 logger.info("Schedule action for {0}".format(departure))
                 thread = SendActionThread(action, offset, ping[domain], file)
                 thread.start()
+                logger.info(train_ignore)
 
 class DaemonThread(threading.Thread):
     def __init__(self):

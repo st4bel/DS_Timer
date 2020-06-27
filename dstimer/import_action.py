@@ -178,7 +178,7 @@ def import_from_ui(action, rand_mill = False, id = None):
         directory = os.path.join(common.get_root_folder(), "temp_action")
     else:
         directory = os.path.join(common.get_root_folder(), "schedule")
-    if id:
+    if id: # removing old file
         for file in os.listdir(directory):
             if os.path.isfile(os.path.join(directory, file)) and id in file:
                 os.remove(os.path.join(directory, file))
@@ -189,6 +189,7 @@ def import_from_ui(action, rand_mill = False, id = None):
         mill = timedelta(seconds=random.random()-0.5)
         action["departure_time"] = (dateutil.parser.parse(action["departure_time"]) + mill).isoformat()
         action["arrival_time"] = (dateutil.parser.parse(action["arrival_time"]) + mill).isoformat()
+    action["id"] = id
     filename = dateutil.parser.parse(action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + id + ".txt"
     file = os.path.join(directory, filename)
     with open(file, "w") as fd:
