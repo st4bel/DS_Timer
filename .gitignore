@@ -10,3 +10,5 @@ beispielseiten
 *.lnk
 tools
 cacert.pem
+*.csv
+*yer.py
