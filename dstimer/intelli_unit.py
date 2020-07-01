@@ -1,5 +1,9 @@
 import re
+import logging
+import json
 from dstimer.common import unit_bh
+
+logger = logging.getLogger("dstimer")
 
 def intelli_single(format, actual):
     format = str(format).strip()
@@ -56,6 +60,20 @@ def intelli_all(format_obj, actual_obj):
         else:
             result[unit] = x
     return result
+
+def intelli_train(action, actual_obj):
+    if action["train"] != {}:
+        # get all unit types used in train
+        units = []
+        for unit in action["units"]:
+            units.append(unit)
+        for counter in action["train"]:
+            for unit in action["train"][counter]:
+                if unit not in units:
+                    units.append(unit)
+        logger.info("units in train: "+json.dumps(units))
+    #else:
+    #    return intelli_all(action["units"], actual_obj)
 
 def get_bh_all(format_obj):
     bh = 0
