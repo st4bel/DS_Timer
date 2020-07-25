@@ -77,6 +77,7 @@ def get_confirm_screen(session, domain, form, units, target_x, target_y, type, v
         if "name" in input.attrs and "value" in input.attrs:
             data[input["name"]] = input["value"]
     data["building"] = "wall"
+    data["save_default_attack_building"] = 0
     return (action, data, response.url)
 
 def just_do_it(session, domain, action, data, referer):
