@@ -205,7 +205,7 @@ class SendActionThread(threading.Thread):
                     time.sleep((time_left / 2).total_seconds())
                 logger.info("Time left: "+str(real_departure - datetime.datetime.now()))
                 logger.info("data: "+json.dumps(data))
-                just_do_it(session, domain, action, data, referer)# ALTER WIEDER ENTKOMMENTIEREN!
+                just_do_it(session, domain, action, data, referer)
                 logger.info("Finished job")
                 # Delete finished action file
                 os.remove(os.path.join(pending_path, self.file))
