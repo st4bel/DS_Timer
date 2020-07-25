@@ -22,16 +22,18 @@ from dstimer.import_keks import check_and_save_sids
 
 logger = logging.getLogger("dstimer")
 
+
 def check_reponse(response):
     if response.url.endswith("/sid_wrong.php"):
         raise ValueError("Session is invalid")
+
 
 def get_place_screen(session, domain, village_id, vacation):
     params = dict(village=village_id, screen="place")
     if vacation != "0":
         logger.info("vacation_mode")
         params["t"] = vacation
-        headers = dict(referer="https://" + domain + "/game.php?t="+vacation)
+        headers = dict(referer="https://" + domain + "/game.php?t=" + vacation)
     else:
         headers = dict(referer="https://" + domain + "/game.php")
     response = session.get("https://" + domain + "/game.php", params=params, headers=headers)
@@ -45,6 +47,7 @@ def get_place_screen(session, domain, village_id, vacation):
     for input in form.select("input"):
         data[input["name"]] = input["value"]
     return (units, data, response.url)
+
 
 def get_confirm_screen(session, domain, form, units, target_x, target_y, type, vacation, referer):
     params = {"village": form["source_village"], "screen": "place", "try": "confirm"}
@@ -61,8 +64,8 @@ def get_confirm_screen(session, domain, form, units, target_x, target_y, type, v
         payload[unit] = units[unit]
 
     headers = dict(referer=referer)
-    response = session.post("https://" + domain + "/game.php",
-        params=params, data=payload, headers=headers)
+    response = session.post("https://" + domain + "/game.php", params=params, data=payload,
+                            headers=headers)
     check_reponse(response)
 
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -78,20 +81,24 @@ def get_confirm_screen(session, domain, form, units, target_x, target_y, type, v
             data[input["name"]] = input["value"]
     return (action, data, response.url)
 
+
 def just_do_it(session, domain, action, data, referer):
     headers = dict(referer=referer)
-    response = session.post("https://" + domain + action, data=data, headers=headers)#, verify=False)
+    response = session.post("https://" + domain + action, data=data,
+                            headers=headers)    #, verify=False)
     check_reponse(response)
     soup = BeautifulSoup(response.content, 'html.parser')
     error = parse_after_send_error(soup)
     if error is not None:
         raise ValueError(error)
 
+
 def parse_after_send_error(soup):
     error_box = soup.select("div[class=error_box]")
     if len(error_box) >= 1:
         return error_box[0].get_text().strip()
     return None
+
 
 def get_local_offset():
     try:
@@ -101,8 +108,9 @@ def get_local_offset():
     except:
         logger.info("Can't connect to 'europe.pool.ntp.org'!")
         #response.offset = 0.0
-        return timedelta(seconds = 0.0)
+        return timedelta(seconds=0.0)
     #return timedelta(seconds=response.offset)
+
 
 def get_ping(domain):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -112,7 +120,9 @@ def get_ping(domain):
     s.close()
     return after - before
 
+
 class SendActionThread(threading.Thread):
+
     def __init__(self, action, offset, ping, file):
         threading.Thread.__init__(self)
         self.action = action
@@ -138,10 +148,12 @@ class SendActionThread(threading.Thread):
     def run(self):
         try:
             pending_path = os.path.join(common.get_root_folder(), "pending")
-            failed_path  = os.path.join(common.get_root_folder(), "failed")
-            keks_path    = os.path.join(common.get_root_folder(), "keks", self.action["domain"])
+            failed_path = os.path.join(common.get_root_folder(), "failed")
+            keks_path = os.path.join(common.get_root_folder(), "keks", self.action["domain"])
             if self.action["sitter"] == "0":
-                keks_file = os.path.join(keks_path, self.action["player_id"]+"_"+common.filename_escape(self.action["player"]))
+                keks_file = os.path.join(
+                    keks_path,
+                    self.action["player_id"] + "_" + common.filename_escape(self.action["player"]))
             else:
                 for filename in os.listdir(keks_path):
                     if self.action["sitter"] in filename:
@@ -151,29 +163,34 @@ class SendActionThread(threading.Thread):
             domain = self.action["domain"]
             # Adding train units
             self.get_train_units()
-            logger.info("train attacks: "+json.dumps(self.action["train"]))
+            logger.info("train attacks: " + json.dumps(self.action["train"]))
             with requests.Session() as session:
                 session.cookies.set("sid", sid)
                 session.headers.update({"user-agent": common.USER_AGENT})
 
-                real_departure = dateutil.parser.parse(self.action["departure_time"]) - self.offset - self.ping
+                real_departure = dateutil.parser.parse(
+                    self.action["departure_time"]) - self.offset - self.ping
 
                 while real_departure - datetime.datetime.now() > datetime.timedelta(seconds=5):
-                    time_left = real_departure - datetime.datetime.now() - datetime.timedelta(seconds=5)
+                    time_left = real_departure - datetime.datetime.now() - datetime.timedelta(
+                        seconds=5)
                     if time_left.total_seconds() <= 0:
                         break
                     time.sleep((time_left / 2).total_seconds())
 
-                logger.info("Prepare job. Forcing attack is "+str(self.action["force"])+"!")
+                logger.info("Prepare job. Forcing attack is " + str(self.action["force"]) + "!")
                 if self.action["force"]:
                     #waiting till 100ms before departur.. reason: wait for troops to come back
                     logger.info("Wait for 100ms before!")
-                    while real_departure - datetime.datetime.now() > datetime.timedelta(milliseconds=100):
+                    while real_departure - datetime.datetime.now() > datetime.timedelta(
+                            milliseconds=100):
                         time_left = real_departure - datetime.datetime.now()
                         if time_left.total_seconds() <= 0:
                             break
                         time.sleep((time_left / 2).total_seconds())
-                (actual_units, form, referer) = get_place_screen(session, domain, self.action["source_id"], self.action["vacation"])
+                (actual_units, form, referer) = get_place_screen(session, domain,
+                                                                 self.action["source_id"],
+                                                                 self.action["vacation"])
                 #for protecting troops from retimes...
                 if self.action["force"]:
                     #if attack is forced, then no check vs. actual_units
@@ -182,20 +199,27 @@ class SendActionThread(threading.Thread):
                     logger.info("Checking for available units...")
                     units = intelli_all(self.action["units"], actual_units)
                 if units is None:
-                    raise ValueError("Could not satisfy unit conditions. Expected: {0}, Actual {1}".format(
-                        self.action["units"], actual_units))
+                    raise ValueError(
+                        "Could not satisfy unit conditions. Expected: {0}, Actual {1}".format(
+                            self.action["units"], actual_units))
                 intelli_train(self.action, actual_units)
                 # Check if speed of troops has changed
                 logger.info("Checking for change in unit speed...")
                 stats = dstimer.import_action.get_cached_unit_info(domain)
-                original_speed = dstimer.import_action.speed(self.action["units"], self.action["type"], stats)
+                original_speed = dstimer.import_action.speed(self.action["units"],
+                                                             self.action["type"], stats)
                 current_speed = dstimer.import_action.speed(units, self.action["type"], stats)
                 if original_speed != current_speed:
-                    raise ValueError("Unit speed changed from {0} to {1} with units in village {2}, user format {3} and calculated {4}".format(
-                        original_speed, current_speed, actual_units, self.action["units"], units))
+                    raise ValueError(
+                        "Unit speed changed from {0} to {1} with units in village {2}, user format {3} and calculated {4}"
+                        .format(original_speed, current_speed, actual_units, self.action["units"],
+                                units))
                 logger.info("Confirm.")
                 (action, data, referer) = get_confirm_screen(session, domain, form, units,
-                    self.action["target_coord"]["x"], self.action["target_coord"]["y"], self.action["type"], self.action["vacation"] , referer)
+                                                             self.action["target_coord"]["x"],
+                                                             self.action["target_coord"]["y"],
+                                                             self.action["type"],
+                                                             self.action["vacation"], referer)
 
                 logger.info("Wait for sending")
                 while real_departure - datetime.datetime.now() > datetime.timedelta(milliseconds=1):
@@ -203,8 +227,8 @@ class SendActionThread(threading.Thread):
                     if time_left.total_seconds() <= 0:
                         break
                     time.sleep((time_left / 2).total_seconds())
-                logger.info("Time left: "+str(real_departure - datetime.datetime.now()))
-                logger.info("data: "+json.dumps(data))
+                logger.info("Time left: " + str(real_departure - datetime.datetime.now()))
+                logger.info("data: " + json.dumps(data))
                 just_do_it(session, domain, action, data, referer)
                 logger.info("Finished job")
                 # Delete finished action file
@@ -213,6 +237,7 @@ class SendActionThread(threading.Thread):
             logger.error(str(e))
             # Move action file to failed folder
             os.rename(os.path.join(pending_path, self.file), os.path.join(failed_path, self.file))
+
 
 def cycle():
     now = datetime.datetime.now()
@@ -238,10 +263,11 @@ def cycle():
                 #logger.info("skipping")
                 continue
             #else:
-                #logger.info("not skipping")
+            #logger.info("not skipping")
             departure = dateutil.parser.parse(action["departure_time"])
             if departure < now:
-                logger.error("Action scheduled for {0} is expired. Will not send.".format(departure))
+                logger.error(
+                    "Action scheduled for {0} is expired. Will not send.".format(departure))
                 # Move action file to expired folder
                 os.rename(os.path.join(schedule_path, file), os.path.join(expired_path, file))
             elif departure - now < datetime.timedelta(seconds=90):
@@ -251,10 +277,12 @@ def cycle():
                 next_attack = action["next_attack"]
                 while next_attack:
                     for file in os.listdir(schedule_path):
-                        if os.path.isfile(os.path.join(schedule_path, file)) and next_attack in file:
+                        if os.path.isfile(os.path.join(schedule_path,
+                                                       file)) and next_attack in file:
                             with open(os.path.join(schedule_path, file)) as fd:
                                 a = json.load(fd)
-                            os.rename(os.path.join(schedule_path, file), os.path.join(pending_path, file))
+                            os.rename(os.path.join(schedule_path, file),
+                                      os.path.join(pending_path, file))
                             next_attack = a["next_attack"]
                             break
                 # Request Offset & Ping
@@ -264,7 +292,8 @@ def cycle():
                     logger.info("Time Offset: {0} ms".format(round(offset.total_seconds() * 1000)))
                 if domain not in ping:
                     ping[domain] = get_ping(domain)
-                    logger.info("Ping for {0}: {1} ms".format(domain, round(ping[domain].total_seconds() * 1000)))
+                    logger.info("Ping for {0}: {1} ms".format(
+                        domain, round(ping[domain].total_seconds() * 1000)))
                 # Execute the action in the near future
                 logger.info("Schedule action for {0}".format(departure))
                 thread = SendActionThread(action, offset, ping[domain], file)
@@ -274,6 +303,7 @@ def cycle():
 
 
 class DaemonThread(threading.Thread):
+
     def __init__(self):
         threading.Thread.__init__(self, daemon=True)
 
@@ -284,7 +314,7 @@ class DaemonThread(threading.Thread):
             cycle()
             if check_sid_counter == 0:
                 check_and_save_sids()
-                check_sid_counter = random.randint(30, 90) # every 30 to 90 minutes
+                check_sid_counter = random.randint(30, 90)    # every 30 to 90 minutes
             else:
                 check_sid_counter -= 1
             time.sleep(5)
