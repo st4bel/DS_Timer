@@ -5,12 +5,15 @@ import os
 import math
 import requests
 import xml.etree.ElementTree as ET
+import logging
 from datetime import timedelta, datetime
 import dateutil.parser
 import random, string
 from dstimer import common, world_data
 from dstimer.intelli_unit import get_bh_all
 #import numpy as np
+
+logger = logging.getLogger("dstimer")
 
 def distance(source, target):
     return math.sqrt(pow(target["x"] - source["x"], 2) + pow(target["y"] - source["y"], 2))
@@ -28,8 +31,8 @@ def speed(units, type, stats):
             slowest = stats[unit]
     return slowest
 
-def runtime(speed, distance):
-    return timedelta(seconds=round(60 * speed * distance))
+def runtime(speed, distance, domain):
+    return timedelta(seconds=round(distance * (speed / (world_data.get_unit_speed(domain) * world_data.get_world_speed(domain))) * 60))
 
 def get_unit_info(domain):
     headers = {"user-agent": common.USER_AGENT}
@@ -69,7 +72,7 @@ def get_LZ_factor(action):
             return 1
     if "departure_time" not in action:
         duration = runtime(speed(action["units"], action["type"], get_cached_unit_info(action["domain"]))/(1+int(LZ["magnitude"])/100),
-            distance(action["source_coord"], action["target_coord"]))
+            distance(action["source_coord"], action["target_coord"]), action["domain"])
         departure_time = dateutil.parser.parse(action["arrival_time"]) - duration
         if departure_time > dateutil.parser.parse(LZ["until"]):
             return 1
@@ -90,7 +93,7 @@ def autocomplete(action):
         del action["units"][unit]
     unit_info = get_cached_unit_info(action["domain"])
     duration = runtime(speed(action["units"], action["type"], unit_info)/get_LZ_factor(action),
-        distance(action["source_coord"], action["target_coord"]))
+        distance(action["source_coord"], action["target_coord"]), action["domain"])
     if "departure_time" not in action:
         action["departure_time"] = (dateutil.parser.parse(action["arrival_time"]) - duration).isoformat()
     if "arrival_time" not in action:
@@ -154,7 +157,7 @@ def import_wb_action(text,name):
         date[0] = date[0].split(".")
         #action["departure_time"] = "20"+date[0][2]+"-"+date[0][1]+"-"+date[0][0]+"T"+date[1]+"."+random_milliseconds(100)
         action["departure_time"] = "20"+date[0][2]+"-"+date[0][1]+"-"+date[0][0]+"T"+date[1]
-        if len(date[1].split('.'))==1: #falls keine millisekunden übergeben
+        if len(date[1].split('.'))==1:
             action["departure_time"] += "."+random_milliseconds(100)
         action["units"] = get_troups_from_template(columns[1].split("(")[1].split(")")[0])
         action["player"]=name

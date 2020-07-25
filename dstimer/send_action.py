@@ -205,7 +205,7 @@ class SendActionThread(threading.Thread):
                     time.sleep((time_left / 2).total_seconds())
                 logger.info("Time left: "+str(real_departure - datetime.datetime.now()))
                 logger.info("data: "+json.dumps(data))
-                #just_do_it(session, domain, action, data, referer)
+                just_do_it(session, domain, action, data, referer)# ALTER WIEDER ENTKOMMENTIEREN!
                 logger.info("Finished job")
                 # Delete finished action file
                 os.remove(os.path.join(pending_path, self.file))
@@ -287,4 +287,4 @@ class DaemonThread(threading.Thread):
                 check_sid_counter = random.randint(30, 90) # every 30 to 90 minutes
             else:
                 check_sid_counter -= 1
-            time.sleep(60)
+            time.sleep(5)
