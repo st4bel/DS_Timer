@@ -12,3 +12,5 @@ tools
 cacert.pem
 *.csv
 *yer.py
+*.pyc
+updates

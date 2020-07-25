@@ -24,7 +24,7 @@ if __name__ == "__main__":
     common.create_folder_structure()
 
     # init logger
-    log_dir = os.path.join(common.get_root_folder(), "logs")
+    log_dir = os.path.join(common.get_root_folder(), "logs") #C:\Users\<username>\.dstimer\logs
     os.makedirs(log_dir, exist_ok=True)
     log_path = os.path.join(log_dir, "dstimer.log")
     logger = logging.getLogger("dstimer")

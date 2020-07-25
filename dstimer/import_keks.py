@@ -10,6 +10,7 @@ from dstimer import world_data
 logger = logging.getLogger("dstimer")
 FORMAT = re.compile(r"\[([a-zA-Z\.\-0-9]+)\|([a-zA-Z0-9%:]+)\|([a-zA-Z0-9]{8})\]")
 
+
 def parse_keks(str):
     """Parse an exported session cookie string from DS Kekse."""
     match = FORMAT.search(str)
@@ -18,25 +19,28 @@ def parse_keks(str):
     else:
         return None
 
+
 def player_id_from_keks(keks):
     cookies = dict(sid=keks["sid"])
     headers = {"user-agent": common.USER_AGENT}
-    response = requests.get("https://" +  keks["domain"] + "/game.php",
-        cookies=cookies, headers=headers)#, verify=False)
+    response = requests.get("https://" + keks["domain"] + "/game.php", cookies=cookies,
+                            headers=headers)    #, verify=False)
     for line in response.content.decode("utf-8").splitlines():
         if line.strip().startswith("TribalWars.updateGameData("):
-            game_data = json.loads(line[line.index("(")+1:line.rindex(")")])
+            game_data = json.loads(line[line.index("(") + 1:line.rindex(")")])
             return (game_data["player"]["id"], game_data["player"]["name"])
     return None
+
 
 def write_keks(keks, id, name):
     directory = os.path.join(common.get_root_folder(), "keks", keks["domain"])
     name_clean = common.filename_escape(name)
-    filename = id+"_"+name_clean
+    filename = id + "_" + name_clean
     file = os.path.join(directory, filename)
     os.makedirs(directory, exist_ok=True)
     with open(file, "w") as fd:
         fd.write(keks["sid"])
+
 
 def import_from_text(text):
     keks = parse_keks(text)
@@ -47,7 +51,8 @@ def import_from_text(text):
         raise ValueError("Session is expired or invalid")
     write_keks(keks, id, name)
     world_data.refresh_world_data()
-    common.send_stats(common.create_stats(player_id = id, domain = keks["domain"]))
+    common.send_stats(common.create_stats(player_id=id, domain=keks["domain"]))
+
 
 def check_sids():
     schedule_path = os.path.join(common.get_root_folder(), "schedule")
@@ -61,15 +66,16 @@ def check_sids():
     issues = []
     for (domain, player, player_id) in players_to_check:
         player_clean = "".join(i for i in player if i.isalnum())
-        keks_file = os.path.join(common.get_root_folder(), "keks", domain, player_id+"_"+common.filename_escape(player_clean))
+        keks_file = os.path.join(common.get_root_folder(), "keks", domain,
+                                 player_id + "_" + common.filename_escape(player_clean))
         try:
             with open(keks_file) as fd:
                 sid = fd.read()
         except:
             issues.append(dict(domain=domain, player=player, issue="notfound"))
             continue
-        response = requests.get("https://" +  domain + "/game.php",
-            cookies=dict(sid=sid), headers={"user-agent": common.USER_AGENT})
+        response = requests.get("https://" + domain + "/game.php", cookies=dict(sid=sid),
+                                headers={"user-agent": common.USER_AGENT})
         if response.url.endswith("/sid_wrong.php"):
             issues.append(dict(domain=domain, player=player, issue="invalid"))
             continue
@@ -78,8 +84,9 @@ def check_sids():
             issues.append(dict(domain=domain, player=player, issue="botcheck"))
     return issues
 
+
 def check_and_save_sids():
     issues = check_sids()
-#    logger.info()
+    #    logger.info()
     with open(os.path.join(common.get_root_folder(), "status.txt"), "w") as fd:
         json.dump(issues, fd)

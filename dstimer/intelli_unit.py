@@ -5,6 +5,7 @@ from dstimer.common import unit_bh
 
 logger = logging.getLogger("dstimer")
 
+
 def intelli_single(format, actual):
     format = str(format).strip()
     # Format: x
@@ -44,12 +45,14 @@ def intelli_single(format, actual):
         if left is None or right is None:
             return None
         result = min(left, right)
-        if intelli_single(format[0], result) is not None and intelli_single(format[2], result) is not None:
+        if intelli_single(format[0], result) is not None and intelli_single(format[2],
+                                                                            result) is not None:
             return result
         else:
             return None
     # Error
     raise ValueError("Unknown format: {0}".format(format))
+
 
 def intelli_all(format_obj, actual_obj):
     result = {}
@@ -61,6 +64,7 @@ def intelli_all(format_obj, actual_obj):
             result[unit] = x
     return result
 
+
 def intelli_train(action, actual_obj):
     if action["train"] != {}:
         # get all unit types used in train
@@ -71,9 +75,10 @@ def intelli_train(action, actual_obj):
             for unit in action["train"][counter]:
                 if unit not in units:
                     units.append(unit)
-        logger.info("units in train: "+json.dumps(units))
+        logger.info("units in train: " + json.dumps(units))
     #else:
     #    return intelli_all(action["units"], actual_obj)
+
 
 def get_bh_all(format_obj):
     bh = 0
@@ -84,6 +89,7 @@ def get_bh_all(format_obj):
         else:
             bh += x * unit_bh[unit]
     return bh
+
 
 def get_bh_single(format):
     format = str(format)

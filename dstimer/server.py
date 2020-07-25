@@ -3,6 +3,7 @@ from flask.json import jsonify
 import os
 import json
 import dateutil.parser
+from datetime import datetime
 from dstimer import import_action
 from dstimer import import_template
 from dstimer import import_keks
@@ -50,16 +51,23 @@ def get_scheduled_actions(folder = "schedule"):
     schedule_path = os.path.join(os.path.expanduser("~"), ".dstimer", folder)
     actions = []
     player = []
+    village_data = None
     for file in os.listdir(schedule_path):
         if os.path.isfile(os.path.join(schedule_path, file)):
             with open(os.path.join(schedule_path, file)) as fd:
                 action = json.load(fd)
+                if village_data is None:
+                    village_data = world_data.get_village_data(action["domain"])
+                for dataset in village_data:
+                    if action["source_id"] == int(dataset[0]):
+                        action["source_village_name"] = world_data.unquote_name(dataset[1])
+                    if action["target_id"] == int(dataset[0]):
+                        action["target_village_name"] = world_data.unquote_name(dataset[1])
+
                 action["departure_time"]        = dateutil.parser.parse(action["departure_time"])
                 action["arrival_time"]          = dateutil.parser.parse(action["arrival_time"])
                 action["world"]                 = action["domain"].partition(".")[0]
                 action["id"]                    = file[file.rfind("_")+1:-4]
-                action["source_village_name"]   = world_data.get_village_name_from_id(action["domain"], action["source_id"])
-                action["target_village_name"]   = world_data.get_village_name_from_id(action["domain"], action["target_id"])
                 action["size"]                  = import_action.get_attack_size(action["units"])
                 if action["player"] not in player:
                     player.append(action["player"])
@@ -152,7 +160,14 @@ def wb_get():
 def wb_post():
     try:
         text = request.form["text"]
-        playername = request.form["playername"]
+        keks_path = os.path.join(common.get_root_folder(), "keks")
+        players = []
+        for folder in os.listdir(keks_path):
+            for file in os.listdir(os.path.join(keks_path, folder)):
+                s_file = file.split("_", 1)
+                playername = common.filename_unescape(s_file[1])
+        if playername == None:
+            playername = request.form["playername"]
         if request.form["type"] == "wb_template":
             import_template.import_from_workbench(text)
             return redirect("/templates")
