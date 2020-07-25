@@ -11,6 +11,7 @@ import random, string
 from dstimer import common
 from dstimer import import_action
 
+
 def import_from_workbench(text):
     tree = ET.fromstring(text)
     template = {}
@@ -24,14 +25,13 @@ def import_from_workbench(text):
                 if tree_unit.get("fixAmount") != "-1":
                     units[tree_unit.get("unit")] = tree_unit.get("fixAmount")
                 else:
-                #dynamische Truppenangebe: Alle+-+100;
+                    #dynamische Truppenangebe: Alle+-+100;
                     text = tree_unit.get("dynAmount")
-                    text = text.replace("+","").replace("Alle","")
+                    text = text.replace("+", "").replace("Alle", "")
                     units[tree_unit.get("unit")] = text
-        template["units"]=units;
+        template["units"] = units
         if filled:
             import_as_json(template)
-
 
 
 #<stdAttacks>
@@ -42,9 +42,11 @@ def import_from_workbench(text):
 
 def import_as_json(dict):
     if dict["name"] != "":
-        path = os.path.join(os.path.expanduser("~"), ".dstimer", "templates", dict["name"]+"_"+import_action.random_id(6)+".template")
+        path = os.path.join(os.path.expanduser("~"), ".dstimer", "templates",
+                            dict["name"] + "_" + import_action.random_id(6) + ".template")
         with open(path, "w") as fd:
             json.dump(dict["units"], fd, indent=2)
+
 
 def remove_by_id(id):
     template_path = os.path.join(os.path.expanduser("~"), ".dstimer", "templates")

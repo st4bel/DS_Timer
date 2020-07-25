@@ -13,3 +13,5 @@ cacert.pem
 *.csv
 *yer.py
 *.pyc
+DSTimer.egg-info/PKG-INFO
+.vscode
