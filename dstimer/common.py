@@ -46,6 +46,10 @@ def get_root_folder():
     return os.path.join(os.path.expanduser("~"), ".dstimer")
 
 
+def get_username(domain):
+    directory = os.path.join(common.get_root_folder(), "keks", domain)
+
+
 def create_folder_structure():
     """Create all folders needed by DS_Timer
 
