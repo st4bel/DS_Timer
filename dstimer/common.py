@@ -25,6 +25,12 @@ unitnames = [
     "spear", "sword", "axe", "archer", "spy", "light", "marcher", "heavy", "ram", "catapult",
     "knight", "snob"
 ]
+
+buildingnames = [
+    "main", "farm", "storage", "place", "barracks", "church", "smith", "wood", "stone", "iron",
+    "market", "stable", "wall", "garage", "hide", "snob", "statue", "watchtower"
+]
+
 unit_bh = {
     "spear": 1,
     "sword": 1,

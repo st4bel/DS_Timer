@@ -75,7 +75,11 @@ def get_scheduled_actions(folder = "schedule"):
     return player, actions
 
 def get_unitnames():
-    return ["spear", "sword", "axe", "archer", "spy", "light", "marcher", "heavy", "ram", "catapult", "knight", "snob"]
+    return common.unitnames
+    #return ["spear", "sword", "axe", "archer", "spy", "light", "marcher", "heavy", "ram", "catapult", "knight", "snob"]
+
+def get_buildingnames(): 
+    return common.buildingnames
 
 def get_LZ_reduction():
     options = common.read_options()
@@ -228,7 +232,7 @@ def new_atts_get():
         for file in os.listdir(os.path.join(keks_path, folder)):
             s_file = file.split("_", 1)
             players.append({"domain" : folder, "id" : s_file[0], "name" : common.filename_unescape(s_file[1])})
-    return render_template("new_attack.html", templates = get_templates(), unitnames = get_unitnames(), players=players, N_O_P = len(players))
+    return render_template("new_attack.html", templates = get_templates(), unitnames = get_unitnames(), players=players, N_O_P = len(players), buildings = get_buildingnames())
 
 @app.route("/new_attack", methods=["POST"])
 def new_atts_post():
