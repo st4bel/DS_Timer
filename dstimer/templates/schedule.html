@@ -36,6 +36,7 @@
             <th><a href="/schedule?player={{name}}&sort=source_coord&reverse={{rev}}">Start</a></th>
             <th><a href="/schedule?player={{name}}&sort=target_coord&reverse={{rev}}">Ziel</a></th>
             <th>Einheiten</th>
+            <th>Gebäude</th>
             <th>
               <form action="" method="post">
                 <button type="submit" name="type" value="delete__all" class="btn btn-default">Löschen</button>
@@ -76,6 +77,11 @@
                 {% for unit, amount in action.units|dictsort %}
                     <span class="badge alert-success" title="{{unit}}">{{ amount }} <img src="{{ innocdn_url('/graphic/unit/unit_' + unit + '.png') }}"></span>
                 {% endfor %}
+            </td>
+            <td>
+              {% if "catapult" in action.units %}
+              <span class="badge alert-success" title="{{ action.building }}"><img src="{{ innocdn_url('/graphic/buildings/' + action.building + '.png') }}" alt="{{ action.building }}"></span>
+              {% endif %}
             </td>
             <td>
                 <form action="" method="post">
