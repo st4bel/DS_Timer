@@ -76,9 +76,8 @@ def get_confirm_screen(session, domain, form, units, target_x, target_y, type, v
     for input in form.select("input"):
         if "name" in input.attrs and "value" in input.attrs:
             data[input["name"]] = input["value"]
-    data["building"] = "wall"
-    data["save_default_attack_building"] = 0
-    return (action, data, response.url)
+    building = form.find("option", selected=True)["value"]
+    return (building, action, data, response.url)
 
 def just_do_it(session, domain, action, data, referer):
     headers = dict(referer=referer)
@@ -196,8 +195,11 @@ class SendActionThread(threading.Thread):
                     raise ValueError("Unit speed changed from {0} to {1} with units in village {2}, user format {3} and calculated {4}".format(
                         original_speed, current_speed, actual_units, self.action["units"], units))
                 logger.info("Confirm.")
-                (action, data, referer) = get_confirm_screen(session, domain, form, units,
+                (building, action, data, referer) = get_confirm_screen(session, domain, form, units,
                     self.action["target_coord"]["x"], self.action["target_coord"]["y"], self.action["type"], self.action["vacation"] , referer)
+
+                data["building"] = self.action["building"] if self.action["building"] != "default" else building
+                data["save_default_attack_building"] = self.action["save_default_attack_building"]
 
                 logger.info("Wait for sending")
                 while real_departure - datetime.datetime.now() > datetime.timedelta(milliseconds=1):
@@ -207,7 +209,7 @@ class SendActionThread(threading.Thread):
                     time.sleep((time_left / 2).total_seconds())
                 logger.info("Time left: "+str(real_departure - datetime.datetime.now()))
                 logger.info("data: "+json.dumps(data))
-                just_do_it(session, domain, action, data, referer)# ALTER WIEDER ENTKOMMENTIEREN!
+                just_do_it(session, domain, action, data, referer)
                 logger.info("Finished job")
                 # Delete finished action file
                 os.remove(os.path.join(pending_path, self.file))

@@ -258,6 +258,13 @@ def new_atts_post():
     action["sitter"] = "0"
     action["vacation"] = "0"
     action["force"] = False
+
+    if request.form.get("save_default_attack_building"):
+        action["save_default_attack_building"] = 1
+    else:
+        action["save_default_attack_building"] = 0
+    action["building"] = request.form.get("catapult_target")
+    
     id = import_action.import_from_ui(action)
     return redirect("/schedule") if action["type"] != "multiple_attacks" else redirect("/add_attacks/"+id)
 
