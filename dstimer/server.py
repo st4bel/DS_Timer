@@ -264,7 +264,7 @@ def new_atts_post():
     else:
         action["save_default_attack_building"] = 0
     action["building"] = request.form.get("catapult_target")
-    
+
     id = import_action.import_from_ui(action)
     return redirect("/schedule") if action["type"] != "multiple_attacks" else redirect("/add_attacks/"+id)
 
@@ -334,7 +334,7 @@ def edit_action_get(id):
         for file in os.listdir(os.path.join(keks_path, folder)):
             s_file = file.split("_", 1)
             players.append({"domain" : folder, "id" : s_file[0], "name" : common.filename_unescape(s_file[1])})
-    return render_template("edit_action.html", players = players, action = action, unitnames = get_unitnames(), templates = get_templates())
+    return render_template("edit_action.html", players = players, action = action, unitnames = get_unitnames(), templates = get_templates(), buildings = get_buildingnames())
 
 @app.route("/edit_action/<id>", methods=["POST"])
 def edit_action_post(id):
@@ -362,7 +362,13 @@ def edit_action_post(id):
     action["sitter"] = "0"
     action["vacation"] = "0"
     action["force"] = False
-    logger.info(id)
+    
+    if request.form.get("save_default_attack_building"):
+        action["save_default_attack_building"] = 1
+    else:
+        action["save_default_attack_building"] = 0
+    action["building"] = request.form.get("catapult_target")
+
     import_action.import_from_ui(action, id = id)
     return redirect("/schedule")
 

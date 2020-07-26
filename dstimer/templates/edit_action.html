@@ -137,6 +137,7 @@
     var unitnames = parse_python_array($("#unitnames_help").text());
     loadUnits(units, unitnames);
     loadTime();
+    $("option[value={{ action.building }}]", $("#catapult_target")).attr("selected", "selected")
     //$("#units_help_button").click()
   });
 </script>
@@ -235,6 +236,25 @@
                 </tr>
             </tbody>
         </table><br>
+        <table>
+          <tbody>
+            <tr>
+              <td>Katapultziel</td>
+              <td>
+                <select id="catapult_target" name="catapult_target">
+                  <option value="default">Standardziel Staemme</option>
+                  {% for building in buildings %}
+                    <option value="{{ building }}">{{ building }}</option>
+                  {% endfor %}
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td>Als neues Standardziel speichern</td>
+              <td><input type="checkbox" name="save_default_attack_building" id="save_default_attack_building" {% if action.save_default_attack_building == 1 %}checked{% endif %}></td>
+            </tr>
+          </tbody>
+        </table>
         <table class="table" width="200">
           <tbody>
             <tr>
