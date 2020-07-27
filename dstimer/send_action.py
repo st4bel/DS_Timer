@@ -206,6 +206,11 @@ class SendActionThread(threading.Thread):
                 data["building"] = self.action["building"] if self.action["building"] != "default" else building
                 data["save_default_attack_building"] = self.action["save_default_attack_building"]
 
+                for i in range(self.action["traincounter"]):
+                    for unit in common.unitnames:
+                        if "train[" + str(i+2) + "][" + unit +"]" in self.action:
+                            data["train[" + str(i+2) + "][" + unit +"]"] = self.action["train[" + str(i+2) + "][" + unit +"]"]
+
                 logger.info("Wait for sending")
                 while real_departure - datetime.datetime.now() > datetime.timedelta(milliseconds=1):
                     time_left = real_departure - datetime.datetime.now()
