@@ -124,17 +124,19 @@ class SendActionThread(threading.Thread):
     def get_train_units(self):
         pending_path = os.path.join(common.get_root_folder(), "pending")
         next_attack = self.action["next_attack"]
-        self.action["train"] = {}
+
         counter = 0
         while next_attack:
             for file in os.listdir(pending_path):
                 if os.path.isfile(os.path.join(pending_path, file)) and next_attack in file:
                     with open(os.path.join(pending_path, file)) as fd:
                         a = json.load(fd)
-                    self.action["train"][counter] = a["units"]
+                    for unit in a["units"]:
+                        self.action["train[" + str(counter+2) + "][" + unit + "]"] = str(a["units"][unit])
                     next_attack = a["next_attack"]
                     counter += 1
                     break
+        self.action["traincounter"] = counter
 
     def run(self):
         try:
@@ -152,7 +154,7 @@ class SendActionThread(threading.Thread):
             domain = self.action["domain"]
             # Adding train units
             self.get_train_units()
-            logger.info("train attacks: "+json.dumps(self.action["train"]))
+            
             with requests.Session() as session:
                 session.cookies.set("sid", sid)
                 session.headers.update({"user-agent": common.USER_AGENT})
@@ -185,7 +187,10 @@ class SendActionThread(threading.Thread):
                 if units is None:
                     raise ValueError("Could not satisfy unit conditions. Expected: {0}, Actual {1}".format(
                         self.action["units"], actual_units))
-                intelli_train(self.action, actual_units)
+
+                if not intelli_train(self.action, actual_units):
+                    raise ValueError("Could not satisfy combined unit conditions.")
+
                 # Check if speed of troops has changed
                 logger.info("Checking for change in unit speed...")
                 stats = dstimer.import_action.get_cached_unit_info(domain)
