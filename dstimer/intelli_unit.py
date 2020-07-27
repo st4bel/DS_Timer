@@ -1,7 +1,7 @@
 import re
 import logging
 import json
-from dstimer.common import unit_bh
+from dstimer.common import unit_bh, unitnames
 
 logger = logging.getLogger("dstimer")
 
@@ -66,18 +66,22 @@ def intelli_all(format_obj, actual_obj):
 
 
 def intelli_train(action, actual_obj):
-    if action["train"] != {}:
+    # Returns True if combined troops of train are less equal actual units or its not a train.
+    if action["traincounter"] > 0:
         # get all unit types used in train
-        units = []
-        for unit in action["units"]:
-            units.append(unit)
-        for counter in action["train"]:
-            for unit in action["train"][counter]:
-                if unit not in units:
-                    units.append(unit)
-        logger.info("units in train: " + json.dumps(units))
-    #else:
-    #    return intelli_all(action["units"], actual_obj)
+        sum = {}
+        for unit in unitnames:
+            sum[unit] = int(action["units"][unit]) if unit in action["units"] else 0
+        for i in range(action["traincounter"]):
+            for unit in unitnames:
+                sum[unit] += int(action["train["+ str(i+2) + "][" + unit + "]"]) if ("train["+ str(i+2) + "][" + unit + "]") in action else 0
+        result = intelli_all(sum, actual_obj)
+        for unit in unitnames:
+            if sum[unit] != result[unit]:
+                return False
+        return True
+    else:
+        return True
 
 
 def get_bh_all(format_obj):

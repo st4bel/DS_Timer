@@ -175,6 +175,25 @@
                 </tr>
             </tbody>
         </table><br>
+        <table>
+          <tbody>
+            <tr>
+              <td>Katapultziel</td>
+              <td>
+                <select id="catapult_target" name="catapult_target">
+                  <option value="default" selected = "selected">Standardziel Staemme</option>
+                  {% for building in buildings %}
+                    <option value="{{ building }}">{{ building }}</option>
+                  {% endfor %}
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td>Als neues Standardziel speichern</td>
+              <td><input type="checkbox" name="save_default_attack_building" id="save_default_attack_building"></td>
+            </tr>
+          </tbody>
+        </table>
         <table class="table" width="200">
           <tbody>
             <tr>

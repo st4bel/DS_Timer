@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        DS_Timer_Export
 // @namespace   de.die-staemme
-// @version     0.1.5-dev
+// @version     0.1.5
 // @description Export your Attack-Details for DS_Timer
 // @grant       GM_getValue
 // @grant       GM_setValue
@@ -32,7 +32,7 @@ $(function(){
 
     /*storageSet("troops",storageGet("troops",JSON.stringify({"current":{"spear":0,"sword":0,"axe":0,"archer":0,"spy":0,"light":0,"marcher":0,"heavy":0,"ram":1,"catapult":0,"snob":0},
                                                             "leer":{"spear":0,"sword":0,"axe":0,"archer":0,"spy":0,"light":0,"marcher":0,"heavy":0,"ram":0,"catapult":0,"snob":0}})));*/
-    storageSet("troops",storageGet("troops",JSON.stringify({"current":{"spear":0,"sword":0,"axe":0,"archer":0,"spy":0,"light":0,"marcher":0,"heavy":0,"ram":1,"catapult":0,"snob":0},"leer":{}})));
+    storageSet("troops",storageGet("troops",JSON.stringify({"use_selected": {}, "current":{"spear":0,"sword":0,"axe":0,"archer":0,"spy":0,"light":0,"marcher":0,"heavy":0,"ram":1,"catapult":0,"snob":0},"leer":{}})));
     //storageSet("troops",JSON.stringify({"current":{"spear":0,"sword":0,"axe":0,"archer":0,"spy":0,"light":0,"marcher":0,"heavy":0,"ram":1,"catapult":0,"snob":0},"leer":{}}));
     //storageSet("troops",JSON.stringify({"current":{"spear":0,"sword":0,"axe":0,"archer":0,"spy":0,"light":0,"marcher":0,"heavy":0,"ram":1,"catapult":0,"snob":0},
     //                                        "leer":{"spear":0,"sword":0,"axe":0,"archer":0,"spy":0,"light":0,"marcher":0,"heavy":0,"ram":0,"catapult":0,"snob":0}}));
@@ -116,8 +116,10 @@ $(function(){
 
 		var unitTableHead	= $("<tr>").attr("id","AF_unitTableHead").appendTo(unitTable);
 		var unitTableInput	= $("<tr>").attr("id","AF_unitTableInput").appendTo(unitTable);
+        //storageSet("troops",JSON.stringify(troops));
+
 		for(var name in troopspead){
-			$("<th>")
+            $("<th>")
 			.append(
 				$("<span>")
 				.append(
@@ -280,17 +282,27 @@ $(function(){
         $('option[value="'+storageGet("current_template")+'"]',$("#select_template")).eq(0).prop('selected', true);
 
         fillTroops();
+        //HIER wird der spaß überschrieben
+
 
         function fillTroops(){
             for(var name in troopspead){
-                if(troops[$("option:selected",select_template).val()][name]!=""){
+                if($("option:selected",select_template).val() == "use_selected") {
+                    $("input#"+name).val($(".units-row .unit-item.unit-item-"+name).text());
+                } else if(troops[$("option:selected",select_template).val()][name]!=""){
                     $("input#"+name).val(troops[$("option:selected",select_template).val()][name]);
                 }else{
                     $("input#"+name).val("0");
                 }
 
             }
-            troops.current = JSON.parse(JSON.stringify(troops[storageGet("current_template")]));
+            if($("option:selected",select_template).val() == "use_selected") {
+                for(var name_ in troopspead) {
+                    troops.current[name_] = $(".units-row .unit-item.unit-item-"+name_).text();
+                }
+            } else {
+                troops.current = JSON.parse(JSON.stringify(troops[storageGet("current_template")]));
+            }
         }
         function addRow(desc,content) {
             $("<tr>")
@@ -344,6 +356,9 @@ $(function(){
         ex_str.vacation         = getPageAttribute("t");
         ex_str.sitter           = game_data.player.sitter;
         ex_str.player_id        = game_data.player.id;
+
+        ex_str.building         = $("#place_confirm_catapult_target select[name=building] option:selected").val();
+
 
         console.log(JSON.stringify(ex_str));
         $("#input_export").val(JSON.stringify(ex_str));

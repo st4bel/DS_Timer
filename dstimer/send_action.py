@@ -76,9 +76,8 @@ def get_confirm_screen(session, domain, form, units, target_x, target_y, type, v
     for input in form.select("input"):
         if "name" in input.attrs and "value" in input.attrs:
             data[input["name"]] = input["value"]
-    data["building"] = "wall"
-    data["save_default_attack_building"] = 0
-    return (action, data, response.url)
+    building = form.find("option", selected=True)["value"]
+    return (building, action, data, response.url)
 
 def just_do_it(session, domain, action, data, referer):
     headers = dict(referer=referer)
@@ -125,17 +124,19 @@ class SendActionThread(threading.Thread):
     def get_train_units(self):
         pending_path = os.path.join(common.get_root_folder(), "pending")
         next_attack = self.action["next_attack"]
-        self.action["train"] = {}
+
         counter = 0
         while next_attack:
             for file in os.listdir(pending_path):
                 if os.path.isfile(os.path.join(pending_path, file)) and next_attack in file:
                     with open(os.path.join(pending_path, file)) as fd:
                         a = json.load(fd)
-                    self.action["train"][counter] = a["units"]
+                    for unit in a["units"]:
+                        self.action["train[" + str(counter+2) + "][" + unit + "]"] = str(a["units"][unit])
                     next_attack = a["next_attack"]
                     counter += 1
                     break
+        self.action["traincounter"] = counter
 
     def run(self):
         try:
@@ -153,7 +154,7 @@ class SendActionThread(threading.Thread):
             domain = self.action["domain"]
             # Adding train units
             self.get_train_units()
-            logger.info("train attacks: "+json.dumps(self.action["train"]))
+            
             with requests.Session() as session:
                 session.cookies.set("sid", sid)
                 session.headers.update({"user-agent": common.USER_AGENT})
@@ -186,7 +187,10 @@ class SendActionThread(threading.Thread):
                 if units is None:
                     raise ValueError("Could not satisfy unit conditions. Expected: {0}, Actual {1}".format(
                         self.action["units"], actual_units))
-                intelli_train(self.action, actual_units)
+
+                if not intelli_train(self.action, actual_units):
+                    raise ValueError("Could not satisfy combined unit conditions.")
+
                 # Check if speed of troops has changed
                 logger.info("Checking for change in unit speed...")
                 stats = dstimer.import_action.get_cached_unit_info(domain)
@@ -196,8 +200,16 @@ class SendActionThread(threading.Thread):
                     raise ValueError("Unit speed changed from {0} to {1} with units in village {2}, user format {3} and calculated {4}".format(
                         original_speed, current_speed, actual_units, self.action["units"], units))
                 logger.info("Confirm.")
-                (action, data, referer) = get_confirm_screen(session, domain, form, units,
+                (building, action, data, referer) = get_confirm_screen(session, domain, form, units,
                     self.action["target_coord"]["x"], self.action["target_coord"]["y"], self.action["type"], self.action["vacation"] , referer)
+
+                data["building"] = self.action["building"] if self.action["building"] != "default" else building
+                data["save_default_attack_building"] = self.action["save_default_attack_building"]
+
+                for i in range(self.action["traincounter"]):
+                    for unit in common.unitnames:
+                        if "train[" + str(i+2) + "][" + unit +"]" in self.action:
+                            data["train[" + str(i+2) + "][" + unit +"]"] = self.action["train[" + str(i+2) + "][" + unit +"]"]
 
                 logger.info("Wait for sending")
                 while real_departure - datetime.datetime.now() > datetime.timedelta(milliseconds=1):
@@ -207,7 +219,7 @@ class SendActionThread(threading.Thread):
                     time.sleep((time_left / 2).total_seconds())
                 logger.info("Time left: "+str(real_departure - datetime.datetime.now()))
                 logger.info("data: "+json.dumps(data))
-                just_do_it(session, domain, action, data, referer)# ALTER WIEDER ENTKOMMENTIEREN!
+                just_do_it(session, domain, action, data, referer)
                 logger.info("Finished job")
                 # Delete finished action file
                 os.remove(os.path.join(pending_path, self.file))

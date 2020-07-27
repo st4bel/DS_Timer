@@ -100,6 +100,10 @@ def autocomplete(action):
         action["arrival_time"] = (dateutil.parser.parse(action["departure_time"]) + duration).isoformat()
     if "next_attack" not in action:
         action["next_attack"] = False
+    if "building" not in action:
+        action["building"] = False
+    if "save_default_attack_building" not in action:
+        action["save_default_attack_building"] = 0
 
 def random_id(length):
     return "".join(random.choice(string.ascii_lowercase) for i in range(length))
