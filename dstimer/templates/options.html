@@ -2,11 +2,11 @@
 {% block title %}Optionen{% endblock %}
 {% block header %}
 <script type="text/javascript">
-  function timestrings(){
+  function timestrings() {
     var today = new Date();
-    return today.getFullYear()+"-"+(today.getMonth()+1)+"-"+today.getDate()+"T"+today.getHours()+":"+today.getMinutes()+":"+today.getSeconds()+".000"
+    return today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate() + "T" + today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds() + ".000"
   }
-  $(function() {
+  $(function () {
     var curtime = timestrings();
     $("#LZ_reduction_until").val(curtime);
   });
@@ -16,18 +16,23 @@
 <form class="" action="" method="post">
   <h3>Weltdaten aktualisieren</h3>
   <div class="">
-    Der Timer lädt anhand der importierten Kekse die Weltdaten der jeweiligen Server herunter. Sollten auf <a href="/new_attack">New Att</a> die Spieler und Dörfer nicht geladen werden, dann bitte folgenden Button drücken.
+    Der Timer lädt anhand der importierten Kekse die Weltdaten der jeweiligen Server herunter. Sollten auf <a
+      href="/new_attack">New Att</a> die Spieler und Dörfer nicht geladen werden, dann bitte folgenden Button drücken.
   </div><br>
-  <button type="submit" name="type" value="refresh-world-data" class="btn btn-default">Weltdaten aktualisieren</button><br><br>
+  <button type="submit" name="type" value="refresh-world-data" class="btn btn-default">Weltdaten
+    aktualisieren</button><br><br>
   <h3>Ordnerstruktur zurücksetzen</h3>
   <div class="">
-    Nach jedem Update sollte der Ordner, in dem alle Daten des Timers abgespeichert werden, zurückgesetzt werden. Dazu bitte einmal den Button drücken, Timer schließen und im Explorer alle Ordner löschen. Danach den Timer neu starten!
+    Nach jedem Update sollte der Ordner, in dem alle Daten des Timers abgespeichert werden, zurückgesetzt werden. Dazu
+    bitte einmal den Button drücken, Timer schließen und im Explorer alle Ordner löschen. Danach den Timer neu starten!
   </div><br>
   <button type="submit" name="type" value="reset-folders" class="btn btn-default">Gespeicherte Daten öffnen</button><br>
   <br>
   <h3>Laufzeitverkürzung</h3>
   <div class="">
-    Sollte die Laufzeit von Unterstützungen aufgrund von Boni wie z.B. Banner der Bedrängniss verkürzt sein, kann das hier eingestellt werden. Sollten alle Ziele von der Verkürzung betroffen sein, bitte "Gültig für Spieler" leer lassen.
+    Sollte die Laufzeit von Unterstützungen aufgrund von Boni wie z.B. Banner der Bedrängniss verkürzt sein, kann das
+    hier eingestellt werden. Sollten alle Ziele von der Verkürzung betroffen sein, bitte "Gültig für Spieler" leer
+    lassen.
   </div><br>
   <table>
     <tr>
@@ -40,32 +45,35 @@
     </tr>
     <tr>
       <td>Server:</td>
-      <td><input type="text" id="LZ_reduction_domain_input" name="LZ_reduction_domain_input" value="de100.die-staemme.de"></td>
+      <td><input type="text" id="LZ_reduction_domain_input" name="LZ_reduction_domain_input"
+          value="de100.die-staemme.de"></td>
     </tr>
     <tr>
       <td>Gültig bis:</td>
-      <td><input name="LZ_reduction_until" type="datetime-local" step="0.25" id="LZ_reduction_until" style="width: 160px"></td>
+      <td><input name="LZ_reduction_until" type="datetime-local" step="0.25" id="LZ_reduction_until"
+          style="width: 160px"></td>
     </tr>
   </table>
   <button type="submit" name="type" value="LZ_reduction" class="btn btn-default">Übernehmen</button><br>
   <button type="submit" name="type" value="LZ_reduction_delete" class="btn btn-default">Löschen</button><br>
   <br>
   <h3>Mindestabstand von zwei Angriffen</h3>
-    <div class="">
-      Bitte hier den Mindestabstand in <i>ms</i> zwischen zwei Angriffen aus dem gleichen Dorf angeben:
-    </div>
-    <input type="text" name="min_time_diff" value="{{ options['min_time_diff'] }}"><br>
-    <button type="submit" name="type" value="min_time_diff">Übernehmen</button>
+  <div class="">
+    Bitte hier den Mindestabstand in <i>ms</i> zwischen zwei Angriffen aus dem gleichen Dorf angeben:
+  </div>
+  <input type="text" name="min_time_diff" value="{{ options['min_time_diff'] }}"><br>
+  <button type="submit" name="type" value="min_time_diff">Übernehmen</button>
   <br>
   <h3>Spendenbutton anzeigen/ausblenden</h3>
   <div class="">
-    Ich betreibe die Weiterentwicklung des DS-Timers in meiner Freizeit. Gebt mir gerne einen Kaffee oder zwei aus, wenn euch dieses Projekt gefällt und ihr mich unterstützen wollt!
+    Ich betreibe die Weiterentwicklung des DS-Timers in meiner Freizeit. Gebt mir gerne einen Kaffee oder zwei aus, wenn
+    euch dieses Projekt gefällt und ihr mich unterstützen wollt!
   </div><br>
   <button type="submit" name="type" value="donate_toogle" class="btn btn-default">
     {% if options["show_donate"] %}
-      Ausblenden
+    Ausblenden
     {% else %}
-      Anzeigen
+    Anzeigen
     {% endif %}
   </button>
 </form>

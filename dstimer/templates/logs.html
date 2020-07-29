@@ -2,12 +2,12 @@
 {% block title %}Logs{% endblock %}
 {% block content %}
 <table class="table">
-{% for log in logs %}
+    {% for log in logs %}
     <tr class="{{ dict(WARNING='warning', ERROR='danger', CRITICAL='danger').get(log.levelname, '') }}">
         <td class="col-md-2">{{ log.asctime }}</td>
         <td class="col-md-1">{{ log.levelname }}</td>
         <td class="col-md-9">{{ log.message }}</td>
     </tr>
-{% endfor %}
+    {% endfor %}
 </table>
 {% endblock %}

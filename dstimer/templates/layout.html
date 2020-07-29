@@ -1,99 +1,110 @@
 <!doctype html>
 <html>
+
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" type="image/png" href="{{ url_for("static_files", path="crow.png") }}">
-    <title>{% block title %}{% endblock %} :: DS-Timer</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <style type="text/css">
-        body {
-            padding-top: 60px;
-        }
-    </style>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    {% block header %}{% endblock %}
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="{{ url_for("static_files", path="crow.png") }}">
+  <title>{% block title %}{% endblock %} :: DS-Timer</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <style type="text/css">
+    body {
+      padding-top: 60px;
+    }
+  </style>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  {% block header %}{% endblock %}
 </head>
 <body>
-    <nav class="navbar navbar-inverse navbar-fixed-top" style="justify-content: center;">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="/">DS-Timer</a>
-        </div>
-        <div id="navbar" class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-            <li><a href="/schedule">Schedule</a></li>
-            <li><a href="/import">Import</a></li>
-            <li><a href="/wb">Workbench</a></li>
-            <li><a href="/new_attack">New Att</a></li>
-            <li><a href="/templates">Templates</a></li>
-            <li><a href="/options">Optionen</a></li>
-            <li><a href="/logs">Logs</a></li>
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
-            {% if options["show_donate"] %}
-              <li>
-                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-                  <input type="hidden" name="cmd" value="_s-xclick" />
-                  <input type="hidden" name="hosted_button_id" value="FEVNDFQSUQFEW" />
-                  <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" style="padding-top: 15px; padding-bottom: 0px; vertical-align: middle"/>
-                  <img alt="" border="0" src="https://www.paypal.com/en_DE/i/scr/pixel.gif" width="1" height="1" />
-                </form>
-              </li>
-              {% endif %}
-              <li><a href="https://github.com/st4bel/DS_Timer/releases/latest">{{ version }}</a></li>
-          </ul>
-        </div><!--/.nav-collapse -->
-      </div>
-    </nav>
-
+  <nav class="navbar navbar-inverse navbar-fixed-top" style="justify-content: center;">
     <div class="container">
-        {% with status = sids_status() %}
-        {% if status %}
-        <div class="alert alert-warning">
-            <strong>Session-IDs fehlerhaft:</strong>
-            <ul>
-                {% for issue in status %}
-                <li>
-                    <span class="badge">{{ issue.domain.partition(".")[0] }}</span>
-                    {{ issue.player }}:
-                    {% if issue.issue == "notfound" %}Nicht importiert
-                    {% elif issue.issue == "invalid" %}Session abgelaufen
-                    {% elif issue.issue == "botcheck" %}Botschutz aktiv
-                    {% endif %}
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-        {% endif %}
-        {% endwith %}
-        {% if update %}
-          <div class="alert alert-warning">
-            <strong>Update verfügbar! <a href="https://github.com/st4bel/DS_Timer/releases/latest">Hier</a></strong>
-          </div>
-        {% endif %}
-        {% with LZ_reduction = get_LZ_reduction() %}
-        {% if LZ_reduction != {} %}
-        <div class="alert alert-warning">
-          <strong>Laufzeitverkürzung aktiv:</strong>
-          <ul>
-            <li>
-              <span class="badge">{{ LZ_reduction.domain.partition(".")[0] }}</span>
-              <span>Prozent: {{ LZ_reduction.magnitude }}%, Spieler: {% if LZ_reduction.player == "" %}Alle{% else %}{{ LZ_reduction.player }}{% endif %}, Endet: {{ LZ_reduction.until }}</span>
-            </li>
-          </ul>
-        </div>
-        {% endif %}
-        {% endwith %}
-        {% block content %}{% endblock %}
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+          aria-expanded="false" aria-controls="navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">DS-Timer</a>
+      </div>
+      <div id="navbar" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="/schedule">Schedule</a></li>
+          <li><a href="/import">Import</a></li>
+          <li><a href="/wb">Workbench</a></li>
+          <li><a href="/new_attack">New Att</a></li>
+          <li><a href="/templates">Templates</a></li>
+          <li><a href="/options">Optionen</a></li>
+          <li><a href="/logs">Logs</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          {% if options["show_donate"] %}
+          <li>
+            <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+              <input type="hidden" name="cmd" value="_s-xclick" />
+              <input type="hidden" name="hosted_button_id" value="FEVNDFQSUQFEW" />
+              <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0"
+                name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button"
+                style="padding-top: 15px; padding-bottom: 0px; vertical-align: middle" />
+              <img alt="" border="0" src="https://www.paypal.com/en_DE/i/scr/pixel.gif" width="1" height="1" />
+            </form>
+          </li>
+          {% endif %}
+          <li><a href="https://github.com/st4bel/DS_Timer/releases/latest">{{ version }}</a></li>
+        </ul>
+      </div>
+      <!--/.nav-collapse -->
     </div>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  </nav>
+
+  <div class="container">
+    {% with status = sids_status() %}
+    {% if status %}
+    <div class="alert alert-warning">
+      <strong>Session-IDs fehlerhaft:</strong>
+      <ul>
+        {% for issue in status %}
+        <li>
+          <span class="badge">{{ issue.domain.partition(".")[0] }}</span>
+          {{ issue.player }}:
+          {% if issue.issue == "notfound" %}Nicht importiert
+          {% elif issue.issue == "invalid" %}Session abgelaufen
+          {% elif issue.issue == "botcheck" %}Botschutz aktiv
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+    {% endwith %}
+    {% if update %}
+    <div class="alert alert-warning">
+      <strong>Update verfügbar! <a href="https://github.com/st4bel/DS_Timer/releases/latest">Hier</a></strong>
+    </div>
+    {% endif %}
+    {% with LZ_reduction = get_LZ_reduction() %}
+    {% if LZ_reduction != {} %}
+    <div class="alert alert-warning">
+      <strong>Laufzeitverkürzung aktiv:</strong>
+      <ul>
+        <li>
+          <span class="badge">{{ LZ_reduction.domain.partition(".")[0] }}</span>
+          <span>Prozent: {{ LZ_reduction.magnitude }}%, Spieler:
+            {% if LZ_reduction.player == "" %}Alle{% else %}{{ LZ_reduction.player }}{% endif %}, Endet:
+            {{ LZ_reduction.until }}</span>
+        </li>
+      </ul>
+    </div>
+    {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </div>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+    integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+    crossorigin="anonymous"></script>
 </body>
+
 </html>

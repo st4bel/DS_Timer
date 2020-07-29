@@ -2,27 +2,27 @@
 {% block title %}Add Attacks{% endblock %}
 {% block header %}
 <script type="text/javascript">
-  function addRow(){
+  function addRow() {
     var outer_table = $("#outer_table");
     var counter = $(".row").length;
     var options_container = $("<td>").attr("class", "options_container");
-    var row = $("<tr>").attr("id", "row_"+counter).attr("class", "row")
-      .append($("<td>").append($("<span>").html("<b>"+(counter+1)+"</b>")))
+    var row = $("<tr>").attr("id", "row_" + counter).attr("class", "row")
+      .append($("<td>").append($("<span>").html("<b>" + (counter + 1) + "</b>")))
     {% for unitname in unitnames %}
       .append(
-        $("<td>").append(
-          $("<img>").attr("src", "{{ innocdn_url('/graphic/unit/unit_'+unitname+'.png') }}")
-        )
-        .append(
-          $("<input>").attr("id", "unit_input_{{ unitname }}_"+counter).attr("type", "text").attr("style", "width: 40px").attr("name", "{{ unitname }}_"+counter)
-        )
+      $("<td>").append(
+        $("<img>").attr("src", "{{ innocdn_url('/graphic/unit/unit_'+unitname+'.png') }}")
       )
+        .append(
+          $("<input>").attr("id", "unit_input_{{ unitname }}_" + counter).attr("type", "text").attr("style", "width: 40px").attr("name", "{{ unitname }}_" + counter)
+        )
+    )
     {% endfor %}
       .append(options_container)
       .insertAfter($(".row", outer_table).last());
-    $("#submit_button").val(parseInt($("#submit_button").val())+1)
+    $("#submit_button").val(parseInt($("#submit_button").val()) + 1)
   }
-  $(function() {
+  $(function () {
     addRow();
   });
 </script>
@@ -32,22 +32,24 @@
   <tr>
     <td><b>Startdorf:</b></td>
     <td>
-      <a href="https://{{action.domain}}/game.php?screen=map&x={{ action.source_coord.x }}&y={{ action.source_coord.y }}&beacon" rel="noreferrer">
-          <img src="{{ innocdn_url('/graphic/icons/map2.png') }}">
+      <a href="https://{{action.domain}}/game.php?screen=map&x={{ action.source_coord.x }}&y={{ action.source_coord.y }}&beacon"
+        rel="noreferrer">
+        <img src="{{ innocdn_url('/graphic/icons/map2.png') }}">
       </a>
       <a href="https://{{action.domain}}/game.php?screen=info_village&id={{action.source_id}}" rel="noreferrer">
-          {{ action.source_village_name }} {{ action.source_coord.x }}|{{ action.source_coord.y }}
+        {{ action.source_village_name }} {{ action.source_coord.x }}|{{ action.source_coord.y }}
       </a>
     </td>
   </tr>
   <tr>
     <td><b>Zieldorf:</b></td>
     <td>
-      <a href="https://{{action.domain}}/game.php?screen=map&x={{ action.target_coord.x }}&y={{ action.target_coord.y }}&beacon" rel="noreferrer">
-          <img src="{{ innocdn_url('/graphic/icons/map2.png') }}">
+      <a href="https://{{action.domain}}/game.php?screen=map&x={{ action.target_coord.x }}&y={{ action.target_coord.y }}&beacon"
+        rel="noreferrer">
+        <img src="{{ innocdn_url('/graphic/icons/map2.png') }}">
       </a>
       <a href="https://{{action.domain}}/game.php?screen=info_village&id={{action.target_id}}" rel="noreferrer">
-          {{ action.target_village_name }} {{ action.target_coord.x }}|{{ action.target_coord.y }}
+        {{ action.target_village_name }} {{ action.target_coord.x }}|{{ action.target_coord.y }}
       </a>
     </td>
   </tr>
@@ -71,9 +73,10 @@
     <tr class="row" id="row_0">
       <td><b>1</b></td>
       {% for unitname in unitnames %}
-        <td width="70px" align="right">
-          <span class="badge alert-success" title="{{unitname}}">{{action.units[unitname]}}<img src="{{ innocdn_url('/graphic/unit/unit_' + unitname + '.png') }}"></span>
-        </td>
+      <td width="70px" align="right">
+        <span class="badge alert-success" title="{{unitname}}">{{action.units[unitname]}}<img
+            src="{{ innocdn_url('/graphic/unit/unit_' + unitname + '.png') }}"></span>
+      </td>
       {% endfor %}
       <td>
         <span>ok</span>

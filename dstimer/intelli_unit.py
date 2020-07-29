@@ -74,7 +74,9 @@ def intelli_train(action, actual_obj):
             sum[unit] = int(action["units"][unit]) if unit in action["units"] else 0
         for i in range(action["traincounter"]):
             for unit in unitnames:
-                sum[unit] += int(action["train["+ str(i+2) + "][" + unit + "]"]) if ("train["+ str(i+2) + "][" + unit + "]") in action else 0
+                sum[unit] += int(action["train[" + str(i + 2) + "][" + unit +
+                                        "]"]) if ("train[" + str(i + 2) + "][" + unit +
+                                                  "]") in action else 0
         result = intelli_all(sum, actual_obj)
         for unit in unitnames:
             if sum[unit] != result[unit]:

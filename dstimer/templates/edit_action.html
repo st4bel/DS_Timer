@@ -2,136 +2,136 @@
 {% block title %}Edit Attack{% endblock %}
 {% block header %}
 <script type="text/javascript">
-  function useTemplate(template, unitnames){
-    for(var i = 0; i < unitnames.length; i++){
-      var unitField = document.getElementById("unit_input_"+unitnames[i]);
+  function useTemplate(template, unitnames) {
+    for (var i = 0; i < unitnames.length; i++) {
+      var unitField = document.getElementById("unit_input_" + unitnames[i]);
       unitField.value = template.units[unitnames[i]];
     }
   }
-  function loadUnits(units, unitnames){
-    for(var i = 0; i < unitnames.length; i++){
-      if (units[unitnames[i]] != undefined){
-        var unitField = document.getElementById("unit_input_"+unitnames[i]);
+  function loadUnits(units, unitnames) {
+    for (var i = 0; i < unitnames.length; i++) {
+      if (units[unitnames[i]] != undefined) {
+        var unitField = document.getElementById("unit_input_" + unitnames[i]);
         unitField.value = units[unitnames[i]];
       }
     }
   }
-  function source_player_selected(){
+  function source_player_selected() {
     var source_player = $("#source_player_select :selected").val();
     var s = source_player.split("+")
-    if (source_player != ""){
+    if (source_player != "") {
       load_source_villages(s[0], s[1]);
       load_players(s[1]);
     }
   }
-  function load_source_villages(player_id, domain){
+  function load_source_villages(player_id, domain) {
     // TODO remove old villages
-    $.get("/villages_of_player/"+domain+"/"+player_id, function(villages) {
+    $.get("/villages_of_player/" + domain + "/" + player_id, function (villages) {
       window.source_villages = villages;
-      for (var i=0; i < villages.length;i++){
-        if ($("option[value='"+villages[i]["id"]+"']", $("#source_village")).length == 0){
-          $("#source_village").append($("<option>").text(villages[i]["name"]+"@"+villages[i]["coord"]["x"]+"|"+villages[i]["coord"]["y"]).attr("value",villages[i]["id"]));
+      for (var i = 0; i < villages.length; i++) {
+        if ($("option[value='" + villages[i]["id"] + "']", $("#source_village")).length == 0) {
+          $("#source_village").append($("<option>").text(villages[i]["name"] + "@" + villages[i]["coord"]["x"] + "|" + villages[i]["coord"]["y"]).attr("value", villages[i]["id"]));
         }
       }
       set_coords('source');
     })
   }
-  function load_target_villages(){
+  function load_target_villages() {
     var source_player = $("#source_player_select :selected").val();
     var domain = source_player.split("+")[1];
     var target_player = $("#target_player").val();
     if (target_player == "None") {
       target_player_id = "0";
-    }else{
+    } else {
       players = window.players;
       target_player_id = undefined;
-      for (var i = 0; i<players.length;i++){
-        if (players[i]["name"]==target_player){
-          target_player_id=players[i]["id"];
+      for (var i = 0; i < players.length; i++) {
+        if (players[i]["name"] == target_player) {
+          target_player_id = players[i]["id"];
           break;
         }
       }
     }
-    if (target_player_id){
-      $.get("/villages_of_player/"+domain+"/"+target_player_id, function(villages) {
+    if (target_player_id) {
+      $.get("/villages_of_player/" + domain + "/" + target_player_id, function (villages) {
         window.target_villages = villages
-        for (var i=0; i < villages.length;i++){
-          if ($("option[value='"+villages[i]["id"]+"']", $("#target_village")).length == 0){
-            $("#target_village").append($("<option>").text(villages[i]["name"]+"@"+villages[i]["coord"]["x"]+"|"+villages[i]["coord"]["y"]).attr("value",villages[i]["id"]));
+        for (var i = 0; i < villages.length; i++) {
+          if ($("option[value='" + villages[i]["id"] + "']", $("#target_village")).length == 0) {
+            $("#target_village").append($("<option>").text(villages[i]["name"] + "@" + villages[i]["coord"]["x"] + "|" + villages[i]["coord"]["y"]).attr("value", villages[i]["id"]));
           }
         }
         set_coords('target');
       })
     }
   }
-  function load_players(domain){
-    $.get("/load_players/"+domain, function(players){
+  function load_players(domain) {
+    $.get("/load_players/" + domain, function (players) {
       window.players = players;
-      for (var i=0; i<players.length;i++){
+      for (var i = 0; i < players.length; i++) {
         $("#target_player_list").append($("<option>").attr("value", players[i]["name"]));
       }
       $("#target_player").val($("#target_player_help").text())
       load_target_villages();
     })
   }
-  function set_coords(s){
-    console.log("set coords: "+s)
-    var village = $("#"+s+"_village").val();
-    var villages = window[s+"_villages"];
-    for (var i=0; i<villages.length;i++){
+  function set_coords(s) {
+    console.log("set coords: " + s)
+    var village = $("#" + s + "_village").val();
+    var villages = window[s + "_villages"];
+    for (var i = 0; i < villages.length; i++) {
       if (village == villages[i]["id"]) {
         var x = villages[i]["coord"]["x"];
         var y = villages[i]["coord"]["y"];
       }
     }
-    $("#"+s+"_x").val(x);
-    $("#"+s+"_y").val(y);
+    $("#" + s + "_x").val(x);
+    $("#" + s + "_y").val(y);
   }
-  function get_village_from_coords(s){
-    var x = $("#"+s+"_x").val();
-    var y = $("#"+s+"_y").val();
+  function get_village_from_coords(s) {
+    var x = $("#" + s + "_x").val();
+    var y = $("#" + s + "_y").val();
     var source_villages = window.source_villages;
-    for (var i=0; i<source_villages.length;i++){
+    for (var i = 0; i < source_villages.length; i++) {
       if (x == source_villages[i]["coord"]["x"] && y == source_villages[i]["coord"]["y"]) {
         $("#source_village").val(source_villages[i]["id"]);
       }
     }
     // TODO target
   }
-  function timestrings(){
+  function timestrings() {
     var today = new Date();
-    return today.getFullYear()+"-"+(today.getMonth()+1)+"-"+today.getDate()+"T"+today.getHours()+":"+today.getMinutes()+":"+today.getSeconds()+".000"
+    return today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate() + "T" + today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds() + ".000"
   }
-  function parse_python_dict(text){
+  function parse_python_dict(text) {
     var json = {};
     // "{'snob': '=500', 'spear': '10'}"
     var elements = text.split(",");
     // [ "{'snob': '=500'", " 'spear': '10'}" ]
-    for (element of elements){
+    for (element of elements) {
       var left = element.split(":")[0].split("'")[1]
       var rigth = element.split(":")[1].split("'")[1]
       json[left] = rigth;
     }
     return json;
   }
-  function parse_python_array(text){
+  function parse_python_array(text) {
     var json = [];
     var elements = text.split(",");
-    for (element of elements){
+    for (element of elements) {
       json.push(element.split("'")[1])
     }
     return json;
   }
-  function loadTime(){
+  function loadTime() {
     if (document.getElementById("departure").checked) {
       var type = "departure";
     } else {
       var type = "arrival"
     }
-    var time = $("#"+type+"_time_help").text();
+    var time = $("#" + type + "_time_help").text();
     $("#time").val(time.replace(" ", "T"))
   }
-  $(function() {
+  $(function () {
     source_player_selected();
     var units = parse_python_dict($("#units_help").text());
     var unitnames = parse_python_array($("#unitnames_help").text());
@@ -148,160 +148,231 @@
 
 
 <div id="div_new_template">
-    <form action="" method="post">
-        <table class="table">
-            <tbody>
+  <form action="" method="post">
+    <table class="table">
+      <tbody>
+        <tr>
+          <th>Spieler/Server</th>
+          <th>Start Koord</th>
+        </tr>
+        <tr>
+          <td>
+            <select id="source_player_select" name="source_player_select" onchange="source_player_selected()">
+              {% if N_O_P != 1%}
+              <option value="">Spieler auswählen</option>
+              {% endif %}
+              {% for player in players %}
+              <option value="{{ player.id }}+{{ player.domain }}"
+                {% if player.id == action.player_id and player.domain == action.domain %} selected="selected"
+                {% endif %}>{{ player.name }}@{{ player.domain }}</option>
+              {% endfor %}
+            </select>
+          </td>
+          <td>
+            <input name="source_x" id="source_x" type="text" style="width: 40px"
+              onchange="get_village_from_coords('source')"><input name="source_y" id="source_y" type="text"
+              style="width: 40px" onchange="get_village_from_coords('source')"><br>
+            <select id="source_village" name="source_village" onchange="set_coords('source')">
+              <option value="">Dorf auswählen</option>
+              <option value="{{action.source_id}}" selected="selected">
+                {{action.source_village_name}}@{{action.source_coord.x}}|{{action.source_coord.y}}</option>
+            </select>
+          </td>
+        </tr>
+      </tbody>
+    </table><br>
+    <table class="table">
+      <tbody>
+        <tr>
+          <th>Ziel Spieler</th>
+          <th>Ziel Koord</th>
+        </tr>
+        <tr>
+          <td>
+            <input list="target_player_list" value="" id="target_player" onchange="load_target_villages()"
+              value="{{action.target_player}}" />
+            <span id="target_player_help" style="display:none;">{{action.target_player}}</span>
+            <datalist id="target_player_list"></datalist>
+          </td>
+          <td>
+            <input name="target_x" id="target_x" type="text" style="width: 40px"><input name="target_y" id="target_y"
+              type="text" style="width: 40px"><br>
+            <select id="target_village" name="target_village" onchange="set_coords('target')">
+              <option value="">Dorf auswählen</option>
+              <option value="{{action.target_id}}" selected="selected">
+                {{action.target_village_name}}@{{action.target_coord.x}}|{{action.target_coord.y}}</option>
+            </select>
+          </td>
+        </tr>
+      </tbody>
+    </table><br>
+    <h3>Truppen eingeben</h3>
+    <span id="units_help" style="display:none;">{{action.units}}</span><span id="unitnames_help"
+      style="display:none;">{{unitnames}}</span>
+    <!-- <button id="units_help_button" onclick="loadUnits({{ action.units }},{{ unitnames }})" name="type" value="" class="btn btn-default" style="display:none;">alte Truppen</button>-->
+    <table>
+      <tbody>
+        <tr>
+          <td valign="top">
+            <table class="table" width="100%">
+              <tbody>
                 <tr>
-                    <th>Spieler/Server</th><th>Start Koord</th>
+                  <th>Infanterie</th>
                 </tr>
                 <tr>
-                    <td>
-                      <select id="source_player_select" name="source_player_select" onchange="source_player_selected()">
-                        {% if N_O_P != 1%}
-                          <option value="">Spieler auswählen</option>
-                        {% endif %}
-                        {% for player in players %}
-                          <option value="{{ player.id }}+{{ player.domain }}" {% if player.id == action.player_id and player.domain == action.domain %} selected = "selected"{% endif %}>{{ player.name }}@{{ player.domain }}</option>
-                        {% endfor %}
-                      </select>
-                    </td>
-                    <td>
-                        <input name="source_x" id="source_x" type="text" style="width: 40px" onchange="get_village_from_coords('source')"><input name="source_y" id="source_y" type="text" style="width: 40px" onchange="get_village_from_coords('source')"><br>
-                        <select id="source_village" name="source_village" onchange="set_coords('source')">
-                          <option value="">Dorf auswählen</option>
-                          <option value="{{action.source_id}}" selected="selected">{{action.source_village_name}}@{{action.source_coord.x}}|{{action.source_coord.y}}</option>
-                        </select>
-                    </td>
+                  <td><img src="{{ innocdn_url('/graphic/unit/unit_spear.png') }}" title="Speerträger" alt=""
+                      class=""><input id="unit_input_spear" name="spear" type="text" style="width: 40px"></td>
                 </tr>
-            </tbody>
-        </table><br>
-        <table class="table">
-          <tbody>
-            <tr>
-              <th>Ziel Spieler</th><th>Ziel Koord</th>
-            </tr>
-            <tr>
-              <td>
-                <input list="target_player_list" value="" id="target_player" onchange="load_target_villages()" value="{{action.target_player}}"/>
-                <span id="target_player_help" style="display:none;">{{action.target_player}}</span>
-                <datalist id="target_player_list"></datalist>
-              </td>
-              <td>
-                  <input name="target_x" id="target_x" type="text" style="width: 40px"><input name="target_y" id="target_y" type="text" style="width: 40px"><br>
-                  <select id="target_village" name="target_village" onchange="set_coords('target')">
-                    <option value="">Dorf auswählen</option>
-                    <option value="{{action.target_id}}" selected = "selected">{{action.target_village_name}}@{{action.target_coord.x}}|{{action.target_coord.y}}</option>
-                  </select>
-              </td>
-            </tr>
-          </tbody>
-        </table><br>
-        <h3>Truppen eingeben</h3>
-        <span id="units_help" style="display:none;">{{action.units}}</span><span id="unitnames_help" style="display:none;">{{unitnames}}</span>
-        <!-- <button id="units_help_button" onclick="loadUnits({{ action.units }},{{ unitnames }})" name="type" value="" class="btn btn-default" style="display:none;">alte Truppen</button>-->
-        <table>
-            <tbody>
-                <tr><td valign="top">
-                        <table class="table" width="100%"><tbody>
-                            <tr><th>Infanterie</th></tr>
-                            <tr><td><img src="{{ innocdn_url('/graphic/unit/unit_spear.png') }}" title="Speerträger" alt="" class=""><input id="unit_input_spear" name="spear" type="text" style="width: 40px"></td></tr>
-                            <tr><td><img src="{{ innocdn_url('/graphic/unit/unit_sword.png') }}" title="Schwertkämpfer" alt="" class=""><input id="unit_input_sword" name="sword" type="text" style="width: 40px"></td></tr>
-                            <tr><td><img src="{{ innocdn_url('/graphic/unit/unit_axe.png') }}" title="Axtkämpfer" alt="" class=""><input id="unit_input_axe" name="axe" type="text" style="width: 40px"></td></tr>
-                            <tr><td><img src="{{ innocdn_url('/graphic/unit/unit_archer.png') }}" title="Bogenschützen" alt="" class=""><input id="unit_input_archer" name="archer" type="text" style="width: 40px"></td></tr>
-                        </tbody></table>
-                    </td>
-                    <td valign="top">
-                        <table class="table" width="100%"><tbody>
-                            <tr><th>Kavallerie</th></tr>
-                            <tr><td><img src="{{ innocdn_url('/graphic/unit/unit_spy.png') }}" title="Späher" alt="" class=""><input id="unit_input_spy" name="spy" type="text" style="width: 40px"></td></tr>
-                            <tr><td><img src="{{ innocdn_url('/graphic/unit/unit_light.png') }}" title="Leichte Kavallerie" alt="" class=""><input id="unit_input_light" name="light" type="text" style="width: 40px"></td></tr>
-                            <tr><td><img src="{{ innocdn_url('/graphic/unit/unit_marcher.png') }}" title="Berittene Bogenschützen" alt="" class=""><input id="unit_input_marcher" name="marcher" type="text" style="width: 40px"></td></tr>
-                            <tr><td><img src="{{ innocdn_url('/graphic/unit/unit_heavy.png') }}" title="Schwere Kavallerie" alt="" class=""><input id="unit_input_heavy" name="heavy" type="text" style="width: 40px"></td></tr>
-                        </tbody></table>
-                    </td>
-                    <td valign="top">
-                        <table class="table" width="100%"><tbody>
-                            <tr><th>Belagerung</th></tr>
-                            <tr><td><img src="{{ innocdn_url('/graphic/unit/unit_ram.png') }}" title="Rammbock" alt="" class=""><input id="unit_input_ram" name="ram" type="text" style="width: 40px"></td></tr>
-                            <tr><td><img src="{{ innocdn_url('/graphic/unit/unit_catapult.png') }}" title="Katapult" alt="" class=""><input id="unit_input_catapult" name="catapult" type="text" style="width: 40px"></td></tr>
-                        </tbody></table>
-                    </td>
-                    <td valign="top">
-                        <table class="table" width="100%"><tbody>
-                            <tr><th>Andere</th></tr>
-                            <tr><td><img src="{{ innocdn_url('/graphic/unit/unit_knight.png') }}" title="Paladin" alt="" class=""><input id="unit_input_knight" name="knight" type="text" style="width: 40px"></td></tr>
-                            <tr><td><img src="{{ innocdn_url('/graphic/unit/unit_snob.png') }}" title="Adelsgeschlecht" alt="" class=""><input id="unit_input_snob" name="snob" type="text" style="width: 40px"></td></tr>
-                        </tbody></table>
-                    </td>
+                <tr>
+                  <td><img src="{{ innocdn_url('/graphic/unit/unit_sword.png') }}" title="Schwertkämpfer" alt=""
+                      class=""><input id="unit_input_sword" name="sword" type="text" style="width: 40px"></td>
                 </tr>
-            </tbody>
-        </table><br>
-        <table>
-          <tbody>
-            <tr>
-              <td>Katapultziel</td>
-              <td>
-                <select id="catapult_target" name="catapult_target">
-                  <option value="default">Standardziel Staemme</option>
-                  {% for building in buildings %}
-                    <option value="{{ building }}">{{ building }}</option>
-                  {% endfor %}
-                </select>
-              </td>
-            </tr>
-            <tr>
-              <td>Als neues Standardziel speichern</td>
-              <td><input type="checkbox" name="save_default_attack_building" id="save_default_attack_building" {% if action.save_default_attack_building == 1 %}checked{% endif %}></td>
-            </tr>
-          </tbody>
-        </table>
-        <table class="table" width="200">
-          <tbody>
-            <tr>
-              <th>Zeit</th><th>Abschickzeit?</th>
-            </tr>
-            <tr>
-              <td>
-                <input name="time" type="datetime-local" step="0.25" id="time" style="width: 160px">
-                <span id="departure_time_help" style="display:none;">{{action.departure_time}}</span>
-                <span id="arrival_time_help" style="display:none;">{{action.arrival_time}}</span>
-              <td>
-              <td>
-                <input name="departure" type="checkbox" onclick="loadTime()" id="departure" checked>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <button type="submit" name="type" value="{{action.type}}" class="btn btn-default">Ändern</button>
-        <button type="submit" name="type" value="abbort" class="btn btn-default">Abbrechen</button>
-    </form>
+                <tr>
+                  <td><img src="{{ innocdn_url('/graphic/unit/unit_axe.png') }}" title="Axtkämpfer" alt=""
+                      class=""><input id="unit_input_axe" name="axe" type="text" style="width: 40px"></td>
+                </tr>
+                <tr>
+                  <td><img src="{{ innocdn_url('/graphic/unit/unit_archer.png') }}" title="Bogenschützen" alt=""
+                      class=""><input id="unit_input_archer" name="archer" type="text" style="width: 40px"></td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+          <td valign="top">
+            <table class="table" width="100%">
+              <tbody>
+                <tr>
+                  <th>Kavallerie</th>
+                </tr>
+                <tr>
+                  <td><img src="{{ innocdn_url('/graphic/unit/unit_spy.png') }}" title="Späher" alt="" class=""><input
+                      id="unit_input_spy" name="spy" type="text" style="width: 40px"></td>
+                </tr>
+                <tr>
+                  <td><img src="{{ innocdn_url('/graphic/unit/unit_light.png') }}" title="Leichte Kavallerie" alt=""
+                      class=""><input id="unit_input_light" name="light" type="text" style="width: 40px"></td>
+                </tr>
+                <tr>
+                  <td><img src="{{ innocdn_url('/graphic/unit/unit_marcher.png') }}" title="Berittene Bogenschützen"
+                      alt="" class=""><input id="unit_input_marcher" name="marcher" type="text" style="width: 40px">
+                  </td>
+                </tr>
+                <tr>
+                  <td><img src="{{ innocdn_url('/graphic/unit/unit_heavy.png') }}" title="Schwere Kavallerie" alt=""
+                      class=""><input id="unit_input_heavy" name="heavy" type="text" style="width: 40px"></td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+          <td valign="top">
+            <table class="table" width="100%">
+              <tbody>
+                <tr>
+                  <th>Belagerung</th>
+                </tr>
+                <tr>
+                  <td><img src="{{ innocdn_url('/graphic/unit/unit_ram.png') }}" title="Rammbock" alt="" class=""><input
+                      id="unit_input_ram" name="ram" type="text" style="width: 40px"></td>
+                </tr>
+                <tr>
+                  <td><img src="{{ innocdn_url('/graphic/unit/unit_catapult.png') }}" title="Katapult" alt=""
+                      class=""><input id="unit_input_catapult" name="catapult" type="text" style="width: 40px"></td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+          <td valign="top">
+            <table class="table" width="100%">
+              <tbody>
+                <tr>
+                  <th>Andere</th>
+                </tr>
+                <tr>
+                  <td><img src="{{ innocdn_url('/graphic/unit/unit_knight.png') }}" title="Paladin" alt=""
+                      class=""><input id="unit_input_knight" name="knight" type="text" style="width: 40px"></td>
+                </tr>
+                <tr>
+                  <td><img src="{{ innocdn_url('/graphic/unit/unit_snob.png') }}" title="Adelsgeschlecht" alt=""
+                      class=""><input id="unit_input_snob" name="snob" type="text" style="width: 40px"></td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table><br>
+    <table>
+      <tbody>
+        <tr>
+          <td>Katapultziel</td>
+          <td>
+            <select id="catapult_target" name="catapult_target">
+              <option value="default">Standardziel Staemme</option>
+              {% for building in buildings %}
+              <option value="{{ building }}">{{ building }}</option>
+              {% endfor %}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>Als neues Standardziel speichern</td>
+          <td><input type="checkbox" name="save_default_attack_building" id="save_default_attack_building"
+              {% if action.save_default_attack_building == 1 %}checked{% endif %}></td>
+        </tr>
+      </tbody>
+    </table>
+    <table class="table" width="200">
+      <tbody>
+        <tr>
+          <th>Zeit</th>
+          <th>Abschickzeit?</th>
+        </tr>
+        <tr>
+          <td>
+            <input name="time" type="datetime-local" step="0.25" id="time" style="width: 160px">
+            <span id="departure_time_help" style="display:none;">{{action.departure_time}}</span>
+            <span id="arrival_time_help" style="display:none;">{{action.arrival_time}}</span>
+          <td>
+          <td>
+            <input name="departure" type="checkbox" onclick="loadTime()" id="departure" checked>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <button type="submit" name="type" value="{{action.type}}" class="btn btn-default">Ändern</button>
+    <button type="submit" name="type" value="abbort" class="btn btn-default">Abbrechen</button>
+  </form>
 </div>
 <h3>Vorlage verwenden</h3> <a href="/templates">Vorlage erstellen</a>
 <table class="table">
-    <tr>
-        <th>Name</th>
-        <th>Truppen</th>
-        <th>Aktionen</th>
-    </tr>
-    {% for template in templates%}
-    <tr>
-        <td><b>{{ template.name }}</b></td>
-        <td>
-            <table><tr>
-            {% for unitname in unitnames %}
-                <td width="70px" align="right">
-                    <span class="badge alert-success" title="{{unitname}}">{{template.units[unitname]}}<img src="{{ innocdn_url('/graphic/unit/unit_' + unitname + '.png') }}"></span>
-                </td>
-            {% endfor %}
-            </tr></table>
-        </td>
-        <td>
+  <tr>
+    <th>Name</th>
+    <th>Truppen</th>
+    <th>Aktionen</th>
+  </tr>
+  {% for template in templates%}
+  <tr>
+    <td><b>{{ template.name }}</b></td>
+    <td>
+      <table>
+        <tr>
+          {% for unitname in unitnames %}
+          <td width="70px" align="right">
+            <span class="badge alert-success" title="{{unitname}}">{{template.units[unitname]}}<img
+                src="{{ innocdn_url('/graphic/unit/unit_' + unitname + '.png') }}"></span>
+          </td>
+          {% endfor %}
+        </tr>
+      </table>
+    </td>
+    <td>
 
-                <button onclick="useTemplate({{ template }},{{ unitnames }})" name="type" value="use_{{template.id}}" class="btn btn-default">Verwenden</button>
+      <button onclick="useTemplate({{ template }},{{ unitnames }})" name="type" value="use_{{template.id}}"
+        class="btn btn-default">Verwenden</button>
 
-        </td>
-    </tr>
-    {% endfor %}
+    </td>
+  </tr>
+  {% endfor %}
 </table>
 <small><a href="/options">Weltdaten aktualisieren</a></small>
 
