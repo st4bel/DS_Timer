@@ -79,7 +79,11 @@ def get_confirm_screen(session, domain, form, units, target_x, target_y, type, v
     for input in form.select("input"):
         if "name" in input.attrs and "value" in input.attrs:
             data[input["name"]] = input["value"]
-    building = form.find("option", selected=True)["value"]
+    # bei unterstützungen werden kata ziele nicht "angezeigt"
+    if type != "support":
+        building = form.find("option", selected=True)["value"]
+    else:
+        building = None
     return (building, action, data, response.url)
 
 
@@ -226,10 +230,10 @@ class SendActionThread(threading.Thread):
                     session, domain, form, units, self.action["target_coord"]["x"],
                     self.action["target_coord"]["y"], self.action["type"], self.action["vacation"],
                     referer)
-
-                data["building"] = self.action[
-                    "building"] if self.action["building"] != "default" else building
-                data["save_default_attack_building"] = self.action["save_default_attack_building"]
+                if building:
+                    data["building"] = self.action[
+                        "building"] if self.action["building"] != "default" else building
+                    data["save_default_attack_building"] = self.action["save_default_attack_building"]
 
                 for i in range(self.action["traincounter"]):
                     for unit in common.unitnames:
