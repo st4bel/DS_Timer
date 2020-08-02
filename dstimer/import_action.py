@@ -21,7 +21,6 @@ def distance(source, target):
 def is_zero(format):
     return str(format) == "0" or format == "=0" or format == ""
 
-
 def speed(units, type, stats):
     if type == "support" and not is_zero(units.get("knight", 0)):
         # travel with knight speed if there is a knight
@@ -45,7 +44,6 @@ def get_unit_info(domain):
         units[unit.tag] = round(float(unit.find("speed").text))
     return units
 
-
 def get_cached_unit_info(domain):
     directory = os.path.join(common.get_root_folder(), "cache")
     file = os.path.join(directory, domain)
@@ -61,7 +59,6 @@ def get_cached_unit_info(domain):
         with open(file, "w") as fd:
             json.dump(unit_info, fd)
         return unit_info
-
 
 def get_LZ_factor(action):
     LZ = common.read_options()["LZ_reduction"]
@@ -108,13 +105,12 @@ def autocomplete(action):
     if "next_attack" not in action:
         action["next_attack"] = False
     if "building" not in action:
-        action["building"] = False
+        action["building"] = common.read_options()["kata-target"]
     if "save_default_attack_building" not in action:
         action["save_default_attack_building"] = 0
 
 def random_id(length):
     return "".join(random.choice(string.ascii_lowercase) for i in range(length))
-
 
 def random_milliseconds(border):
     ms = int("".join(random.choice(string.digits) for i in range(3)))
@@ -123,7 +119,6 @@ def random_milliseconds(border):
     elif ms > 1000 - border:
         ms = ms - 2 * border
     return str(ms)
-
 
 def import_from_text(text, rand_mill=False):
     actions = json.loads(text)
@@ -144,7 +139,6 @@ def import_from_text(text, rand_mill=False):
         file = os.path.join(directory, filename)
         with open(file, "w") as fd:
             json.dump(action, fd, indent=4)
-
 
 def import_wb_action(text, name):
     #splitting text for [*]
