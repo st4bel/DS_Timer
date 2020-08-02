@@ -10,11 +10,6 @@ import hashlib
 import logging
 from version_parser import Version
 
-<<<<<<< HEAD
-logger = logging.getLogger("dstimer")
-
-=======
->>>>>>> 0e2b5c82c1a8a4e44cd462d55a55808c0cdc3555
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"
 
 escape_table = {
@@ -57,17 +52,9 @@ stat_URL = "http://ds-kalation.de/stat_receive_Timer_0.6.2.php"
 def get_root_folder():
     return os.path.join(os.path.expanduser("~"), ".dstimer")
 
-<<<<<<< HEAD
 def get_username(domain):
     directory = os.path.join(common.get_root_folder(), "keks", domain)
 
-=======
-
-def get_username(domain):
-    directory = os.path.join(common.get_root_folder(), "keks", domain)
-
-
->>>>>>> 0e2b5c82c1a8a4e44cd462d55a55808c0cdc3555
 def create_folder_structure():
     """Create all folders needed by DS_Timer
 
