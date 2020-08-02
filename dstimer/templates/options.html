@@ -19,8 +19,38 @@
     Der Timer lädt anhand der importierten Kekse die Weltdaten der jeweiligen Server herunter. Sollten auf <a
       href="/new_attack">New Att</a> die Spieler und Dörfer nicht geladen werden, dann bitte folgenden Button drücken.
   </div><br>
+<<<<<<< HEAD
+  <button type="submit" name="type" value="refresh-world-data" class="btn btn-default">Weltdaten aktualisieren</button><br><br>
+  <h3>Standard Kataziel</h3>
+  <div class="">
+    Hier kannst du dein standard Kataziel einstellen.
+  </div><br>
+  <form>
+    <select name="kata-target-menu">
+      <option value="default"{% if options['kata-target']=='default' %} selected="selected"{% endif %}>Stämme Ziel</option>
+      <option value="main"{% if options['kata-target']=='main' %} selected="selected"{% endif %}>Hauptgebäude</option>
+      <option value="barracks"{% if options['kata-target']=='barracks' %} selected="selected"{% endif %}>Kaserne</option>
+      <option value="stable"{% if options['kata-target']=='stable' %} selected="selected"{% endif %}>Stall</option>
+      <option value="garage"{% if options['kata-target']=='garage' %} selected="selected"{% endif %}>Werkstatt</option>
+      <option value="watchtower"{% if options['kata-target']=='watchtower' %} selected="selected"{% endif %}>Wachturm</option>
+      <option value="snob"{% if options['kata-target']=='snob' %} selected="selected"{% endif %}>Adelshof</option>
+      <option value="smith"{% if options['kata-target']=='smith' %} selected="selected"{% endif %}>Schmiede</option>
+      <option value="place"{% if options['kata-target']=='place' %} selected="selected"{% endif %}>Versammlungsplatz</option>
+      <option value="wood"{% if options['kata-target']=='wood' %} selected="selected"{% endif %}>Holzfäller</option>
+      <option value="stone"{% if options['kata-target']=='stone' %} selected="selected"{% endif %}>Lehmgrube</option>
+      <option value="iron"{% if options['kata-target']=='iron' %} selected="selected"{% endif %}>Eisenmine</option>
+      <option value="farm"{% if options['kata-target']=='farm' %} selected="selected"{% endif %}>Bauernhof</option>
+      <option value="storage"{% if options['kata-target']=='storage' %} selected="selected"{% endif %}>Speicher</option>
+      <option value="wall"{% if options['kata-target']=='wall' %} selected="selected"{% endif %}>Wall</option>
+    </select>
+    <button type="submit" name="type" value="kata-target" class="btn btn-default">Speichern</button><br>
+  </form>
+  
+  <br>
+=======
   <button type="submit" name="type" value="refresh-world-data" class="btn btn-default">Weltdaten
     aktualisieren</button><br><br>
+>>>>>>> 0e2b5c82c1a8a4e44cd462d55a55808c0cdc3555
   <h3>Ordnerstruktur zurücksetzen</h3>
   <div class="">
     Nach jedem Update sollte der Ordner, in dem alle Daten des Timers abgespeichert werden, zurückgesetzt werden. Dazu

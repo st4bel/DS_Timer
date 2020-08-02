@@ -9,3 +9,4 @@ https://github.com/pyinstaller/pyinstaller/archive/develop.zip
 version_parser==1.0.0
 werkzeug<1.0
 flask_cors>=3.0.0
+tcp-latency>=0.0.8

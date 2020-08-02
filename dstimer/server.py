@@ -68,11 +68,19 @@ def get_scheduled_actions(folder="schedule"):
                     if action["target_id"] == int(dataset[0]):
                         action["target_village_name"] = world_data.unquote_name(dataset[1])
 
+<<<<<<< HEAD
+                action["departure_time"]        = dateutil.parser.parse(action["departure_time"])
+                action["arrival_time"]          = dateutil.parser.parse(action["arrival_time"])
+                action["world"]                 = action["domain"].partition(".")[0]
+                action["id"]                    = file[file.rfind("_")+1:-4]
+                action["size"]                  = import_action.get_attack_size(action["units"])
+=======
                 action["departure_time"] = dateutil.parser.parse(action["departure_time"])
                 action["arrival_time"] = dateutil.parser.parse(action["arrival_time"])
                 action["world"] = action["domain"].partition(".")[0]
                 action["id"] = file[file.rfind("_") + 1:-4]
                 action["size"] = import_action.get_attack_size(action["units"])
+>>>>>>> 0e2b5c82c1a8a4e44cd462d55a55808c0cdc3555
                 if action["player"] not in player:
                     player.append(action["player"])
                 actions.append(action)
@@ -459,6 +467,9 @@ def options_post():
     options = common.read_options()
     if request.form["type"] == "refresh-world-data":
         world_data.refresh_world_data()
+    elif request.form["type"] == "kata-target":
+        logger.info("standard Kataziel ausgewählt: " + request.form.get("kata-target-menu"))
+        options["kata-target"] = request.form.get("kata-target-menu")
     elif request.form["type"] == "reset-folders":
         common.reset_folders()
     elif request.form["type"] == "donate_toogle":

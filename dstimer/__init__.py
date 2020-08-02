@@ -9,7 +9,8 @@ __stdOptions__ = {
     "show_donate": True,
     "version": __version__,
     "LZ_reduction": {},
-    "min_time_diff": 150
+    "min_time_diff": 150,
+    "kata-target": "default"
 }
 
 try:

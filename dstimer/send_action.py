@@ -19,6 +19,8 @@ import dstimer.import_action
 import dstimer.common as common
 import random
 from dstimer.import_keks import check_and_save_sids
+from tcp_latency import measure_latency
+
 
 logger = logging.getLogger("dstimer")
 
@@ -79,6 +81,15 @@ def get_confirm_screen(session, domain, form, units, target_x, target_y, type, v
     for input in form.select("input"):
         if "name" in input.attrs and "value" in input.attrs:
             data[input["name"]] = input["value"]
+<<<<<<< HEAD
+    if type == "attack":
+        if common.read_options()["kata-target"] == "default":
+            defaultTarget = str(soup.find_all('option', selected=True)[0]['value'])
+            logger.info("kataTarget found stämme default: " + defaultTarget)
+            data["building"] = defaultTarget
+        data["save_default_attack_building"] = 0
+    return (action, data, response.url)
+=======
     # bei unterstützungen werden kata ziele nicht "angezeigt"
     if type != "support":
         building = form.find("option", selected=True)["value"]
@@ -86,6 +97,7 @@ def get_confirm_screen(session, domain, form, units, target_x, target_y, type, v
         building = None
     return (building, action, data, response.url)
 
+>>>>>>> 0e2b5c82c1a8a4e44cd462d55a55808c0cdc3555
 
 def just_do_it(session, domain, action, data, referer):
     headers = dict(referer=referer)
@@ -108,22 +120,25 @@ def parse_after_send_error(soup):
 def get_local_offset():
     try:
         client = ntplib.NTPClient()
-        response = client.request("europe.pool.ntp.org", version=3)
+        response = client.request("de.pool.ntp.org", version=3)
         return timedelta(seconds=response.offset)
     except:
-        logger.info("Can't connect to 'europe.pool.ntp.org'!")
+        logger.info("Can't connect to 'de.pool.ntp.org'!")
         #response.offset = 0.0
         return timedelta(seconds=0.0)
     #return timedelta(seconds=response.offset)
 
 
 def get_ping(domain):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    before = datetime.datetime.now()
-    s.connect((domain, 80))
-    after = datetime.datetime.now()
-    s.close()
-    return after - before
+    pingList = measure_latency(host=domain, runs=10, timeout=0.2)
+    logger.debug("Ping List: " + str(pingList))
+    if not list(filter(None, pingList)):
+        logger.info("ping failed")
+        pingList = measure_latency(host=domain, runs=5, timeout=1)
+        logger.debug("Ping List retry: " + str(pingList))
+    avgPing = sum(filter(None, pingList)) / len(list(filter(None, pingList)))
+    logger.info("avg Ping: " + str(avgPing))
+    return timedelta(microseconds=avgPing * 1000)
 
 
 class SendActionThread(threading.Thread):
@@ -176,9 +191,13 @@ class SendActionThread(threading.Thread):
                 session.cookies.set("sid", sid)
                 session.headers.update({"user-agent": common.USER_AGENT})
 
+<<<<<<< HEAD
+                real_departure = dateutil.parser.parse(self.action["departure_time"]) - self.offset - self.ping
+=======
                 real_departure = dateutil.parser.parse(
                     self.action["departure_time"]) - self.offset - self.ping
 
+>>>>>>> 0e2b5c82c1a8a4e44cd462d55a55808c0cdc3555
                 while real_departure - datetime.datetime.now() > datetime.timedelta(seconds=5):
                     time_left = real_departure - datetime.datetime.now() - datetime.timedelta(
                         seconds=5)
@@ -226,6 +245,16 @@ class SendActionThread(threading.Thread):
                         .format(original_speed, current_speed, actual_units, self.action["units"],
                                 units))
                 logger.info("Confirm.")
+<<<<<<< HEAD
+                (action, data, referer) = get_confirm_screen(session, domain, form, units,
+                    self.action["target_coord"]["x"], self.action["target_coord"]["y"], self.action["type"], self.action["vacation"] , referer)
+                if self.action["type"] == "attack":
+                    if "kataTarget" in self.action and self.action["kataTarget"] != "default":
+                        data["building"] = self.action["kataTarget"]
+                        logger.info("kataTarget in attack found: " + data["building"])
+                    else:
+                        logger.info("no kataTarget found going to default: " + data["building"])
+=======
                 (building, action, data, referer) = get_confirm_screen(
                     session, domain, form, units, self.action["target_coord"]["x"],
                     self.action["target_coord"]["y"], self.action["type"], self.action["vacation"],
@@ -241,14 +270,20 @@ class SendActionThread(threading.Thread):
                             data["train[" + str(i + 2) + "][" + unit +
                                  "]"] = self.action["train[" + str(i + 2) + "][" + unit + "]"]
 
+>>>>>>> 0e2b5c82c1a8a4e44cd462d55a55808c0cdc3555
                 logger.info("Wait for sending")
                 while real_departure - datetime.datetime.now() > datetime.timedelta(milliseconds=1):
                     time_left = real_departure - datetime.datetime.now()
                     if time_left.total_seconds() <= 0:
                         break
                     time.sleep((time_left / 2).total_seconds())
+<<<<<<< HEAD
+                logger.info("Time left: "+str(real_departure - datetime.datetime.now()))
+                logger.info("data: "+json.dumps(data))
+=======
                 logger.info("Time left: " + str(real_departure - datetime.datetime.now()))
                 logger.info("data: " + json.dumps(data))
+>>>>>>> 0e2b5c82c1a8a4e44cd462d55a55808c0cdc3555
                 just_do_it(session, domain, action, data, referer)
                 logger.info("Finished job")
                 # Delete finished action file
@@ -312,8 +347,12 @@ def cycle():
                     logger.info("Time Offset: {0} ms".format(round(offset.total_seconds() * 1000)))
                 if domain not in ping:
                     ping[domain] = get_ping(domain)
+<<<<<<< HEAD
+                    logger.info("Ping for {0}: {1} ms".format(domain, ping[domain].total_seconds() * 1000))
+=======
                     logger.info("Ping for {0}: {1} ms".format(
                         domain, round(ping[domain].total_seconds() * 1000)))
+>>>>>>> 0e2b5c82c1a8a4e44cd462d55a55808c0cdc3555
                 # Execute the action in the near future
                 logger.info("Schedule action for {0}".format(departure))
                 thread = SendActionThread(action, offset, ping[domain], file)
