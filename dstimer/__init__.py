@@ -2,14 +2,15 @@
 import requests
 from version_parser import Version
 
-__version__ = "v0.6.4"
+__version__ = "v0.6.5"
 
 __key__ = "insert key here lol"
 __stdOptions__ = {
     "show_donate": True,
     "version": __version__,
     "LZ_reduction": {},
-    "min_time_diff": 150
+    "min_time_diff": 150,
+    "kata-target": "default"
 }
 
 try:

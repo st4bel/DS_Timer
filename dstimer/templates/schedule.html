@@ -83,7 +83,7 @@
       {% endfor %}
     </td>
     <td>
-      {% if "catapult" in action.units %}
+      {% if "catapult" in action.units and action.building != "default" %}
       <span class="badge alert-success" title="{{ action.building }}"><img
           src="{{ innocdn_url('/graphic/buildings/' + action.building + '.png') }}" alt="{{ action.building }}"></span>
       {% endif %}

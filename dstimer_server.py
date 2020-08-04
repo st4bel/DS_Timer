@@ -23,6 +23,8 @@ if __name__ == "__main__":
 
     common.create_folder_structure()
 
+    os.environ['TZ'] = 'Europe/Berlin'
+
     # init logger
     log_dir = os.path.join(common.get_root_folder(), "logs") #C:\Users\<username>\.dstimer\logs
     os.makedirs(log_dir, exist_ok=True)

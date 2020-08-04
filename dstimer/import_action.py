@@ -15,14 +15,11 @@ from dstimer.intelli_unit import get_bh_all
 
 logger = logging.getLogger("dstimer")
 
-
 def distance(source, target):
     return math.sqrt(pow(target["x"] - source["x"], 2) + pow(target["y"] - source["y"], 2))
 
-
 def is_zero(format):
     return str(format) == "0" or format == "=0" or format == ""
-
 
 def speed(units, type, stats):
     if type == "support" and not is_zero(units.get("knight", 0)):
@@ -34,14 +31,8 @@ def speed(units, type, stats):
             slowest = stats[unit]
     return slowest
 
-
 def runtime(speed, distance, domain):
-    return timedelta(
-        seconds=round(distance *
-                      (speed /
-                       (world_data.get_unit_speed(domain) * world_data.get_world_speed(domain))) *
-                      60))
-
+    return timedelta(seconds=round(distance * (speed / (world_data.get_unit_speed(domain) * world_data.get_world_speed(domain))) * 60))
 
 def get_unit_info(domain):
     headers = {"user-agent": common.USER_AGENT}
@@ -52,7 +43,6 @@ def get_unit_info(domain):
     for unit in tree:
         units[unit.tag] = round(float(unit.find("speed").text))
     return units
-
 
 def get_cached_unit_info(domain):
     directory = os.path.join(common.get_root_folder(), "cache")
@@ -70,7 +60,6 @@ def get_cached_unit_info(domain):
             json.dump(unit_info, fd)
         return unit_info
 
-
 def get_LZ_factor(action):
     LZ = common.read_options()["LZ_reduction"]
     if action["type"] != "support" or LZ == {}:
@@ -84,9 +73,7 @@ def get_LZ_factor(action):
         if dateutil.parser.parse(action["departure_time"]) > dateutil.parser.parse(LZ["until"]):
             return 1
     if "departure_time" not in action:
-        duration = runtime(
-            speed(action["units"], action["type"], get_cached_unit_info(action["domain"])) /
-            (1 + int(LZ["magnitude"]) / 100),
+        duration = runtime(speed(action["units"], action["type"], get_cached_unit_info(action["domain"]))/(1+int(LZ["magnitude"])/100),
             distance(action["source_coord"], action["target_coord"]), action["domain"])
         departure_time = dateutil.parser.parse(action["arrival_time"]) - duration
         if departure_time > dateutil.parser.parse(LZ["until"]):
@@ -108,26 +95,22 @@ def autocomplete(action):
     for unit in units_to_delete:
         del action["units"][unit]
     unit_info = get_cached_unit_info(action["domain"])
-    duration = runtime(
-        speed(action["units"], action["type"], unit_info) / get_LZ_factor(action),
+
+    duration = runtime(speed(action["units"], action["type"], unit_info)/get_LZ_factor(action), 
         distance(action["source_coord"], action["target_coord"]), action["domain"])
     if "departure_time" not in action:
-        action["departure_time"] = (dateutil.parser.parse(action["arrival_time"]) -
-                                    duration).isoformat()
+        action["departure_time"] = (dateutil.parser.parse(action["arrival_time"]) - duration).isoformat()
     if "arrival_time" not in action:
-        action["arrival_time"] = (dateutil.parser.parse(action["departure_time"]) +
-                                  duration).isoformat()
+        action["arrival_time"] = (dateutil.parser.parse(action["departure_time"]) + duration).isoformat()
     if "next_attack" not in action:
         action["next_attack"] = False
     if "building" not in action:
-        action["building"] = False
+        action["building"] = common.read_options()["kata-target"]
     if "save_default_attack_building" not in action:
         action["save_default_attack_building"] = 0
 
-
 def random_id(length):
     return "".join(random.choice(string.ascii_lowercase) for i in range(length))
-
 
 def random_milliseconds(border):
     ms = int("".join(random.choice(string.digits) for i in range(3)))
@@ -136,7 +119,6 @@ def random_milliseconds(border):
     elif ms > 1000 - border:
         ms = ms - 2 * border
     return str(ms)
-
 
 def import_from_text(text, rand_mill=False):
     actions = json.loads(text)
@@ -147,19 +129,16 @@ def import_from_text(text, rand_mill=False):
     for action in actions:
         autocomplete(action)
         if rand_mill:
-            mill = timedelta(seconds=random.random() - 0.5)
-            action["departure_time"] = (dateutil.parser.parse(action["departure_time"]) +
-                                        mill).isoformat()
-            action["arrival_time"] = (dateutil.parser.parse(action["arrival_time"]) +
-                                      mill).isoformat()
-        filename = dateutil.parser.parse(
-            action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + random_id(6) + ".txt"
+
+            mill = timedelta(seconds=random.random()-0.5)
+            action["departure_time"] = (dateutil.parser.parse(action["departure_time"]) + mill).isoformat()
+            action["arrival_time"] = (dateutil.parser.parse(action["arrival_time"]) + mill).isoformat()
+        filename = dateutil.parser.parse(action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + random_id(6) + ".txt"
 
         directory = os.path.join(common.get_root_folder(), "schedule")
         file = os.path.join(directory, filename)
         with open(file, "w") as fd:
             json.dump(action, fd, indent=4)
-
 
 def import_wb_action(text, name):
     #splitting text for [*]
@@ -188,17 +167,18 @@ def import_wb_action(text, name):
         date = columns[5].split(" um ")
         date[0] = date[0].split(".")
         #action["departure_time"] = "20"+date[0][2]+"-"+date[0][1]+"-"+date[0][0]+"T"+date[1]+"."+random_milliseconds(100)
-        action["departure_time"] = "20" + date[0][2] + "-" + date[0][1] + "-" + date[0][
-            0] + "T" + date[1]
-        if len(date[1].split('.')) == 1:
-            action["departure_time"] += "." + random_milliseconds(100)
+
+        action["departure_time"] = "20"+date[0][2]+"-"+date[0][1]+"-"+date[0][0]+"T"+date[1]
+        if len(date[1].split('.'))==1:
+            action["departure_time"] += "."+random_milliseconds(100)
+
         if "(" in columns[1]:
             action["units"] = get_troups_from_template(columns[1].split("(")[1].split(")")[0])
         else:
             action["units"] = get_troups_from_template(columns[1])
         logger.info(action["units"])
-        action["player"] = name
-        action["player_id"] = world_data.get_player_id(action["domain"], action["player"])
+        action["player"]=name
+        action["player_id"] = world_data.get_player_id(action["domain"],action["player"])
         action["force"] = False
         action["vacation"] = "0"
         action["sitter"] = "0"
@@ -255,12 +235,12 @@ def get_attack_size(units):
     bh = get_bh_all(units)
     if not bh:
         return ""
-    if bh <= 1000:
+    if bh < 1000:
         return "_small"
-    elif bh > 1000 and bh <= 5000:
+    elif bh >= 1000 and bh <= 5000:
         return "_medium"
     else:
-        return "_big"
+        return "_large"
 
 
 def check_LZ(LZ):

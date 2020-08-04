@@ -7,6 +7,7 @@ import math
 from datetime import datetime
 import requests
 import hashlib
+import logging
 from version_parser import Version
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"
@@ -51,10 +52,8 @@ stat_URL = "http://ds-kalation.de/stat_receive_Timer_0.6.2.php"
 def get_root_folder():
     return os.path.join(os.path.expanduser("~"), ".dstimer")
 
-
 def get_username(domain):
     directory = os.path.join(common.get_root_folder(), "keks", domain)
-
 
 def create_folder_structure():
     """Create all folders needed by DS_Timer
@@ -91,10 +90,12 @@ def read_options():
     file = os.path.join(get_root_folder(), "options.txt")
     try:
         if not os.path.exists(file):
+            logger.info("creating options.txt")
             write_options()
         with open(file) as fd:
             options = json.load(fd)
         if Version(__version__) > Version(options["version"]):
+            logger.info("found an update install it!")
             write_options()
             return __stdOptions__
         return options
