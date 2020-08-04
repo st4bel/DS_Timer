@@ -8,6 +8,7 @@ import xml.etree.ElementTree as ET
 
 logger = logging.getLogger("dstimer")
 
+
 def get_server_files(domain):
     directory = os.path.join(common.get_root_folder(), "world_data", domain)
     os.makedirs(directory, exist_ok=True)
@@ -18,6 +19,7 @@ def get_server_files(domain):
         filename = os.path.join(directory, name + ".txt")
         open(filename, "wb").write(file.content)
 
+
 def get_world_config(domain):
     directory = os.path.join(common.get_root_folder(), "world_data", domain)
     os.makedirs(directory, exist_ok=True)
@@ -26,11 +28,13 @@ def get_world_config(domain):
     filename = os.path.join(directory, "world_config.txt")
     open(filename, "wb").write(file.content)
 
+
 def refresh_world_data():
     keks_path = os.path.join(common.get_root_folder(), "keks")
     for domain in os.listdir(keks_path):
         get_server_files(domain)
         get_world_config(domain)
+
 
 def get_unit_speed(domain):
     file = os.path.join(common.get_root_folder(), "world_data", domain, "world_config.txt")
@@ -145,9 +149,11 @@ def get_village_id_from_coords(domain, x, y):
             return dataset[0]
     return None
 
+
 def get_village_data(domain):
     file = os.path.join(common.get_root_folder(), "world_data", domain, "village.txt")
     return readfile_norm(file)
+
 
 def get_village_name_from_id(domain, id):
     file = os.path.join(common.get_root_folder(), "world_data", domain, "village.txt")
