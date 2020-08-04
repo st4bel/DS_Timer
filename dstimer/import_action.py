@@ -176,7 +176,7 @@ def import_wb_action(text, name):
             action["units"] = get_troups_from_template(columns[1].split("(")[1].split(")")[0])
         else:
             action["units"] = get_troups_from_template(columns[1])
-        logger.info(action["units"])
+
         action["player"]=name
         action["player_id"] = world_data.get_player_id(action["domain"],action["player"])
         action["force"] = False
