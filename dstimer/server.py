@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, flash, url_for, send_from_directory
 from flask.json import jsonify
+from flask_socketio import SocketIO
 import os
 import json
 import dateutil.parser
@@ -19,6 +20,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 app.secret_key = 'ds_timer'
 CORS(app)
+socketio = SocketIO(app)
 
 logger = logging.getLogger("dstimer")
 
@@ -171,6 +173,11 @@ def import_action_post():
         flash("{}: {}".format(type(e).__name__, e))
         return redirect(url_for("import_action_get", text=text))
 
+@app.route("/autoimport", methods=["POST"])
+def autoimport_action_post():
+    req_data = request.get_json()
+    import_action.import_from_tampermonkey(action=req_data)
+    return req_data
 
 @app.route("/wb")
 def wb_get():

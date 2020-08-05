@@ -163,6 +163,16 @@ def import_from_text(text, rand_mill=False):
             json.dump(action, fd, indent=4)
 
 
+def import_from_tampermonkey(action):
+    autocomplete(action)
+    filename = dateutil.parser.parse(
+        action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + random_id(6) + ".txt"
+
+    directory = os.path.join(common.get_root_folder(), "schedule")
+    file = os.path.join(directory, filename)
+    with open(file, "w") as fd:
+        json.dump(action, fd, indent=4)
+
 def import_wb_action(text, name):
     #splitting text for [*]
     s = text.split("[/**]")
