@@ -10,3 +10,4 @@ version_parser==1.0.0
 werkzeug==1.0.1
 flask_cors==3.0.8
 tcp-latency==0.0.8
+pyopenssl==19.1.0
