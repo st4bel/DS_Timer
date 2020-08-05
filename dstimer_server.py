@@ -49,5 +49,5 @@ if __name__ == "__main__":
         webbrowser.open("http://127.0.0.1:" + str(args.port), new=2)
 
     send_action.DaemonThread().start()
-    Process(target=https_app, kwargs=dict(host=args.host, port=args.port+443), daemon=True).start()
+    #Process(target=https_app, kwargs=dict(host=args.host, port=args.port+443), daemon=True).start()
     server.app.run(host=args.host, port=args.port)
