@@ -14,6 +14,7 @@ import os
 import json
 import socket
 import logging
+import re
 from dstimer.intelli_unit import intelli_all, intelli_train
 import dstimer.import_action
 import dstimer.common as common
@@ -40,13 +41,15 @@ def get_place_screen(session, domain, village_id, vacation):
     response = session.get("https://" + domain + "/game.php", params=params, headers=headers)
     check_reponse(response)
     soup = BeautifulSoup(response.content, 'html.parser')
-    form = soup.select("form#command-data-form")[0]
+    form = soup.find(id="command-data-form")
     units = dict()
-    for input in form.select("input[id^=unit_input_]"):
-        units[input["name"]] = int(input.find_next_sibling("a").get_text()[1:-1])
     data = dict()
-    for input in form.select("input"):
-        data[input["name"]] = input["value"]
+    for input in form.findAll("input", {"id" : re.compile('unit_input_*')}):
+        units[input["name"]] = int(input["data-all-count"])
+
+    for input in form.findAll("input"):
+        data[input["name"]] = input["value"]    
+    
     return (units, data, response.url)
 
 
@@ -75,10 +78,11 @@ def get_confirm_screen(session, domain, form, units, target_x, target_y, type, v
     if error is not None:
         raise ValueError(error)
 
-    form = soup.select("form#command-data-form")[0]
+    form = soup.find(id="command-data-form")
     action = form["action"]
     data = dict()
-    for input in form.select("input"):
+
+    for input in form.findAll("input"):
         if "name" in input.attrs and "value" in input.attrs:
             data[input["name"]] = input["value"]
     try:
@@ -343,4 +347,4 @@ class DaemonThread(threading.Thread):
                 check_sid_counter = random.randint(30, 90)    # every 30 to 90 minutes
             else:
                 check_sid_counter -= 1
-            time.sleep(5)
+            time.sleep(1)

@@ -171,6 +171,11 @@ def import_action_post():
         flash("{}: {}".format(type(e).__name__, e))
         return redirect(url_for("import_action_get", text=text))
 
+@app.route("/autoimport", methods=["POST"])
+def autoimport_action_post():
+    req_data = request.get_json()
+    import_action.import_from_tampermonkey(action=req_data)
+    return req_data
 
 @app.route("/wb")
 def wb_get():
