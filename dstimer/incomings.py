@@ -26,6 +26,10 @@ def load_incomings(domain, player, player_id):
         check_reponse(response)
 
         soup = BeautifulSoup(response.content, "html.parser")
+        if not soup.select("table#incomings_table"):
+            logger.info("no incomings")
+            return dict()
+                    
         table = soup.select("table#incomings_table")[0]
 
         incomings = dict()
