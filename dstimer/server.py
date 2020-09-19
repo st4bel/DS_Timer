@@ -12,6 +12,7 @@ from dstimer import delete_action
 from dstimer import world_data
 from dstimer import common
 import dstimer.common as common
+import dstimer.incomings as incomings
 from dstimer.import_keks import check_and_save_sids
 from operator import itemgetter, attrgetter
 import logging
@@ -480,3 +481,8 @@ def options_post():
     common.write_options(options)
     app.jinja_env.globals.update(options=options)
     return redirect("/options")
+
+@app.route("/incomings/<domain>/<player_id>", methods=["GET"])
+def incomings_get(domain, player_id):
+    incs = incomings.load_incomings(domain, world_data.get_player_name(domain, player_id), player_id)
+    return render_template("incomings.html", incs = dict())

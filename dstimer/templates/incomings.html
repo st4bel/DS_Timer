@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% block title %}Incomings{% endblock %}
+{% block content %}
+<table class="table">
+    <tr><!-- 7 spalten -->
+        <th>Angriffs-ID</th>
+        <th>Name</th>
+        <th>Herkunft</th>
+        <th>Spieler</th>
+        <th>Ziel</th>
+        <th>Ankunft</th>
+        <th>Typ</th>
+    </tr>
+    {% for inc in incs %}
+    <tr>
+        <td class="col-md-3">{{ inc.id }}</td>
+        <td class="col-md-3">{{ inc.name }}</td>
+        <td class="col-md-3">{{ inc.origin }}</td>
+        <td class="col-md-3">{{ inc.origin_player }}</td>
+        <td class="col-md-3">{{ inc.targte }}</td>
+        <td class="col-md-3">{{ inc.arrival_time }}</td>
+        <td class="col-md-3">{{ inc.type }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
