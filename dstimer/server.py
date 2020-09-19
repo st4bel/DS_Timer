@@ -485,4 +485,4 @@ def options_post():
 @app.route("/incomings/<domain>/<player_id>", methods=["GET"])
 def incomings_get(domain, player_id):
     incs = incomings.load_incomings(domain, world_data.get_player_name(domain, player_id), player_id)
-    return render_template("incomings.html", incs = dict())
+    return render_template("incomings.html", incs = incs)

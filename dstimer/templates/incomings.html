@@ -2,24 +2,24 @@
 {% block title %}Incomings{% endblock %}
 {% block content %}
 <table class="table">
-    <tr><!-- 7 spalten -->
+    <tr>
         <th>Angriffs-ID</th>
         <th>Name</th>
+        <th>Ziel</th>
         <th>Herkunft</th>
         <th>Spieler</th>
-        <th>Ziel</th>
+        <th>Entfernung</th>
         <th>Ankunft</th>
-        <th>Typ</th>
     </tr>
-    {% for inc in incs %}
+    {% for inc_id in incs %}
     <tr>
-        <td class="col-md-3">{{ inc.id }}</td>
-        <td class="col-md-3">{{ inc.name }}</td>
-        <td class="col-md-3">{{ inc.origin }}</td>
-        <td class="col-md-3">{{ inc.origin_player }}</td>
-        <td class="col-md-3">{{ inc.targte }}</td>
-        <td class="col-md-3">{{ inc.arrival_time }}</td>
-        <td class="col-md-3">{{ inc.type }}</td>
+        <td class="col-md-1">{{ incs[inc_id].id }}</td>
+        <td class="col-md-1">{{ incs[inc_id].name }}</td>
+        <td class="col-md-2">{{ incs[inc_id].target_village_name }}</td>
+        <td class="col-md-2">{{ incs[inc_id].source_village_name }}</td>
+        <td class="col-md-2">{{ incs[inc_id].source_player_name }}</td>
+        <td class="col-md-1">{{ incs[inc_id].distance }}</td>
+        <td class="col-md-3">{{ incs[inc_id].arrival_string }}</td>
     </tr>
     {% endfor %}
 </table>

@@ -34,6 +34,9 @@ def load_incomings(domain, player, player_id):
             logger.info("inc_id: "+id)
 
             inc = dict()
+            inc["id"] = id
+            inc["name"] = row.select("td")[0].select("a")[0].text
+            
             inc["target_village_id"] = int(row.select("td")[1].select("a")[0]["href"].split("village=")[1].split("&")[0])
             inc["target_village_name"] = row.select("td")[1].select("a")[0].text
             #logger.info(inc["target_village_name"])
@@ -42,11 +45,8 @@ def load_incomings(domain, player, player_id):
             inc["source_player_id"] = int(row.select("td")[3].select("a")[0]["href"].split("id=")[1])
             inc["source_player_name"] = row.select("td")[3].select("a")[0].text
 
-            inc["name"] = row.select("td")[0].select("a")[0].text
-
-            arrival_string = row.select("td")[5].text
-
-            logger.info(arrival_string)
+            inc["distance"] = row.select("td")[4].text
+            inc["arrival_string"] = row.select("td")[5].text # todo: parse
 
             incomings[id] = inc
 
