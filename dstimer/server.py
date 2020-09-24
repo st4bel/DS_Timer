@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, flash, url_for, send_from_directory
 from flask.json import jsonify
+from flask_sqlalchemy import SQLAlchemy
 import os
 import json
 import dateutil.parser
@@ -20,6 +21,12 @@ from flask_cors import CORS
 app = Flask(__name__)
 app.secret_key = 'ds_timer'
 CORS(app)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite:///' + os.path.join(common.get_root_folder(), 'app.db')
+db = SQLAlchemy(app)
+from dstimer.models import *
+
+db.create_all()
 
 logger = logging.getLogger("dstimer")
 

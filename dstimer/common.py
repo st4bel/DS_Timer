@@ -9,6 +9,7 @@ import requests
 import hashlib
 import logging
 from version_parser import Version
+import datetime
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"
 
@@ -132,3 +133,41 @@ def create_stats(player_id, domain):
 def send_stats(stats):
     response = requests.get(url=stat_URL, params=stats)
     return response
+
+def parse_timestring(date_string):
+    # heute um 22:43:54:442, etc zu datetime
+    now = datetime.datetime.now()
+    date_string = date_string.split(" um ")
+    date = datetime.datetime.today()
+    if "morgen" in date_string[0]: # heute: do nothing, morgen: add one, specific date, set
+        date = date + datetime.timedelta(days=1)
+    elif "heute" not in date_string[0]:
+        date = date.replace(month=int(date_string[0].split("am ")[1].split(".")[1]), day=int(date_string[0].split("am ")[1].split(".")[0]))
+        if now.month > date.month: # falls im nächsten jahr
+            date = date.replace(year=date.year + 1)
+
+    time = date_string[1].split(":")
+
+    date = date.replace(hour = int(time[0]), minute = int(time[1]), second = int(time[2]))
+
+    if len(time) > 3: #milliseconds 
+        date = date.replace(microsecond=int(time[3])*1000)
+    else:
+        date = date.replace(microsecond=0)
+    
+    return date
+
+def unparse_timestring(date):
+    # datetime zu heute um 22:43:54:442, etc
+    now = datetime.datetime.now()
+    day_string = ""
+    if now.date() == date.date():
+        day_string = "heute"
+    elif now.date() + datetime.timedelta(days=1) == date.date():
+        day_string = "morgen"
+    else:
+        day_string = "am " + str(date.day) + "." + str(date.month) + "."
+
+    time_string = str(date.hour) + ":" + str(date.minute) + ":" + str(date.second) + ":" + str(int(date.microsecond / 1000)).zfill(3) # leading zeros 
+
+    return day_string + " um " + time_string
