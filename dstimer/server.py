@@ -489,6 +489,19 @@ def options_post():
     app.jinja_env.globals.update(options=options)
     return redirect("/options")
 
+@app.route("/keks_overview", methods = ["GET"])
+def keks_overview():
+    saved_kekse = []
+    for root, subdirs, files in os.walk(os.path.join(common.get_root_folder(), "keks")):
+        if len(subdirs) > 0: 
+            continue #skipping listing of subdirs of keksfolder
+        for file in files:
+            saved_kekse.append(dict(domain = root.split("\\")[-1], player_id = file.split("_")[0], player_name = common.filename_unescape(file.split("_")[1])))
+    return render_template("keks_overview.html", saved_kekse = saved_kekse)        
+
+
+
+
 @app.route("/incomings/<domain>/<player_id>", methods=["GET"])
 def incomings_get(domain, player_id):
     incs = incomings.load_incomings(domain, world_data.get_player_name(domain, player_id), player_id)

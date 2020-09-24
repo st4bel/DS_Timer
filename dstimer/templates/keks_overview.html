@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block title %}Incomings{% endblock %}
+{% block content %}
+<table class="table">
+    <tr>
+        <th>domain</th>
+        <th>Name</th>
+        <th>id</th>
+        <th>link</th>
+    </tr>
+    {% for keks in saved_kekse %}
+    <tr>
+        <td class="col-md-1">{{ keks["domain"] }}</td>
+        <td class="col-md-2">{{ keks["player_name"] }}</td>
+        <td class="col-md-1">{{ keks["player_id"]}}</td>
+        <td class="col-md-1"><a href="/incomings/{{ keks['domain'] }}/{{ keks['player_id'] }}">incomings</a></td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

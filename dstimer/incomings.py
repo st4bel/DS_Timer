@@ -3,6 +3,7 @@ import dstimer.common as common
 import requests
 from bs4 import BeautifulSoup
 import logging
+from dstimer import common
 
 logger = logging.getLogger("dstimer")
 
@@ -50,12 +51,13 @@ def load_incomings(domain, player, player_id):
             inc["source_player_name"] = row.select("td")[3].select("a")[0].text
 
             inc["distance"] = row.select("td")[4].text
-            inc["arrival_string"] = row.select("td")[5].text # todo: parse
+            inc["arrival_time"] = common.parse_timestring(row.select("td")[5].text)
 
             incomings[id] = inc
 
 
-    return incomings
+        return incomings
+    return dict()
             
 
 

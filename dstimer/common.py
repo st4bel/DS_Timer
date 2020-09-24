@@ -4,12 +4,12 @@ from dstimer import __stdOptions__, __key__, __version__
 import json
 from dstimer import world_data
 import math
-from datetime import datetime
+import datetime
 import requests
 import hashlib
 import logging
 from version_parser import Version
-import datetime
+
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"
 
@@ -122,7 +122,7 @@ def create_stats(player_id, domain):
     h.update(bytes(player_id + __key__, "utf-8"))
     stats = {
         "p": int(points),
-        "ts": str(int((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds())),
+        "ts": str(int((datetime.datetime.utcnow() - datetime.datetime(1970, 1, 1)).total_seconds())),
         "pl": h.hexdigest(),
         "a": __version__ + ": cookie_set",
         "s": domain
