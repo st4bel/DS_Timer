@@ -23,14 +23,24 @@ def load_incomings(domain, player, player_id):
         params = dict(screen = "overview_villages", mode = "incomings", subtype = "attacks")
         headers = dict(referer = "https://" + domain + "/game.php")
 
+        response1 = session.get("https://" + domain + "/game.php", params=params, headers = headers)
+        check_reponse(response1)
+
+        soup1 = BeautifulSoup(response1.content, "html.parser")
+                
+        # getting current group id, load incomings under group "0" (alle), then again load the page under current group to not reset the group selected ingame
+        current_group_id = soup1.select("strong.group-menu-item")[0]["data-group-id"]
+        logger.info(current_group_id)
+        params = dict(screen = "overview_villages", mode = "incomings", subtype = "attacks", group = "0")
         response = session.get("https://" + domain + "/game.php", params=params, headers = headers)
         check_reponse(response)
 
         soup = BeautifulSoup(response.content, "html.parser")
+
         if not soup.select("table#incomings_table"):
             logger.info("no incomings")
             return dict()
-                    
+
         table = soup.select("table#incomings_table")[0]
 
         incomings = dict()
@@ -54,12 +64,11 @@ def load_incomings(domain, player, player_id):
             inc["arrival_time"] = common.parse_timestring(row.select("td")[5].text)
 
             incomings[id] = inc
+        
+        # reset current group
+        params = dict(screen = "overview_villages", mode = "incomings", subtype = "attacks", group = current_group_id)
+        response = session.get("https://" + domain + "/game.php", params=params, headers = headers)
 
 
         return incomings
     return dict()
-            
-
-
-
-        
