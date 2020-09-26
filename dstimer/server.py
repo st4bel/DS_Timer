@@ -17,17 +17,8 @@ import dstimer.incomings as incomings
 from dstimer.import_keks import check_and_save_sids
 from operator import itemgetter, attrgetter
 import logging
-from flask_cors import CORS
-app = Flask(__name__)
-app.secret_key = 'ds_timer'
-CORS(app)
-
-app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite:///' + os.path.join(common.get_root_folder(), 'app.db')
-db = SQLAlchemy(app)
-from dstimer.models import *
-
-db.create_all()
-
+from dstimer.models import Incomings
+from dstimer import app, db
 logger = logging.getLogger("dstimer")
 
 

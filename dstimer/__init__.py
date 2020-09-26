@@ -19,3 +19,27 @@ try:
     __needUpdate__ = Version(__version__) < Version(json_release["name"])
 except:    # if latest Version or current Version cant be parsed
     __needUpdate__ = False
+
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
+import os
+
+app = Flask(__name__)
+app.secret_key = 'ds_timer'
+CORS(app)
+app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite:///' + os.path.join(os.path.join(os.path.expanduser("~"), ".dstimer"), 'app.db')
+db = SQLAlchemy(app)
+db.create_all()
+
+import argparse
+
+parser = argparse.ArgumentParser(description="Attack Helper for Die Staemme")
+parser.add_argument("--host", help="Bind the server on this address", default="127.0.0.1")
+parser.add_argument("--port", help="Bind the server on this port", default=5000)
+parser.add_argument("--allow-root", help="Allow to start server with root or sudo", action="store_true")
+parser.add_argument("--open-browser", help="Open browser tab with dashboard after startup", action="store_true")
+args = parser.parse_args()
+from dstimer import server, models
+app.run(host=args.host, port=args.port)
+

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-from dstimer import server, send_action, common, world_data
+#from dstimer import server
+from dstimer import send_action, common, world_data, db
 import logging
 from logging import handlers
 import os, sys
@@ -10,18 +11,18 @@ import webbrowser
 #from version_parser import Version
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Attack Helper for Die Staemme")
-    parser.add_argument("--host", help="Bind the server on this address", default="127.0.0.1")
-    parser.add_argument("--port", help="Bind the server on this port", default=5000)
-    parser.add_argument("--allow-root", help="Allow to start server with root or sudo",
-                        action="store_true")
-    parser.add_argument("--open-browser", help="Open browser tab with dashboard after startup",
-                        action="store_true")
-    args = parser.parse_args()
+    #parser = argparse.ArgumentParser(description="Attack Helper for Die Staemme")
+    #parser.add_argument("--host", help="Bind the server on this address", default="127.0.0.1")
+    #parser.add_argument("--port", help="Bind the server on this port", default=5000)
+    #parser.add_argument("--allow-root", help="Allow to start server with root or sudo",
+    #                    action="store_true")
+    #parser.add_argument("--open-browser", help="Open browser tab with dashboard after startup",
+    #                    action="store_true")
+    #args = parser.parse_args()
 
-    if "getuid" in dir(os) and os.getuid() == 0 and not args.allow_root:
-        print("Starting DS_Timer as root or with sudo is disabled. Use --allow-root")
-        sys.exit(1)
+    #if "getuid" in dir(os) and os.getuid() == 0 and not args.allow_root:
+    #    print("Starting DS_Timer as root or with sudo is disabled. Use --allow-root")
+    #    sys.exit(1)
 
     common.create_folder_structure()
 
@@ -40,8 +41,7 @@ if __name__ == "__main__":
 
     world_data.refresh_world_data()
 
-    if args.open_browser:
-        webbrowser.open("http://127.0.0.1:" + str(args.port), new=2)
+    #if args.open_browser:
+    #    webbrowser.open("http://127.0.0.1:" + str(args.port), new=2)
 
-    send_action.DaemonThread().start()
-    server.app.run(host=args.host, port=args.port)
+    send_action.DaemonThread().start()   

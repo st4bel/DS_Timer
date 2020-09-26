@@ -1,4 +1,4 @@
-from dstimer.server import db
+from dstimer import db
 
 class Incomings(db.Model):
     id = db.Column(db.Integer, primary_key=True)
