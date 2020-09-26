@@ -4,6 +4,8 @@ import requests
 from bs4 import BeautifulSoup
 import logging
 from dstimer import common
+from dstimer.models import Incomings, db
+#from dstimer.server import db
 
 logger = logging.getLogger("dstimer")
 
@@ -61,6 +63,7 @@ def load_incomings(domain, player, player_id):
             inc["source_player_name"] = row.select("td")[3].select("a")[0].text
 
             inc["distance"] = row.select("td")[4].text
+            inc["arrival_string"] = row.select("td")[5].text
             inc["arrival_time"] = common.parse_timestring(row.select("td")[5].text)
 
             incomings[id] = inc
@@ -72,3 +75,22 @@ def load_incomings(domain, player, player_id):
 
         return incomings
     return dict()
+
+#def save_current_incs(incs):
+#    # saves incs (dict) into database, checks if already saved
+#    for inc_id in incs:
+#        inc = incs[inc_id]
+#        a = Incomings(
+#            id = int(inc["id"]),
+#            name = inc["name"],
+#            target_village_id = int(inc["target_village_id"]),
+#            target_village_name = inc["target_village_name"],
+#            source_village_id = int(inc["source_village_id"]),
+#            source_village_name = inc["source_village_name"],
+#            source_player_id = int(inc["source_player_id"]),
+#            source_player_name = inc["source_player_name"],
+#            distance = float(inc["distance"]),
+#            arrival_time = inc["arrival_time"]
+#        )
+#        db.session.add(a)
+#    db.session.commit()
