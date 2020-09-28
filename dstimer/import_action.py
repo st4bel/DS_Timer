@@ -173,7 +173,7 @@ def import_from_tampermonkey(action):
     with open(file, "w") as fd:
         json.dump(action, fd, indent=4)
 
-def import_wb_action(text, name):
+def import_wb_action(text, name, catapult_target = "default"):
     #splitting text for [*]
     s = text.split("[/**]")
     actions_text = s[1].split("[/*]")
@@ -216,6 +216,7 @@ def import_wb_action(text, name):
         action["force"] = False
         action["vacation"] = "0"
         action["sitter"] = "0"
+        action["building"] = catapult_target
         if "arrival_time" in action:
             del action["arrival_time"]    # no arrival time in workbench export
         autocomplete(action)

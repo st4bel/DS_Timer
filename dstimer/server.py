@@ -179,7 +179,7 @@ def autoimport_action_post():
 
 @app.route("/wb")
 def wb_get():
-    return render_template("workbench_import.html")
+    return render_template("workbench_import.html", buildings=get_buildingnames())
 
 
 @app.route("/wb", methods=["POST"])
@@ -198,7 +198,7 @@ def wb_post():
             import_template.import_from_workbench(text)
             return redirect("/templates")
         elif request.form["type"] == "wb_action":
-            import_action.import_wb_action(text, playername)
+            import_action.import_wb_action(text, playername, request.form.get("catapult_target"))
         return redirect("/schedule", code=302)
     except Exception as e:
         flash(str(e))
