@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 import logging
 from dstimer import common
-from dstimer.models import Incomings, db
+#from dstimer.models import Incomings, db
 #from dstimer.server import db
 
 logger = logging.getLogger("dstimer")
