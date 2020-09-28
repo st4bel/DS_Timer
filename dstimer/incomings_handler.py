@@ -4,8 +4,9 @@ import requests
 from bs4 import BeautifulSoup
 import logging
 from dstimer import common
-#from dstimer.models import Incomings, db
-#from dstimer.server import db
+from dstimer.models import Incomings
+from dstimer import db
+from sqlalchemy.exc import IntegrityError
 
 logger = logging.getLogger("dstimer")
 
@@ -52,18 +53,18 @@ def load_incomings(domain, player, player_id):
 
             inc = dict()
             inc["id"] = id
-            inc["name"] = row.select("td")[0].select("a")[0].text
+            inc["name"] = row.select("td")[0].select("a")[0].text.strip()
             
             inc["target_village_id"] = int(row.select("td")[1].select("a")[0]["href"].split("village=")[1].split("&")[0])
-            inc["target_village_name"] = row.select("td")[1].select("a")[0].text
+            inc["target_village_name"] = row.select("td")[1].select("a")[0].text.strip()
             #logger.info(inc["target_village_name"])
             inc["source_village_id"] = int(row.select("td")[2].select("a")[0]["href"].split("id=")[1])
-            inc["source_village_name"] = row.select("td")[2].select("a")[0].text
+            inc["source_village_name"] = row.select("td")[2].select("a")[0].text.strip()
             inc["source_player_id"] = int(row.select("td")[3].select("a")[0]["href"].split("id=")[1])
-            inc["source_player_name"] = row.select("td")[3].select("a")[0].text
+            inc["source_player_name"] = row.select("td")[3].select("a")[0].text.strip()
 
-            inc["distance"] = row.select("td")[4].text
-            inc["arrival_string"] = row.select("td")[5].text
+            inc["distance"] = row.select("td")[4].text.strip()
+            inc["arrival_string"] = row.select("td")[5].text.strip()
             inc["arrival_time"] = common.parse_timestring(row.select("td")[5].text)
 
             incomings[id] = inc
@@ -76,21 +77,24 @@ def load_incomings(domain, player, player_id):
         return incomings
     return dict()
 
-#def save_current_incs(incs):
-#    # saves incs (dict) into database, checks if already saved
-#    for inc_id in incs:
-#        inc = incs[inc_id]
-#        a = Incomings(
-#            id = int(inc["id"]),
-#            name = inc["name"],
-#            target_village_id = int(inc["target_village_id"]),
-#            target_village_name = inc["target_village_name"],
-#            source_village_id = int(inc["source_village_id"]),
-#            source_village_name = inc["source_village_name"],
-#            source_player_id = int(inc["source_player_id"]),
-#            source_player_name = inc["source_player_name"],
-#            distance = float(inc["distance"]),
-#            arrival_time = inc["arrival_time"]
-#        )
-#        db.session.add(a)
-#    db.session.commit()
+def save_current_incs(incs):
+    # saves incs (dict) into database, checks if already saved
+    for inc_id in incs:
+        inc = incs[inc_id]
+        a = Incomings(
+            inc_id = int(inc["id"]),
+            name = inc["name"],
+            target_village_id = int(inc["target_village_id"]),
+            target_village_name = inc["target_village_name"],
+            source_village_id = int(inc["source_village_id"]),
+            source_village_name = inc["source_village_name"],
+            source_player_id = int(inc["source_player_id"]),
+            source_player_name = inc["source_player_name"],
+            distance = float(inc["distance"]),
+            arrival_time = inc["arrival_time"]
+        )
+        db.session.add(a)
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()

@@ -35,7 +35,9 @@ app.secret_key = 'ds_timer'
 CORS(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite:///' + os.path.join(os.path.join(os.path.expanduser("~"), ".dstimer"), 'app.db')
 db = SQLAlchemy(app)
-db.create_all()
+#db.create_all()
+import dstimer.models as models
+models.init_db()
 
 import argparse
 
@@ -64,5 +66,5 @@ logger.addHandler(handler)
 world_data.refresh_world_data()
 
 send_action.DaemonThread().start()
-app.run(host=args.host, port=args.port)
+
 

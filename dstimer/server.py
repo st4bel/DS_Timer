@@ -13,7 +13,7 @@ from dstimer import delete_action
 from dstimer import world_data
 from dstimer import common
 import dstimer.common as common
-import dstimer.incomings as incomings
+import dstimer.incomings_handler as incomings_handler
 from dstimer.import_keks import check_and_save_sids
 from operator import itemgetter, attrgetter
 import logging
@@ -495,5 +495,6 @@ def keks_overview():
 
 @app.route("/incomings/<domain>/<player_id>", methods=["GET"])
 def incomings_get(domain, player_id):
-    incs = incomings.load_incomings(domain, world_data.get_player_name(domain, player_id), player_id)
+    incs = incomings_handler.load_incomings(domain, world_data.get_player_name(domain, player_id), player_id)
+    incomings_handler.save_current_incs(incs)
     return render_template("incomings.html", incs = incs)
