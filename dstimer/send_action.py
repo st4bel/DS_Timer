@@ -44,12 +44,12 @@ def get_place_screen(session, domain, village_id, vacation):
     form = soup.find(id="command-data-form")
     units = dict()
     data = dict()
-    for input in form.findAll("input", {"id" : re.compile('unit_input_*')}):
+    for input in form.findAll("input", {"id": re.compile('unit_input_*')}):
         units[input["name"]] = int(input["data-all-count"])
 
     for input in form.findAll("input"):
-        data[input["name"]] = input["value"]    
-    
+        data[input["name"]] = input["value"]
+
     return (units, data, response.url)
 
 

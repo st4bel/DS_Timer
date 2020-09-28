@@ -9,8 +9,10 @@ import webbrowser
 #import requests
 #from version_parser import Version
 
+
 def https_app(**kwargs):
     server.app.run(ssl_context='adhoc', **kwargs)
+
 
 if __name__ == "__main__":
     from multiprocessing import Process

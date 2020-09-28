@@ -173,7 +173,8 @@ def import_from_tampermonkey(action):
     with open(file, "w") as fd:
         json.dump(action, fd, indent=4)
 
-def import_wb_action(text, name, catapult_target = "default"):
+
+def import_wb_action(text, name, catapult_target="default"):
     #splitting text for [*]
     s = text.split("[/**]")
     actions_text = s[1].split("[/*]")
@@ -211,8 +212,8 @@ def import_wb_action(text, name, catapult_target = "default"):
         else:
             action["units"] = get_troups_from_template(columns[1])
 
-        action["player"]=name
-        action["player_id"] = world_data.get_player_id(action["domain"],action["player"])
+        action["player"] = name
+        action["player_id"] = world_data.get_player_id(action["domain"], action["player"])
         action["force"] = False
         action["vacation"] = "0"
         action["sitter"] = "0"
