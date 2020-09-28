@@ -24,7 +24,7 @@
   <div class="">
     Hier kannst du dein standard Kataziel einstellen.
   </div><br>
-  <form>
+
     <select name="kata-target-menu">
       <option value="default"{% if options['kata-target']=='default' %} selected="selected"{% endif %}>Stämme Ziel</option>
       <option value="main"{% if options['kata-target']=='main' %} selected="selected"{% endif %}>Hauptgebäude</option>
@@ -43,7 +43,7 @@
       <option value="wall"{% if options['kata-target']=='wall' %} selected="selected"{% endif %}>Wall</option>
     </select>
     <button type="submit" name="type" value="kata-target" class="btn btn-default">Speichern</button><br>
-  </form>
+
   <br>
   <h3>Ordnerstruktur zurücksetzen</h3>
   <div class="">
