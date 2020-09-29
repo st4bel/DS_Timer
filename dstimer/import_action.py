@@ -9,9 +9,9 @@ import logging
 from datetime import timedelta, datetime
 import dateutil.parser
 import random, string
-from dstimer import common, world_data
+from dstimer import common, world_data, db
 from dstimer.intelli_unit import get_bh_all
-#import numpy as np
+from dstimer.models import Attacks
 
 logger = logging.getLogger("dstimer")
 
@@ -161,6 +161,9 @@ def import_from_text(text, rand_mill=False):
         file = os.path.join(directory, filename)
         with open(file, "w") as fd:
             json.dump(action, fd, indent=4)
+        add_attack_to_db(action)
+
+
 
 
 def import_wb_action(text, name):
@@ -284,3 +287,26 @@ def check_LZ(LZ):
     except:
         return {}
     return LZ
+
+
+def add_attack_to_db(action):
+    #autocomplete(action)
+    a = Attacks(
+        departure_time = dateutil.parser.parse(action["departure_time"]),
+        arrival_time = dateutil.parser.parse(action["arrival_time"]),
+        source_id = action["source_id"],
+        source_coord_x = action["source_coord"]["x"],
+        source_coord_y = action["source_coord"]["y"],
+        target_id = action["target_id"],
+        target_coord_x = action["target_coord"]["x"],
+        target_coord_y = action["target_coord"]["y"],
+        player_id = int(action["player_id"]),
+        player_name = action["player"],
+        building = action["building"],
+        save_default_attack_building = action["save_default_attack_building"],
+        units = json.dumps(action["units"]),
+        force = False
+    )
+    if not a.is_expired():
+        db.session.add(a)
+        db.session.commit()

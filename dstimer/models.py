@@ -1,5 +1,7 @@
 from dstimer import db
 from datetime import datetime
+import dateutil.parser
+import json
 
 class Incomings(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -24,7 +26,7 @@ class Attacks(db.Model):
     source_coord_y = db.Column(db.Integer)
     target_id = db.Column(db.Integer)
     target_coord_x = db.Column(db.Integer)
-    target_coord_x = db.Column(db.Integer)
+    target_coord_y = db.Column(db.Integer)
     departure_time = db.Column(db.DateTime)
     arrival_time = db.Column(db.DateTime)
     type = db.Column(db.String(64))
@@ -33,13 +35,14 @@ class Attacks(db.Model):
     sitter = db.Column(db.Integer)
     vacation = db.Column(db.Integer)
     player_id = db.Column(db.Integer)
-    buildings = db.Column(db.String(64))
-    save_default_attack_building = db.Column(db.Boolean)
+    player_name = db.Column(db.String(64))
+    building = db.Column(db.String(64))
+    save_default_attack_building = db.Column(db.Integer)
     units = db.Column(db.String(255))
 
     def __repr__(self):
         return "<Attack {}>".format(self.departure_time.strftime("%m/%d/%Y, %H:%M:%S"))
-    
+       
     def is_expired(self):
         return self.departure_time < datetime.now()
     
