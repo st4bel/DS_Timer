@@ -290,7 +290,7 @@ def check_LZ(LZ):
 
 
 def add_attack_to_db(action):
-    #autocomplete(action)
+    autocomplete(action)
     a = Attacks(
         departure_time = dateutil.parser.parse(action["departure_time"]),
         arrival_time = dateutil.parser.parse(action["arrival_time"]),
@@ -301,11 +301,13 @@ def add_attack_to_db(action):
         target_coord_x = action["target_coord"]["x"],
         target_coord_y = action["target_coord"]["y"],
         player_id = int(action["player_id"]),
-        player_name = action["player"],
+        player = action["player"],
         building = action["building"],
         save_default_attack_building = action["save_default_attack_building"],
-        units = json.dumps(action["units"]),
-        force = False
+        units = str(action["units"]),
+        force = False, 
+        domain = action["domain"], 
+        type = action["type"]
     )
     if not a.is_expired():
         db.session.add(a)

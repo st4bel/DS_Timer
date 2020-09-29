@@ -1,7 +1,7 @@
 from dstimer import db
 from datetime import datetime
 import dateutil.parser
-import json
+import ast
 
 class Incomings(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -35,7 +35,7 @@ class Attacks(db.Model):
     sitter = db.Column(db.Integer)
     vacation = db.Column(db.Integer)
     player_id = db.Column(db.Integer)
-    player_name = db.Column(db.String(64))
+    player = db.Column(db.String(64))
     building = db.Column(db.String(64))
     save_default_attack_building = db.Column(db.Integer)
     units = db.Column(db.String(255))
@@ -47,7 +47,24 @@ class Attacks(db.Model):
         return self.departure_time < datetime.now()
     
     def is_valid(self):
-        return self.source_id is not None and self.target_id is not None and not self.is_expired() and self.player_id is not None and self.unit is not None
+        return self.source_id is not None and self.target_id is not None and not self.is_expired() and self.player_id is not None and self.unit is not None and self.domain is not None and self.type is not None
+    
+    def get_units(self):
+        return ast.literal_eval(self.units)
+    
+    def load_action(self):
+        action = dict(self.__dict__)
+        action["source_coord"] = dict()
+        action["target_coord"] = dict()
+        action["source_coord"]["x"] = self.source_coord_x
+        action["source_coord"]["y"] = self.source_coord_y
+        action["target_coord"]["x"] = self.target_coord_x
+        action["target_coord"]["y"] = self.target_coord_y
+        action["units"] = self.get_units()
+        return action
+
+
+
 
 def init_db():
     db.create_all()

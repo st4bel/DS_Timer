@@ -17,7 +17,7 @@ import dstimer.incomings_handler as incomings_handler
 from dstimer.import_keks import check_and_save_sids
 from operator import itemgetter, attrgetter
 import logging
-from dstimer.models import Incomings
+from dstimer.models import Incomings, Attacks
 from dstimer import app, db
 logger = logging.getLogger("dstimer")
 
@@ -60,7 +60,7 @@ def get_scheduled_actions(folder="schedule"):
             with open(os.path.join(schedule_path, file)) as fd:
                 action = json.load(fd)
                 if village_data is None:
-                    village_data = world_data.get_village_data(action["domain"])
+                    village_data = world_data.get_village_data(action["domain"]) # bug wenn angriffe von mehreren welten geplant
                 for dataset in village_data:
                     if action["source_id"] == int(dataset[0]):
                         action["source_village_name"] = world_data.unquote_name(dataset[1])
@@ -76,6 +76,26 @@ def get_scheduled_actions(folder="schedule"):
                 actions.append(action)
     return player, actions
 
+def get_scheduled_actions_db(): #platzhalter funktion um abfrage db zu testen
+    attacks = Attacks.query.all()
+    actions = []
+    player = []
+    if len(attacks) == 0: 
+        return player, actions
+    village_data = world_data.get_village_data(attacks[0].domain) #platzhalter siehe oben
+    for attack in attacks:
+        action = attack.load_action()
+        for dataset in village_data:
+            if action["source_id"] == int(dataset[0]):
+                action["source_village_name"] = world_data.unquote_name(dataset[1])
+            if action["target_id"] == int(dataset[0]):
+                action["target_village_name"] = world_data.unquote_name(dataset[1])
+        action["world"] = action["domain"].partition(".")[0]
+        action["size"] = import_action.get_attack_size(action["units"])
+        if action["player"] not in player:
+            player.append(action["player"])
+        actions.append(action)
+    return player, actions
 
 def get_unitnames():
     return common.unitnames
@@ -133,6 +153,10 @@ def schedule():
             actions.sort(key=lambda x: x[args]["x"], reverse=rev_bool)
     return render_template("schedule.html", actions=actions, player=player, rev=rev)
 
+@app.route("/schedule_db", methods=["GET"])
+def schedule_db():
+    player, actions = get_scheduled_actions_db()
+    return render_template("schedule.html", actions = actions, player=player, rev="false")
 
 @app.route("/schedule", methods=["POST"])
 def schedule_post():
