@@ -97,4 +97,4 @@ def save_current_incs(incs):
         try:
             db.session.commit()
         except IntegrityError:
-            db.session.rollback()
+            db.session.rollback() #  if inc already in db
