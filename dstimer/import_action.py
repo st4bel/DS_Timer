@@ -159,8 +159,8 @@ def import_from_text(text, rand_mill=False):
 
         directory = os.path.join(common.get_root_folder(), "schedule")
         file = os.path.join(directory, filename)
-        with open(file, "w") as fd:
-            json.dump(action, fd, indent=4)
+        #with open(file, "w") as fd:
+        #    json.dump(action, fd, indent=4)
         add_attack_to_db(action)
 
 
@@ -307,7 +307,8 @@ def add_attack_to_db(action):
         units = str(action["units"]),
         force = False, 
         domain = action["domain"], 
-        type = action["type"]
+        type = action["type"], 
+        status = "scheduled"
     )
     if not a.is_expired():
         db.session.add(a)

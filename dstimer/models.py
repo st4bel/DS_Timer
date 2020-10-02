@@ -39,9 +39,10 @@ class Attacks(db.Model):
     building = db.Column(db.String(64))
     save_default_attack_building = db.Column(db.Integer)
     units = db.Column(db.String(255))
+    status = db.Column(db.String(64)) # scheduled, pending, failed, finished, expired
 
     def __repr__(self):
-        return "<Attack {}>".format(self.departure_time.strftime("%m/%d/%Y, %H:%M:%S"))
+        return "<Attack departure: {}, status: {}>".format(self.departure_time.strftime("%m/%d/%Y, %H:%M:%S"), self.status)
        
     def is_expired(self):
         return self.departure_time < datetime.now()
@@ -61,6 +62,8 @@ class Attacks(db.Model):
         action["target_coord"]["x"] = self.target_coord_x
         action["target_coord"]["y"] = self.target_coord_y
         action["units"] = self.get_units()
+        if self.vacation == None:
+            action["vacation"] = "0"
         return action
 
 

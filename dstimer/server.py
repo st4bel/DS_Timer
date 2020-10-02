@@ -156,7 +156,7 @@ def schedule():
 @app.route("/schedule_db", methods=["GET"])
 def schedule_db():
     player, actions = get_scheduled_actions_db()
-    return render_template("schedule.html", actions = actions, player=player, rev="false")
+    return render_template("schedule_db.html", actions = actions, player=player, rev="false")
 
 @app.route("/schedule", methods=["POST"])
 def schedule_post():

@@ -20,6 +20,8 @@ import dstimer.common as common
 import random
 from dstimer.import_keks import check_and_save_sids
 from tcp_latency import measure_latency
+from dstimer.models import Attacks
+from dstimer import db
 
 logger = logging.getLogger("dstimer")
 
@@ -131,7 +133,7 @@ def get_ping(domain):
 
 class SendActionThread(threading.Thread):
 
-    def __init__(self, action, offset, ping, file):
+    def __init__(self, action, offset, ping, file = None):
         threading.Thread.__init__(self)
         self.action = action
         self.offset = offset
@@ -263,6 +265,98 @@ class SendActionThread(threading.Thread):
             # Move action file to failed folder
             os.rename(os.path.join(pending_path, self.file), os.path.join(failed_path, self.file))
 
+class SendActionThread_DB(threading.Thread):
+    def __init__(self, id, offset, ping):
+        threading.Thread.__init__(self)
+        self.id = id
+        self.offset = offset
+        self.ping = ping
+        attack = Attacks.query.filter_by(id = id).first()
+        self.action = attack.load_action()
+        attack.status = "pending"
+        db.session.add(attack)
+        db.session.commit()
+    
+    def run(self):
+        try:
+            keks_path = os.path.join(common.get_root_folder(), "keks", self.action["domain"])
+            keks_file = os.path.join(
+                keks_path,
+                str(self.action["player_id"]) + "_" + common.filename_escape(self.action["player"]))
+            with open(keks_file) as fd:
+                sid = fd.read()
+            domain = self.action["domain"]
+            real_departure = self.action["departure_time"] - self.offset - self.ping
+
+            with requests.Session() as session:
+                session.cookies.set("sid", sid)
+                session.headers.update({"user-agent": common.USER_AGENT})
+
+                while real_departure - datetime.datetime.now() > datetime.timedelta(seconds=5):
+                    time_left = real_departure - datetime.datetime.now() - datetime.timedelta(
+                        seconds=5)
+                    if time_left.total_seconds() <= 0:
+                        break
+                    time.sleep((time_left / 2).total_seconds())
+                logger.info("Prepare job. Forcing attack is " + str(self.action["force"]) + "!")
+                (actual_units, form, referer) = get_place_screen(session, domain,
+                                                                 self.action["source_id"],
+                                                                 self.action["vacation"])
+                                                                 
+                logger.info("Checking for available units...")
+                units = intelli_all(self.action["units"], actual_units)
+                if units is None:
+                    raise ValueError(
+                        "Could not satisfy unit conditions. Expected: {0}, Actual {1}".format(
+                            self.action["units"], actual_units))
+                
+                # Check if speed of troops has changed
+                logger.info("Checking for change in unit speed...")
+                stats = dstimer.import_action.get_cached_unit_info(domain)
+                original_speed = dstimer.import_action.speed(self.action["units"],
+                                                             self.action["type"], stats)
+                current_speed = dstimer.import_action.speed(units, self.action["type"], stats)
+                if original_speed != current_speed:
+                    raise ValueError(
+                        "Unit speed changed from {0} to {1} with units in village {2}, user format {3} and calculated {4}"
+                        .format(original_speed, current_speed, actual_units, self.action["units"],
+                                units))
+                logger.info("Confirm.")
+
+                (building, action, data, referer) = get_confirm_screen(
+                    session, domain, form, units, self.action["target_coord"]["x"],
+                    self.action["target_coord"]["y"], self.action["type"], self.action["vacation"],
+                    referer)
+                if building:
+                    data["building"] = self.action[
+                        "building"] if self.action["building"] != "default" else building
+                    data["save_default_attack_building"] = self.action[
+                        "save_default_attack_building"]
+
+                logger.info("Wait for sending")
+                while real_departure - datetime.datetime.now() > datetime.timedelta(milliseconds=1):
+                    time_left = real_departure - datetime.datetime.now()
+                    if time_left.total_seconds() <= 0:
+                        break
+                    time.sleep((time_left / 2).total_seconds())
+                
+                logger.info("Time left: " + str(real_departure - datetime.datetime.now()))
+                logger.info("data: " + json.dumps(data))
+                #just_do_it(session, domain, action, data, referer)
+                logger.info("Finished job")
+
+                attack = Attacks.query.filter_by(id = self.id).first()
+                attack.status = "finished"
+                db.session.add(attack)
+                db.session.commit()
+
+        except Exception as e:
+            logger.error(str(e))
+            attack = Attacks.query.filter_by(id = self.id).first()
+            attack.status = "failed"
+            db.session.add(attack)
+            db.session.commit()
+
 
 def cycle():
     now = datetime.datetime.now()
@@ -327,6 +421,34 @@ def cycle():
             #logger.info("train_ignore end: ")
             #logger.info(train_ignore)
 
+def cycle_db():
+    attacks = Attacks.query.filter_by(status = "scheduled").all()
+    now = datetime.datetime.now()
+    ping = dict()
+    offset = None
+    for attack in attacks:
+        action = attack.load_action()
+        departure = action["departure_time"]
+        if departure < now:
+            logger.error("Action scheduled for {0} is expired. Will not send.".format(departure))
+            attack.status = "expired"
+            db.session.add(attack)
+            db.session.commit()
+        elif departure - now < datetime.timedelta(seconds=90):
+            domain = action["domain"]
+            if offset is None:
+                offset = get_local_offset()
+                logger.info("Time Offset: {0} ms".format(round(offset.total_seconds() * 1000)))
+            if domain not in ping:
+                ping[domain] = get_ping(domain)
+                logger.info("Ping for {0}: {1} ms".format(domain, ping[domain].total_seconds() * 1000))
+            logger.info("Schedule action for {0}".format(departure))
+            #attack.status = "pending"
+            #db.session.add(attack)
+            #db.session.commit()           
+            thread = SendActionThread_DB(attack.id, offset, ping[domain])
+            thread.start()
+
 
 class DaemonThread(threading.Thread):
 
@@ -338,6 +460,7 @@ class DaemonThread(threading.Thread):
         check_sid_counter = 0
         while True:
             cycle()
+            cycle_db()
             if check_sid_counter == 0:
                 check_and_save_sids()
                 check_sid_counter = random.randint(30, 90)    # every 30 to 90 minutes
