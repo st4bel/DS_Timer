@@ -200,7 +200,7 @@ def wb_post():
             import_template.import_from_workbench(text)
             return redirect("/templates")
         elif request.form["type"] == "wb_action":
-            import_action.import_wb_action(text, playername, request.form.get("catapult_target"))
+            import_action.import_wb_action(text, playername, request.form.get("catapult_target"), request.form.get("type"))
         return redirect("/schedule", code=302)
     except Exception as e:
         flash(str(e))

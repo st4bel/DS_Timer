@@ -174,17 +174,18 @@ def import_from_tampermonkey(action):
         json.dump(action, fd, indent=4)
 
 
-def import_wb_action(text, name, catapult_target="default"):
+def import_wb_action(text, name, catapult_target="default", action_type = "attack"):
     #splitting text for [*]
     s = text.split("[/**]")
     actions_text = s[1].split("[/*]")
     action = {}
     for action_text in actions_text[:-1]:
         columns = action_text.split("[|]")
-        if "Angriff" in columns[1]:
-            action["type"] = "attack"
-        else:
-            action["type"] = "support"
+        #if "Angriff" in columns[1]:
+        #    action["type"] = "attack"
+        #else:
+        #    action["type"] = "support"
+        action["type"] = action_type
         action["source_coord"] = {}
         action["target_coord"] = {}
         action["source_coord"]["x"] = columns[3].split("|")[0].split("]")[1]
