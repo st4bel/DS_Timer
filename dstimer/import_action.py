@@ -213,8 +213,14 @@ def import_wb_action(text, name, catapult_target="default", action_type = "attac
         else:
             action["units"] = get_troups_from_template(columns[1])
 
-        action["player"] = name
-        action["player_id"] = world_data.get_player_id(action["domain"], action["player"])
+        if name != "":
+            action["player"] = name
+            action["player_id"] = world_data.get_player_id(action["domain"], action["player"])
+        else: 
+            action["player_id"] = world_data.get_village_owner(action["domain"], action["source_id"])
+            action["player"] = world_data.get_player_name(action["domain"], action["player_id"])
+            name = action["player"]
+        
         action["force"] = False
         action["vacation"] = "0"
         action["sitter"] = "0"

@@ -189,18 +189,12 @@ def wb_post():
     try:
         text = request.form["text"]
         keks_path = os.path.join(common.get_root_folder(), "keks")
-        players = []
-        for folder in os.listdir(keks_path):
-            for file in os.listdir(os.path.join(keks_path, folder)):
-                s_file = file.split("_", 1)
-                playername = common.filename_unescape(s_file[1])
-        if playername == None:
-            playername = request.form["playername"]
+        playername = ""#request.form["playername"]
         if request.form["type"] == "wb_template":
             import_template.import_from_workbench(text)
             return redirect("/templates")
         elif request.form["type"] == "wb_action":
-            import_action.import_wb_action(text, playername, request.form.get("catapult_target"), request.form.get("type"))
+            import_action.import_wb_action(text, playername, request.form.get("catapult_target"), request.form.get("action_type"))
         return redirect("/schedule", code=302)
     except Exception as e:
         flash(str(e))

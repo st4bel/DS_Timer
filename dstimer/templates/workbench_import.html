@@ -16,8 +16,8 @@
     <div class="form-group">
         <label for="text">WB-Befehle oder WB-Vorlagen einfügen:</label>
         <textarea rows="20" id="text" name="text" class="form-control">{{ request.args.text }}</textarea><br>
-        <label for="playername">Spielername (richtig schreiben..):</label>
-        <input id="playername" name="playername" type="text"><br>
+    <!--     <label for="playername">Spielername (richtig schreiben..):</label>
+        <input id="playername" name="playername" type="text"><br>-->
         <label for="catapult_target">Katapultziel (für alle Angriffe):</label>
         <select id="catapult_target" name="catapult_target">
             <option value="default" selected="selected">Standardziel Staemme</option>
@@ -25,8 +25,8 @@
                 <option value="{{ building }}">{{ building }}</option>
             {% endfor %}
         </select><br>
-        <label for="type">Angreifen (Unterstützen</label>
-        <select id="type" name="type">
+        <label for="action_type">Angreifen (Unterstützen</label>
+        <select id="action_type" name="action_type">
             <option value="attack" selected="selected">Angreifen</option>
             <option value="support">Unterstützen</option>
         </select><br>
