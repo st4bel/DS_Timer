@@ -3,7 +3,7 @@
 [![Appveyor](https://ci.appveyor.com/api/projects/status/github/st4bel/DS_Timer?svg=true)](https://ci.appveyor.com/project/st4bel/ds-timer)
 [![GitHub release](https://img.shields.io/github/release/st4bel/DS_Timer.svg)]()
 
-[![Github Releases (by Release)](https://img.shields.io/github/downloads/st4bel/ds_timer/v0.6.4/total.svg)](https://github.com/st4bel/ds_timer/releases/tag/v0.6.4)
+[![Github Releases (by Release)](https://img.shields.io/github/downloads/st4bel/ds_timer/v0.6.6/total.svg)](https://github.com/st4bel/ds_timer/releases/tag/v0.6.6)
 
 ![Crow](dstimer/static/crow.png)
 
@@ -68,3 +68,7 @@ Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from 
 [![Github Releases (by Release)](https://img.shields.io/github/downloads/st4bel/ds_timer/v0.6.0/total.svg)](https://github.com/st4bel/ds_timer/releases/tag/v0.6.0)
 
 [![Github Releases (by Release)](https://img.shields.io/github/downloads/st4bel/ds_timer/v0.6.2/total.svg)](https://github.com/st4bel/ds_timer/releases/tag/v0.6.2)
+
+[![Github Releases (by Release)](https://img.shields.io/github/downloads/st4bel/ds_timer/v0.6.4/total.svg)](https://github.com/st4bel/ds_timer/releases/tag/v0.6.4)
+
+[![Github Releases (by Release)](https://img.shields.io/github/downloads/st4bel/ds_timer/v0.6.5/total.svg)](https://github.com/st4bel/ds_timer/releases/tag/v0.6.5)
