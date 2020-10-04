@@ -11,6 +11,7 @@ import dateutil.parser
 import random, string
 from dstimer import common, world_data
 from dstimer.intelli_unit import get_bh_all
+from bs4 import BeautifulSoup
 #import numpy as np
 
 logger = logging.getLogger("dstimer")
@@ -235,6 +236,43 @@ def import_wb_action(text, name, catapult_target="default", action_type = "attac
         file = os.path.join(directory, filename)
         with open(file, "w") as fd:
             json.dump(action, fd, indent=4)
+
+def import_from_workbench_html(text):
+    soup = BeautifulSoup(text, "html.parser")
+    links = soup.find_all("a")
+    dep_times = soup.find_all("td", {"class": "time_left"})
+    counter = 0
+    for link in links:
+   #     link = links[counter]
+    #    dep_time = demp_times
+    #    counter = counter + 1
+        if link.text == "Versammlungsplatz":
+            dep_time = dep_times[counter]
+            counter = counter + 1
+            action = dict()
+            action["departure_time"] = datetime.strptime(dep_time.text, "%d.%m.%Y %H:%M:%S")
+            action["units"] = dict()
+            link_href = link["href"].split("/")
+            action["domain"] = link_href[2]
+            params = link_href[-1].split("?")[1].split("&")
+            for param in params:
+                arg = param.split("=")
+                if "village" in arg[0]:
+                    action["source_id"] = arg[1]
+                elif "target" in arg[0]:
+                    action["target_id"] = arg[1]
+                else:
+                    for unit in common.unitnames:
+                        if unit in arg[0]:
+                            action["units"][unit] = arg[1]
+            action["player_id"] = world_data.get_village_owner(action["domain"], action["source_id"])
+            action["player"] = world_data.get_player_name(action["domain"], action["player_id"])
+            
+            
+
+
+
+
 
 
 def import_from_ui(action, rand_mill=False, id=None):
