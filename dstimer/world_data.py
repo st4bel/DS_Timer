@@ -149,6 +149,14 @@ def get_village_id_from_coords(domain, x, y):
             return dataset[0]
     return None
 
+def get_village_coord_from_id(domain, id):
+    file = os.path.join(common.get_root_folder(), "world_data", domain, "village.txt")
+    data = readfile_norm(file)
+    for dataset in data:
+        if dataset[0] == str(id):
+            return dict(x = dataset[2], y = dataset[3])
+    return None
+
 
 def get_village_data(domain):
     file = os.path.join(common.get_root_folder(), "world_data", domain, "village.txt")

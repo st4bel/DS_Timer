@@ -193,9 +193,10 @@ def wb_post():
         if request.form["type"] == "wb_template":
             import_template.import_from_workbench(text)
             return redirect("/templates")
-        elif request.form["type"] == "wb_action":
+        elif request.form["type"] == "wb_text":
             import_action.import_wb_action(text, playername, request.form.get("catapult_target"), request.form.get("action_type"))
-            #import_action.import_from_workbench_html(text)
+        elif request.form["type"] == "wb_html":
+            import_action.import_from_workbench_html(text, request.form.get("catapult_target"), request.form.get("action_type"))
         return redirect("/schedule", code=302)
     except Exception as e:
         flash(str(e))
