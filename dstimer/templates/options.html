@@ -42,7 +42,7 @@
       <option value="storage"{% if options['kata-target']=='storage' %} selected="selected"{% endif %}>Speicher</option>
       <option value="wall"{% if options['kata-target']=='wall' %} selected="selected"{% endif %}>Wall</option>
     </select>
-    <button type="submit" name="type" value="kata-target" class="btn btn-default">Speichern</button><br>
+    <button type="submit" name="type" value="kata-target" class="btn btn-default">Speichern</button>
 
   <br>
   <h3>Ordnerstruktur zurücksetzen</h3>
@@ -81,6 +81,17 @@
   <button type="submit" name="type" value="LZ_reduction" class="btn btn-default">Übernehmen</button><br>
   <button type="submit" name="type" value="LZ_reduction_delete" class="btn btn-default">Löschen</button><br>
   <br>
+  <h3>Rausstell-Template</h3>
+  <div>
+    Bitte hier die Template auswählen, welche zum rausstellen benutzt werden soll. Wenn "Standard" ausgewählt ist, werden <i>alle</i> Truppen rausgestellt.
+  </div>
+  <select name="evac_template">
+    <option value="default"{% if options['evac_template']=='default' %} selected="selected"{% endif %}>Standard</option>
+    {% for template in templates %}
+      <option value="{{ template['name'] }}"{% if options['evac_template']==template['name'] %} selected="selected"{% endif %}>{{ template["name"] }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" name="type" value="evac_template" class="btn btn-default">Speichern</button><br>
   <h3>Mindestabstand von zwei Angriffen</h3>
   <div class="">
     Bitte hier den Mindestabstand in <i>ms</i> zwischen zwei Angriffen aus dem gleichen Dorf angeben:

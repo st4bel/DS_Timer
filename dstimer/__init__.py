@@ -10,7 +10,8 @@ __stdOptions__ = {
     "version": __version__,
     "LZ_reduction": {},
     "min_time_diff": 150,
-    "kata-target": "default"
+    "kata-target": "default",
+    "evac_template": "default"
 }
 
 try:

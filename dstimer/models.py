@@ -15,9 +15,10 @@ class Incomings(db.Model):
     source_player_name = db.Column(db.String(64))
     distance = db.Column(db.Float)
     arrival_time = db.Column(db.DateTime, nullable=False)
+    status = db.Column(db.String(64)) # 
 
     def __repr__(self):
-        return "<Incomings id: {}, name: {}>".format(self.inc_id, self.name)
+        return "<Incomings id: {}, name: {}, status: {}>".format(self.inc_id, self.name, self.status)
 
 class Attacks(db.Model):
     id = db.Column(db.Integer, primary_key=True)

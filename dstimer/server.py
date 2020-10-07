@@ -232,14 +232,15 @@ def logs():
     return render_template("logs.html", logs=logs)
 
 
-@app.route("/templates")
-def action_templates():
+@app.route("/templates", methods=["GET"])
+def templates_get():
     return render_template("templates.html", templates=get_templates(), unitnames=get_unitnames())
 
 
 @app.route("/templates", methods=["POST"])
 def templates_post():
     units = get_unitnames()
+    templates = get_templates()
     type = request.form["type"]
     if type == "create_template":
         template_units = {}
@@ -247,11 +248,22 @@ def templates_post():
             template_units[name] = request.form[name]
         template = {}
         template["name"] = request.form["newname"]
+        for t in templates:
+            if template["name"] == t["name"]:
+                flash("Template name already used.")
+                return redirect(url_for("templates_get"))
         template["units"] = template_units
         import_template.import_as_json(template)
         return redirect("/templates")
     elif "delete_" in type:
         id = type[7:len(type)]
+        options = common.read_options()
+        for template in templates:
+            if template["id"] == id:
+                if options["evac_template"] == template["name"]:
+                    options["evac_template"] = "default"
+                    common.write_options(options)
+                    flash("Rausstell-Template auf default zurückgesetzt.")
         import_template.remove_by_id(id)
         return redirect("/templates")
     #return redirect("/templates")
@@ -473,7 +485,7 @@ def delete_single_action(id):
 
 @app.route("/options", methods=["GET"])
 def options_get():
-    return render_template("options.html")
+    return render_template("options.html", templates=get_templates())
 
 
 @app.route("/options", methods=["POST"])
@@ -500,6 +512,8 @@ def options_post():
         options["LZ_reduction"] = {}
     elif request.form["type"] == "min_time_diff":
         options["min_time_diff"] = int(request.form.get("min_time_diff"))
+    elif request.form["type"] == "evac_template":
+        options["evac_template"] = request.form.get("evac_template")
     common.write_options(options)
     app.jinja_env.globals.update(options=options)
     return redirect("/options")

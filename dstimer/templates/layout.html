@@ -101,6 +101,15 @@
     </div>
     {% endif %}
     {% endwith %}
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="flashes">
+         {% for message in messages %}
+          <div class="alert alert-warning">{{ message }}</div>
+         {% endfor %}
+     </ul>
+   {% endif %}
+  {% endwith %}
     {% block content %}{% endblock %}
   </div>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
