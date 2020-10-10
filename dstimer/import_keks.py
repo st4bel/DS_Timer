@@ -5,7 +5,9 @@ import re
 from dstimer import common
 from bs4 import BeautifulSoup
 import logging
-from dstimer import world_data
+from dstimer.models import Player
+from dstimer import world_data, db
+
 
 logger = logging.getLogger("dstimer")
 FORMAT = re.compile(r"\[([a-zA-Z\.\-0-9]+)\|([a-zA-Z0-9%:]+)\|([a-zA-Z0-9]{8})\]")
@@ -41,6 +43,20 @@ def write_keks(keks, id, name):
     with open(file, "w") as fd:
         fd.write(keks["sid"])
 
+def write_keks_db(keks, id, name):
+    player = Player.query.filter_by(player_id = id, domain = keks["domain"]).first()
+    if player:
+        player.sid = keks["sid"]
+    else:
+        player = Player(
+            name = name,
+            player_id = id,
+            sid = keks["sid"], 
+            domain = keks["domain"]
+        )
+    db.session.add(player)
+    db.session.commit()
+    
 
 def import_from_text(text):
     keks = parse_keks(text)

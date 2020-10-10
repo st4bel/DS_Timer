@@ -11,7 +11,8 @@ import dateutil.parser
 import random, string
 from dstimer import common, world_data, db
 from dstimer.intelli_unit import get_bh_all
-from dstimer.models import Attacks
+from dstimer.models import Attacks, Player
+from flask import flash
 
 logger = logging.getLogger("dstimer")
 
@@ -291,6 +292,11 @@ def check_LZ(LZ):
 
 def add_attack_to_db(action):
     autocomplete(action)
+    try:
+        player = Player.query.filter_by(domain = action["domain"], player_id = int(action["player_id"])).first()
+    except:
+        flash("Spieler {} auf Server {} nicht gefunden. Bitte zuerst Keks importieren!".format(action["player"], action["domain"]))
+        return
     a = Attacks(
         departure_time = dateutil.parser.parse(action["departure_time"]),
         arrival_time = dateutil.parser.parse(action["arrival_time"]),
@@ -300,13 +306,14 @@ def add_attack_to_db(action):
         target_id = action["target_id"],
         target_coord_x = action["target_coord"]["x"],
         target_coord_y = action["target_coord"]["y"],
-        player_id = int(action["player_id"]),
-        player = action["player"],
+        #player_id = int(action["player_id"]),
+        #player = action["player"],
+        player = player,
         building = action["building"],
         save_default_attack_building = action["save_default_attack_building"],
         units = str(action["units"]),
         force = False, 
-        domain = action["domain"], 
+        #domain = action["domain"], 
         type = action["type"], 
         status = "scheduled"
     )
