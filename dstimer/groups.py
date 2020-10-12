@@ -29,7 +29,7 @@ def load_groups(domain, player_id):
         groups = dict()
 
         for link in group_links:
-            groups[int(link["data-group-id"])] = name = strip_group_name(link.text)
+            groups[int(link["data-group-id"])] = strip_group_name(link.text)
     return groups
 
 def refresh_groups(domain, player_id):
