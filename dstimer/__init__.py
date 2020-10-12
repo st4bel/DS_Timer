@@ -64,7 +64,7 @@ formatter = jsonlogger.JsonFormatter('%(asctime)s - %(name)s - %(levelname)s - %
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-world_data.refresh_world_data()
+#world_data.refresh_world_data()
 
 send_action.DaemonThread().start()
 

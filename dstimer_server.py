@@ -45,4 +45,7 @@ if __name__ == "__main__":
     if "getuid" in dir(os) and os.getuid() == 0 and not args.allow_root:
         print("Starting DS_Timer as root or with sudo is disabled. Use --allow-root")
         sys.exit(1)
+    
+    world_data.refresh_world_data()
+
     app.run(host=args.host, port=args.port)

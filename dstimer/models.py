@@ -104,7 +104,7 @@ class Player(db.Model):
 
 
     def __repr__(self):
-        return "<Player {} ({}) on Server {}>".format(self.name, self.player_id, self.domain)
+        return "<Player {} ({}) on Server {} is {}>".format(self.name, self.player_id, self.domain, "active" if self.is_active() else "inactive")
 
     def is_active(self): # TODO Botschutz -> BeautifulSoup parse for div#botschutz (?)
         response = requests.get("https://" + self.domain + "/game.php", cookies=dict(sid=self.sid),

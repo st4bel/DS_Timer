@@ -98,3 +98,6 @@ def save_current_incs(incs):
             db.session.commit()
         except IntegrityError:
             db.session.rollback() #  if inc already in db
+
+def cycle():
+    return

@@ -17,11 +17,13 @@ import logging
 from dstimer.intelli_unit import intelli_all, intelli_train
 import dstimer.import_action
 import dstimer.common as common
+import dstimer.incomings_handler as incomings_handler
 import random
 from dstimer.import_keks import check_and_save_sids
 from tcp_latency import measure_latency
 from dstimer.models import Attacks
 from dstimer import db
+
 
 logger = logging.getLogger("dstimer")
 
@@ -342,7 +344,7 @@ class SendActionThread_DB(threading.Thread):
                 
                 logger.info("Time left: " + str(real_departure - datetime.datetime.now()))
                 logger.info("data: " + json.dumps(data))
-                #just_do_it(session, domain, action, data, referer)
+                just_do_it(session, domain, action, data, referer)
                 logger.info("Finished job")
 
                 attack = Attacks.query.filter_by(id = self.id).first()
@@ -370,9 +372,6 @@ def cycle():
 
     for file in os.listdir(schedule_path):
         if os.path.isfile(os.path.join(schedule_path, file)):
-            #logger.info("train_ignore start: ")
-            #logger.info(train_ignore)
-            #logger.info("file_id: "+file.split("_")[1].split(".")[0])
             with open(os.path.join(schedule_path, file)) as fd:
                 action = json.load(fd)
             # train
@@ -418,8 +417,6 @@ def cycle():
                 logger.info("Schedule action for {0}".format(departure))
                 thread = SendActionThread(action, offset, ping[domain], file)
                 thread.start()
-            #logger.info("train_ignore end: ")
-            #logger.info(train_ignore)
 
 def cycle_db():
     attacks = Attacks.query.filter_by(status = "scheduled").all()
@@ -461,6 +458,7 @@ class DaemonThread(threading.Thread):
         while True:
             cycle()
             cycle_db()
+            incomings_handler.cycle()
             if check_sid_counter == 0:
                 check_and_save_sids()
                 check_sid_counter = random.randint(30, 90)    # every 30 to 90 minutes

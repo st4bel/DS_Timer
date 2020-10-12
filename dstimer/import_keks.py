@@ -31,7 +31,7 @@ def player_id_from_keks(keks):
         if line.strip().startswith("TribalWars.updateGameData("):
             game_data = json.loads(line[line.index("(") + 1:line.rindex(")")])
             return (game_data["player"]["id"], game_data["player"]["name"])
-    return None
+    return None, None
 
 
 def write_keks(keks, id, name):
@@ -66,6 +66,7 @@ def import_from_text(text):
     if id is None:
         raise ValueError("Session is expired or invalid")
     write_keks(keks, id, name)
+    write_keks_db(keks, id, name)
     world_data.refresh_world_data()
     common.send_stats(common.create_stats(player_id=id, domain=keks["domain"]))
 

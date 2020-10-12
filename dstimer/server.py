@@ -82,7 +82,7 @@ def get_scheduled_actions_db(): #platzhalter funktion um abfrage db zu testen
     player = []
     if len(attacks) == 0: 
         return player, actions
-    village_data = world_data.get_village_data(attacks[0].domain) #platzhalter siehe oben
+    village_data = world_data.get_village_data(attacks[0].player.domain) #platzhalter siehe oben
     for attack in attacks:
         action = attack.load_action()
         for dataset in village_data:
