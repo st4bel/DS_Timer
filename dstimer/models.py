@@ -152,6 +152,9 @@ class Group(db.Model):
     player_id = db.Column(db.Integer, db.ForeignKey("player.id"))
     villages = db.relationship("Village", secondary=group_village, back_populates="groups")
 
+    def __repr__(self):
+        return "<Group {} of {}>".format(self.name, self.player.name)
+
 
 def init_db():
     db.create_all()
