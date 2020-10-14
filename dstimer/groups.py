@@ -39,12 +39,13 @@ def refresh_groups(domain, player_id):
     for group in Group.query.filter_by(player = player):
         if group.group_id in loaded_groups: # Gruppe bereits gespeichert, ggf. name aktualisieren
             if group.name != loaded_groups[group.group_id]:
+                warnings.append("Gruppenname geändert von [{}] zu [{}].".format(group.name, loaded_groups[group.group_id]))
                 group.name = loaded_groups[group.group_id] 
                 db.session.add(group)
             del loaded_groups[group.group_id] # aus loaded groups entfernen, damit nicht erneut darüber iteriert
         else: #Gruppe nicht mehr vorhanden.
             if group.is_used:
-                warnings.append("Gruppe [{}] wurde vom Raussteller benutzt, ist mitlerweile aber nicht mehr vorhanden. Bitte Einstellungen überprüfen!".format(group.name))
+                warnings.append("Gruppe [{}] wurde vom Raussteller benutzt, ist mittlerweile aber nicht mehr vorhanden. Bitte Einstellungen überprüfen!".format(group.name))
             db.session.delete(group)
     
     for group_id in loaded_groups: # sind nur noch "neue" Gruppen

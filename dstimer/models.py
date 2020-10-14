@@ -114,6 +114,12 @@ class Player(db.Model):
     def get_village_ids(self):
         return [v.village_id for v in self.villages]
     
+    def refresh_groups(self):
+        return groups.refresh_groups(self.domain, self.player_id)
+    
+    def refresh_villages(self):
+        groups.refresh_villages_of_player(self.domain, self.player_id)
+    
 group_village = db.Table("group_village",
     db.Column("group_id", db.Integer, db.ForeignKey("group.id")),
     db.Column("village_id", db.Integer, db.ForeignKey("village.id")))
@@ -171,7 +177,7 @@ class Group(db.Model):
             self.villages.remove(village)
 
 
-
+from dstimer import groups
 
 
 def init_db():
