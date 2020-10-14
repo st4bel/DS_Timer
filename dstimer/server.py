@@ -529,10 +529,12 @@ def keks_overview():
     return render_template("keks_overview.html", saved_kekse = saved_kekse)        
 
 
-
-
 @app.route("/incomings/<domain>/<player_id>", methods=["GET"])
 def incomings_get(domain, player_id):
     incs = incomings_handler.load_incomings(domain, world_data.get_player_name(domain, player_id), player_id)
     incomings_handler.save_current_incs(incs)
     return render_template("incomings.html", incs = incs)
+
+@app.route("/inc_options", methods=["GET"])
+def inc_options():
+    return render_template("inc_options.html", templates = get_templates())

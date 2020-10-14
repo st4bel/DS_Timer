@@ -148,6 +148,7 @@ class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     group_id = db.Column(db.Integer)
     name = db.Column(db.String(64))
+    is_used = db.Column(db.Boolean, default=False) # Derzeit benutzt für raussteller
     # relationships
     player_id = db.Column(db.Integer, db.ForeignKey("player.id"))
     villages = db.relationship("Village", secondary=group_village, back_populates="groups")
