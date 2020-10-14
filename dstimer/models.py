@@ -111,6 +111,9 @@ class Player(db.Model):
                                 headers={"user-agent": common.USER_AGENT})
         return response.url.endswith("/game.php")
     
+    def get_village_ids(self):
+        return [v.village_id for v in self.villages]
+    
 group_village = db.Table("group_village",
     db.Column("group_id", db.Integer, db.ForeignKey("group.id")),
     db.Column("village_id", db.Integer, db.ForeignKey("village.id")))
@@ -155,6 +158,20 @@ class Group(db.Model):
 
     def __repr__(self):
         return "<Group {} of {}>".format(self.name, self.player.name)
+    
+    def is_in_group(self, village):
+        return 1 in [1 if v.id == village.id else 0 for v in self.villages]
+    
+    def add_village(self, village):
+        if not self.is_in_group(village):
+            self.villages.append(village)
+    
+    def remove_village(self,village):
+        if self.is_in_group(village):
+            self.villages.remove(village)
+
+
+
 
 
 def init_db():

@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from dstimer.models import Player, Group
+from dstimer.models import Player, Group, Village
 from dstimer import db, common
 
 def check_reponse(response):
@@ -25,7 +25,7 @@ def load_groups(domain, player_id):
 
         soup = BeautifulSoup(response.content, "html.parser")
 
-        group_links = soup.select("a.group-menu-item")
+        group_links = soup.select(".group-menu-item")
         groups = dict()
 
         for link in group_links:
@@ -99,6 +99,37 @@ def load_villages_of_group(domain, player_id, group_id):
             villages.append(int(village["data-id"]))
         
         return villages
+
+def refresh_villages_of_player(domain, player_id):
+    # refreshes all relationships between villages and active groups of player.
+    player = Player.query.filter_by(player_id=player_id, domain=domain).first()
+    groups = Group.query.filter_by(player = player, is_used = True)
+    #villages = Village.query.filter_by(player = player)
+
+    for group in groups:
+        loaded_villages = load_villages_of_group(domain, player_id, group.group_id)
+
+        for village in group.villages:
+            if village.village_id in loaded_villages:
+                loaded_villages.remove(village.village_id)
+            else:
+                #remove relationship 
+                group.remove_village(village)
+        
+        for village_id in loaded_villages:
+            if village_id not in player.get_village_ids():
+                village = Village(
+                    player = player, 
+                    village_id = village_id
+                )
+            else:
+                village = Village.query.filter_by(village_id=village_id).first()
+            group.add_village(village)
+        db.session.add(group)
+    db.session.commit()
+
+        
+
 
 
 
