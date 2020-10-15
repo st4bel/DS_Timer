@@ -128,10 +128,3 @@ def refresh_villages_of_player(domain, player_id):
             group.add_village(village)
         db.session.add(group)
     db.session.commit()
-
-        
-
-
-
-
-

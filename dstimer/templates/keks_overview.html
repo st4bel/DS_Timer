@@ -13,7 +13,10 @@
         <td class="col-md-1">{{ keks["domain"] }}</td>
         <td class="col-md-2">{{ keks["player_name"] }}</td>
         <td class="col-md-1">{{ keks["player_id"]}}</td>
-        <td class="col-md-1"><a href="/incomings/{{ keks['domain'] }}/{{ keks['player_id'] }}">incomings</a></td>
+        <td class="col-md-1">
+            <a href="/incomings/{{ keks['domain'] }}/{{ keks['player_id'] }}">incomings</a>
+            <a href="/inc_options/{{ keks['domain'] }}/{{ keks['player_id'] }}">inc_opt</a>
+        </td>
     </tr>
     {% endfor %}
 </table>

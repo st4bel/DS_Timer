@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block title %}Raussteller Optionen{% endblock %}
+{% block content %}
+<h3>Raussteller Optionen für {{ player.name }} ({{ player.domain }})</h3>
+
+<table class="table">
+    <tr>
+        <th class="col-md-3">Angriffsarten</th>
+        {% for group in player.get_used_groups() %} 
+            <th class="col-md-2">{{group.name}}</th>
+        {% endfor %}
+    </tr>
+    <tr>
+        <td>Priotität</td>
+        {% for group in player.get_used_groups() %} 
+            <td>{{group.priority}}</td>
+        {% endfor %}
+    </tr>
+</table>
+
+{% endblock %}

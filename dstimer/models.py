@@ -1,5 +1,5 @@
 from dstimer import db, common, world_data
-from datetime import datetime
+from datetime import datetime, timedelta
 import dateutil.parser
 import ast
 import requests
@@ -96,6 +96,8 @@ class Player(db.Model):
     player_id = db.Column(db.Integer)
     domain = db.Column(db.String(64))
     sid = db.Column(db.String(255))
+    date_group_refresh = db.Column(db.DateTime, default=datetime.now())
+    date_village_refresh = db.Column(db.DateTime, default=datetime.now())
     # relationships:
     attacks = db.relationship("Attacks", backref="player", lazy='dynamic')
     incs = db.relationship("Incomings", backref="player", lazy='dynamic')
@@ -114,11 +116,21 @@ class Player(db.Model):
     def get_village_ids(self):
         return [v.village_id for v in self.villages]
     
-    def refresh_groups(self):
-        return groups.refresh_groups(self.domain, self.player_id)
+    def refresh_groups(self, force = False):
+        if  datetime.now() - self.date_group_refresh > timedelta(minutes=5) or force:
+            return groups.refresh_groups(self.domain, self.player_id)
+        else:
+            return []
     
-    def refresh_villages(self):
-        groups.refresh_villages_of_player(self.domain, self.player_id)
+    def refresh_villages(self, force = False):
+        if  datetime.now() - self.date_village_refresh > timedelta(minutes=5) or force:
+            groups.refresh_villages_of_player(self.domain, self.player_id)
+    
+    def get_used_groups(self):
+        # returns group_id's sorted by priority
+        return [g for g in self.groups.filter_by(is_used=True).order_by('priority').all()]
+
+
     
 group_village = db.Table("group_village",
     db.Column("group_id", db.Integer, db.ForeignKey("group.id")),
@@ -158,6 +170,7 @@ class Group(db.Model):
     group_id = db.Column(db.Integer)
     name = db.Column(db.String(64))
     is_used = db.Column(db.Boolean, default=False) # Derzeit benutzt für raussteller
+    priority = db.Column(db.Integer) # Priorität 1..N;  1 höchste priorität
     # relationships
     player_id = db.Column(db.Integer, db.ForeignKey("player.id"))
     villages = db.relationship("Village", secondary=group_village, back_populates="groups")
@@ -188,14 +201,17 @@ if __name__ == "__main__":
 
 def init_samples():
     p = Player(name = "st4bel", player_id = "132465", domain = "de183.die-staemme.de")
-    g = Group(name = "Test_Gruppe", group_id = "47")
+    g = Group(name = "Test_Gruppe", group_id = "47", is_used=True, priority = 0)
+    g2 = Group(name = "Test_Gruppe2", group_id = "6447", is_used=True, priority = 1)
     v = Village(village_id = "9874", units = str(dict(spear = 2, catapult = 100)))
 
     v.player = p
     g.player = p
+    g2.player= p
     v.groups.append(g)
 
     db.session.add(p)
     db.session.add(g)
+    db.session.add(g2)
     db.session.add(v)
     db.session.commit()

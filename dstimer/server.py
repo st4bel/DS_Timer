@@ -17,7 +17,7 @@ import dstimer.incomings_handler as incomings_handler
 from dstimer.import_keks import check_and_save_sids
 from operator import itemgetter, attrgetter
 import logging
-from dstimer.models import Incomings, Attacks
+from dstimer.models import Incomings, Attacks, Player
 from dstimer import app, db
 logger = logging.getLogger("dstimer")
 
@@ -535,6 +535,8 @@ def incomings_get(domain, player_id):
     incomings_handler.save_current_incs(incs)
     return render_template("incomings.html", incs = incs)
 
-@app.route("/inc_options", methods=["GET"])
-def inc_options():
-    return render_template("inc_options.html", templates = get_templates())
+@app.route("/inc_options/<domain>/<player_id>", methods=["GET"])
+def inc_options(domain, player_id):
+    p = Player.query.filter_by(player_id=player_id, domain = domain).first()
+    p.refresh_groups()
+    return render_template("inc_options.html", templates = get_templates(), player = p)
