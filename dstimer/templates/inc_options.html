@@ -16,6 +16,16 @@
             <td>{{group.priority}}</td>
         {% endfor %}
     </tr>
+    {% for inctype in inctypes %}
+        <tr>
+            <td>{{ inctype.display_name }}</td>
+            {% for group in player.get_used_groups() %}
+                <td>
+                    
+                </td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
 </table>
 
 {% endblock %}

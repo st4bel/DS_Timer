@@ -539,4 +539,5 @@ def incomings_get(domain, player_id):
 def inc_options(domain, player_id):
     p = Player.query.filter_by(player_id=player_id, domain = domain).first()
     p.refresh_groups()
-    return render_template("inc_options.html", templates = get_templates(), player = p)
+    i = Inctype.query.all()
+    return render_template("inc_options.html", templates = get_templates(), player = p, inctypes = i)

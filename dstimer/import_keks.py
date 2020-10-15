@@ -5,7 +5,7 @@ import re
 from dstimer import common
 from bs4 import BeautifulSoup
 import logging
-from dstimer.models import Player
+from dstimer.models import Player, Group
 from dstimer import world_data, db
 
 
@@ -54,6 +54,14 @@ def write_keks_db(keks, id, name):
             sid = keks["sid"], 
             domain = keks["domain"]
         )
+        all_group = Group(
+            name = "Alle",
+            group_id = 0, 
+            is_used = True, 
+            priority = 1,
+            player = player
+        )
+        db.session.add(all_group)
     db.session.add(player)
     db.session.commit()
     
