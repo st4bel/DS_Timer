@@ -83,6 +83,7 @@ class Template(db.Model):
     units = db.Column(db.String(255))
     # relationships:
     incs = db.relationship("Incomings", backref="template", lazy="dynamic")
+    evacoptions = db.relationship("Evacoption", backref="template", lazy='dynamic')
 
     def __repr__(self):
         return "<Template {}>".format(self.name)
@@ -174,6 +175,7 @@ class Group(db.Model):
     # relationships
     player_id = db.Column(db.Integer, db.ForeignKey("player.id"))
     villages = db.relationship("Village", secondary=group_village, back_populates="groups")
+    evacoptions = db.relationship("Evacoption", backref="group", lazy='dynamic')
 
     def __repr__(self):
         return "<Group {} of {}>".format(self.name, self.player.name)
@@ -189,13 +191,42 @@ class Group(db.Model):
         if self.is_in_group(village):
             self.villages.remove(village)
 
+class Evacoption(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    # relationship
+    inctype_id = db.Column(db.Integer, db.ForeignKey("inctype.id"))
+    template_id = db.Column(db.Integer, db.ForeignKey("template.id"))
+    group_id = db.Column(db.Integer, db.ForeignKey("group.id"))
+
+    def __repr__(self):
+        return "<Evacoptions {}, {}, {}>".format(self.template.name, self.group.name, self.inctype.name)
+
+class Inctype(db.Model):
+    # Angriffstypen. werden nur bei initialisierung der Datenbank eingetragen
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64))
+    display_name = db.Column(db.String(64))
+
+    # relationship
+    evacoptions = db.relationship("Evacoption", backref="inctype", lazy='dynamic')
+
+    def __repr__(self):
+        return "<Inctype {}, {}>".format(self.id, self.name)
 
 from dstimer import groups
 
 
 def init_db():
     db.create_all()
-
+    for entry in common.inc_types:
+        inctype = Inctype(
+            name = entry["name"],
+            display_name = entry["displayname"]
+        )
+        db.session.add(inctype)
+    db.session.commit()
+    
 if __name__ == "__main__":
     init_db()
 
@@ -204,6 +235,9 @@ def init_samples():
     g = Group(name = "Test_Gruppe", group_id = "47", is_used=True, priority = 0)
     g2 = Group(name = "Test_Gruppe2", group_id = "6447", is_used=True, priority = 1)
     v = Village(village_id = "9874", units = str(dict(spear = 2, catapult = 100)))
+    t = Template(name = "TestTemplate", units = str(dict(catapult = 1, axe = 100, spy = 1)))
+    i = Inctype.query.filter_by(name="default").first()
+    e = Evacoption(inctype = i, template = t, group = g)
 
     v.player = p
     g.player = p
@@ -214,4 +248,7 @@ def init_samples():
     db.session.add(g)
     db.session.add(g2)
     db.session.add(v)
+    db.session.add(t)
+    db.session.add(i)
+    db.session.add(e)
     db.session.commit()
