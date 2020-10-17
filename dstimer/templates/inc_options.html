@@ -2,18 +2,22 @@
 {% block title %}Raussteller Optionen{% endblock %}
 {% block content %}
 <h3>Raussteller Optionen für {{ player.name }} ({{ player.domain }})</h3>
-
+<form action="", method="post">
 <table class="table">
     <tr>
         <th class="col-md-3">Angriffsarten</th>
         {% for group in player.get_used_groups() %} 
-            <th class="col-md-2">{{group.name}}</th>
+            <th class="col-md-2">
+                {{group.name}} ({{group.priority}})   
+            </th>
         {% endfor %}
     </tr>
     <tr>
-        <td>Priotität</td>
+        <td>Entfernen</td>
         {% for group in player.get_used_groups() %} 
-            <td>{{group.priority}}</td>
+            <th class="col-md-2">
+                <input type="checkbox" name="delete_group" value="{{ group.group_id }}">
+            </th>
         {% endfor %}
     </tr>
     {% for inctype in inctypes %}
@@ -21,11 +25,36 @@
             <td>{{ inctype.display_name }}</td>
             {% for group in player.get_used_groups() %}
                 <td>
-                    
+                    ignorieren: <input type="checkbox" name="ignore" value="{{inctype.name}}_{{group.group_id}}"><br>
+                    <select name="use_template_{{group.group_id}}">
+                        {% for template in templates %}
+                            <option value = "{{template.id}}" {% if inctype.evacoptions.filter_by(group=group).first().template == template %} selected="selected" {% endif %}>
+                                {{template.name}}
+                            </option>
+                        {% endfor %}
+                    </select>                    
                 </td>
             {% endfor %}
         </tr>
     {% endfor %}
 </table>
+<button type="submit" class="btn btn-default" name="type" value="submit_changes">Änderungen Übernehmen</button>
+<br><br>
+<select name="add_group_menu">
+    <option value="default"selected="selected">DorfGruppe Hinzufügen</option>
+    {% for group in player.groups %}
+        <option value = "{{group.group_id}}">
+            {% if group.group_id in player.get_used_group_ids() %}
+                ------
+            {% endif %}
+                [{{group.name}}]
+        </option>
+    {% endfor %}
+</select>
+<div>Priorität (1..N):</div>
+<input type="text" name = "add_group_priority" value="1"><br>
+<button type="submit" name="type" value="add_group" class="btn btn-default">Hinzufügen</button>
 
+
+</form>
 {% endblock %}

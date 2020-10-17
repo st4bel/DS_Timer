@@ -34,6 +34,8 @@ def load_groups(domain, player_id):
 
 def refresh_groups(domain, player_id):
     player = Player.query.filter_by(player_id=player_id, domain=domain).first_or_404()
+    if not player.is_active():
+        return ["Session nicht aktiv, konnte Gruppen nicht aktualisieren."]
     loaded_groups = load_groups(domain, player_id)
     warnings = []
     for group in Group.query.filter_by(player = player):

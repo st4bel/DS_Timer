@@ -130,7 +130,12 @@ class Player(db.Model):
     def get_used_groups(self):
         # returns group_id's sorted by priority
         return [g for g in self.groups.filter_by(is_used=True).order_by('priority').all()]
+    
+    def get_used_group_ids(self):
+        return [g.group_id for g in self.get_used_groups()]
 
+    def get_used_group_priorities(self):
+        return [g.priority for g in self.get_used_groups()]
 
     
 group_village = db.Table("group_village",
@@ -219,13 +224,14 @@ from dstimer import groups
 
 def init_db():
     db.create_all()
-    for entry in common.inc_types:
-        inctype = Inctype(
-            name = entry["name"],
-            display_name = entry["displayname"]
-        )
-        db.session.add(inctype)
-    db.session.commit()
+    if len(Inctype.query.all()) == 0:
+        for entry in common.inc_types:
+            inctype = Inctype(
+                name = entry["name"],
+                display_name = entry["displayname"]
+            )
+            db.session.add(inctype)
+        db.session.commit()
     
 if __name__ == "__main__":
     init_db()

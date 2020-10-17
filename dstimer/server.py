@@ -17,7 +17,7 @@ import dstimer.incomings_handler as incomings_handler
 from dstimer.import_keks import check_and_save_sids
 from operator import itemgetter, attrgetter
 import logging
-from dstimer.models import Incomings, Attacks, Player
+from dstimer.models import Incomings, Attacks, Player, Inctype, Template
 from dstimer import app, db
 logger = logging.getLogger("dstimer")
 
@@ -537,7 +537,36 @@ def incomings_get(domain, player_id):
 
 @app.route("/inc_options/<domain>/<player_id>", methods=["GET"])
 def inc_options(domain, player_id):
-    p = Player.query.filter_by(player_id=player_id, domain = domain).first()
+    p = Player.query.filter_by(player_id=player_id, domain = domain).first_or_404()
     p.refresh_groups()
     i = Inctype.query.all()
-    return render_template("inc_options.html", templates = get_templates(), player = p, inctypes = i)
+    t = Template.query.all()
+    return render_template("inc_options.html", templates = t, player = p, inctypes = i)
+
+@app.route("/inc_options/<domain>/<player_id>", methods=["POST"])
+def inc_options_post(domain, player_id):
+    p = Player.query.filter_by(player_id=player_id, domain = domain).first_or_404()
+    i = Inctype.query.all()
+
+    if request.form["type"] == "add_group":
+        g = p.groups.filter_by(group_id=request.form.get("add_group_menu")).first()
+        priority = int(request.form.get("add_group_priority"))
+        if priority not in p.get_used_group_priorities():
+            g.is_used = True
+            g.priority = priority
+            db.session.add(g)
+        else:
+            flash("Priorität <strong>{}</strong> bereits besetzt von Gruppe <strong>[{}]</strong>.".format(priority, p.groups.filter_by(is_used=True, priority=priority).first().name))
+    
+    elif request.form["type"] == "submit_changes":
+        # mark groups as unused
+        delete_groups = [int(group_id) for group_id in request.form.getlist("delete_group")]
+        for group_id in delete_groups:
+            g = p.groups.filter_by(group_id=group_id).first()
+            g.is_used = False
+            g.priority = None
+            db.session.add(g)
+    
+    db.session.commit()
+    return redirect(url_for("inc_options", domain=domain, player_id=player_id))
+    
