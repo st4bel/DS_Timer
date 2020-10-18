@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, flash, url_for, send_from_directory
 from flask.json import jsonify
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import desc
 import os
 import json
 import dateutil.parser
@@ -546,7 +547,7 @@ def incomings_get(domain, player_id):
     player = Player.query.filter_by(domain=domain, player_id=player_id).first_or_404()
     incs_dict = incomings_handler.load_incomings(domain, player_id)
     incomings_handler.save_current_incs(incs_dict, domain, player_id)
-    incs = Incomings.query.filter_by(player = player).all()
+    incs = Incomings.query.filter_by(player = player).order_by("arrival_time").all()
     return render_template("incomings.html", incs = incs)
 
 @app.route("/inc_options/<domain>/<player_id>", methods=["GET"])

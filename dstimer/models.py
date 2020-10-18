@@ -18,6 +18,9 @@ class Incomings(db.Model):
     distance = db.Column(db.Float)
     arrival_time = db.Column(db.DateTime, nullable=False)
     status = db.Column(db.String(64)) # 
+    size = db.Column(db.String(64)) # default, small, medium, big
+    unit = db.Column(db.String(64)) # spy, snob (?)
+
     # relationships:
     village_id = db.Column(db.Integer, db.ForeignKey("village.id"))
     player_id = db.Column(db.Integer, db.ForeignKey("player.id"))

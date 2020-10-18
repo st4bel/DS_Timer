@@ -10,12 +10,19 @@
         <th>Spieler</th>
         <th>Entfernung</th>
         <th>Ankunft</th>
-        <th>aktive Gruppen</th>
     </tr>
     {% for inc in incs %}
     <tr>
         <td class="col-md-1">{{ inc.inc_id }}</td>
-        <td class="col-md-1">{{ inc.name }}</td>
+        <td class="col-md-1">
+            {% if inc.size %}
+            <img src="{{innocdn_url('/graphic/command/attack' + ('_'+inc.size if inc.size != 'default') + '.png')}}">
+            {% endif %}
+            {% if inc.unit %}
+            <img src="{{innocdn_url('/graphic/command/' + inc.unit + '.png')}}">
+            {% endif %}
+            {{ inc.name }}
+        </td>
         <td class="col-md-2">{{ inc.target_village_name }}</td>
         <td class="col-md-2">{{ inc.source_village_name }}</td>
         <td class="col-md-2">{{ inc.source_player_name }}</td>

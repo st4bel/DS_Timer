@@ -64,6 +64,17 @@ def load_incomings(domain, player_id):
             inc["arrival_string"] = row.select("td")[5].text.strip()
             inc["arrival_time"] = common.parse_timestring(row.select("td")[5].text)
 
+            # get attack size and possibly detected unit
+            images_src = [images["src"] for images in row.select("td")[0].select("img")]
+            for src in images_src:
+                if "attack" in src:
+                    if len(src.split("attack_")) == 2:
+                        inc["size"] = src.split("attack_")[1].split(".png")[0]
+                    else:
+                        inc["size"] = "default"
+                elif ("spy" in src) or ("snob" in src):
+                    inc["unit"] = src.split("command/")[1].split(".png")[0]
+            
             incomings[id] = inc
         
         # reset current group
@@ -82,7 +93,7 @@ def save_current_incs(incs, domain, player_id):
     for inc_id in incs:
         inc = incs[inc_id]
         if int(inc_id) not in [i.inc_id for i in Incomings.query.all()]:
-            new_inc = Incomings(
+            i = Incomings(
                 inc_id = int(inc["id"]),
                 name = inc["name"],
                 target_village_id = int(inc["target_village_id"]),
@@ -96,8 +107,25 @@ def save_current_incs(incs, domain, player_id):
                 player = player,
                 village = player.villages.filter_by(village_id = int(inc["target_village_id"])).first()
             )
-            db.session.add(new_inc)
+        else:
+            i = Incomings.query.filter_by(inc_id = int(inc_id)).first()
+            i.name = inc["name"]
+        
+        if "size" in inc: #TODO Überprüfen, unter welchen bedingungen size und unit geändert werden darf
+            i.size = inc["size"]
+        else:
+            i.size = "default"
+        if "unit" in inc:
+            i.unit = inc["unit"]
+        else:
+            i.unit = None
+        
+        db.session.add(i)
     db.session.commit()
+
+def decide_template(inc_id):
+    inc = Incomings.query.filter_by(inc_id=inc_id).first()
+
 
 def cycle():
     return
