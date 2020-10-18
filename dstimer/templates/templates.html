@@ -132,7 +132,7 @@
                 <tr>
                     {% for unitname in unitnames %}
                     <td width="70px" align="right">
-                        <span class="badge alert-success" title="{{unitname}}">{{template.units[unitname]}}<img
+                        <span class="badge alert-success" title="{{unitname}}">{{template.get_units()[unitname]}}<img
                                 src="{{ innocdn_url('/graphic/unit/unit_' + unitname + '.png') }}"></span>
                     </td>
                     {% endfor %}

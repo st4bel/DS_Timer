@@ -89,7 +89,14 @@ class Template(db.Model):
         return "<Template {}>".format(self.name)
 
     def get_units(self):
-        return ast.literal_eval(self.units)
+        units = ast.literal_eval(self.units)
+        for unit in common.unitnames:
+            if unit not in units:
+                units[unit] = ""
+        return units
+    
+    def set_units(self, unit_dict):
+        self.units = str(unit_dict)
     
 class Player(db.Model):
     id = db.Column(db.Integer, primary_key=True)

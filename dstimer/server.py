@@ -234,37 +234,44 @@ def logs():
 
 @app.route("/templates", methods=["GET"])
 def templates_get():
-    return render_template("templates.html", templates=get_templates(), unitnames=get_unitnames())
+    t = Template.query.all()
+    return render_template("templates.html", templates=t, unitnames=get_unitnames())
 
 
 @app.route("/templates", methods=["POST"])
 def templates_post():
     units = get_unitnames()
-    templates = get_templates()
+    templates = Template.query.all()
     type = request.form["type"]
     if type == "create_template":
         template_units = {}
         for name in units:
             template_units[name] = request.form[name]
-        template = {}
-        template["name"] = request.form["newname"]
-        for t in templates:
-            if template["name"] == t["name"]:
+        t = Template()
+        t.set_units(template_units)
+        template_name = request.form["newname"]
+        for template in templates:
+            if template_name == template.name:
                 flash("Template name already used.")
                 return redirect(url_for("templates_get"))
-        template["units"] = template_units
-        import_template.import_as_json(template)
+        t.name = template_name
+        db.session.add(t)
+        db.session.commit()
         return redirect("/templates")
     elif "delete_" in type:
-        id = type[7:len(type)]
-        options = common.read_options()
-        for template in templates:
-            if template["id"] == id:
-                if options["evac_template"] == template["name"]:
-                    options["evac_template"] = "default"
-                    common.write_options(options)
-                    flash("Rausstell-Template auf default zurückgesetzt.")
-        import_template.remove_by_id(id)
+        id = int(type[7:len(type)])
+        if id in [t.id for t in templates]:
+            t = Template.query.filter_by(id=id).first()
+            db.session.delete(t)
+            db.session.commit()
+        #options = common.read_options()
+        #for template in templates:
+        #    if template["id"] == id:
+        #        if options["evac_template"] == template["name"]:
+        #            options["evac_template"] = "default"
+        #            common.write_options(options)
+        #            flash("Rausstell-Template auf default zurückgesetzt.")
+        #import_template.remove_by_id(id)
         return redirect("/templates")
     #return redirect("/templates")
 
