@@ -17,7 +17,7 @@ import dstimer.incomings_handler as incomings_handler
 from dstimer.import_keks import check_and_save_sids
 from operator import itemgetter, attrgetter
 import logging
-from dstimer.models import Incomings, Attacks, Player, Inctype, Template
+from dstimer.models import *
 from dstimer import app, db
 logger = logging.getLogger("dstimer")
 
@@ -583,7 +583,22 @@ def inc_options_post(domain, player_id):
             g.is_used = False
             g.priority = None
             db.session.add(g)
-    
+        formnames = [name for name in request.form if "use-template_" in name]
+        ignore = [name.split("_") for name in request.form.getlist("ignore")]
+        for name in formnames:
+            t_id = request.form.get(name)
+            [group_id, inc_id] = name.split("_")[1:]
+            e = Evacoption(
+                group = Group.query.filter_by(group_id = group_id).first(), 
+                inctype = Inctype.query.filter_by(id = inc_id).first(),
+                template = Template.query.filter_by(id = t_id).first(),
+                is_ignored = [group_id, inc_id] in ignore 
+            )
+            db.session.add(e)
+                
+    elif request.form["type"] == "refresh_groups":
+        p.refresh_groups(1)
+
     db.session.commit()
     return redirect(url_for("inc_options", domain=domain, player_id=player_id))
     

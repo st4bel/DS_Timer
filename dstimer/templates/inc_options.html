@@ -25,14 +25,19 @@
             <td>{{ inctype.display_name }}</td>
             {% for group in player.get_used_groups() %}
                 <td>
-                    ignorieren: <input type="checkbox" name="ignore" value="{{inctype.name}}_{{group.group_id}}"><br>
-                    <select name="use_template_{{group.group_id}}">
+                    ignorieren: 
+                    <input type="checkbox" name="ignore" value="{{group.group_id}}_{{inctype.id}}" 
+                    {% if inctype.evacoptions.filter_by(group=group).first().is_ignored %}
+                        checked
+                    {% endif %}
+                    ><br>
+                    <select name="use-template_{{group.group_id}}_{{inctype.id}}">
                         {% for template in templates %}
                             <option value = "{{template.id}}" 
                                 {% if inctype.evacoptions.filter_by(group=group).first() %}
                                     {% if inctype.evacoptions.filter_by(group=group).first().template == template %} 
                                         selected="selected" 
-                                    {% endif %}>
+                                    {% endif %}
                                 {% elif template.is_default %}
                                     selected="selected" 
                                 {% endif %}
@@ -62,7 +67,10 @@
 <div>Priorität (1..N):</div>
 <input type="text" name = "add_group_priority" value="1"><br>
 <button type="submit" name="type" value="add_group" class="btn btn-default">Hinzufügen</button>
+<br><br>
+Gruppen Aktualisieren:
 
+<button type="submit" name="type" value="refresh_groups" class="btn btn-default">Aktualisieren</button>
 
 </form>
 {% endblock %}

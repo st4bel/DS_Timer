@@ -206,7 +206,7 @@ class Group(db.Model):
 
 class Evacoption(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-
+    is_ignored = db.Column(db.Boolean, default=False)
     # relationship
     inctype_id = db.Column(db.Integer, db.ForeignKey("inctype.id"))
     template_id = db.Column(db.Integer, db.ForeignKey("template.id"))
