@@ -126,7 +126,7 @@
     </tr>
     {% for template in templates%}
     <tr>
-        <td><b>{{ template.name }}</b></td>
+        <td><span {% if template.is_default %}class="badge alert-success"{% endif %}><b>{{ template.name }}</b></span></td>
         <td>
             <table>
                 <tr>
@@ -142,7 +142,9 @@
         <td>
             <form action="" method="post">
                 <button type="submit" name="type" value="delete_{{template.id}}"
-                    class="btn btn-default">Löschen</button>
+                    class="btn btn-default">Löschen</button><br>
+                <button type="submit" name="type" value="set-default_{{template.id}}"
+                    class="btn btn-default">Als Standard setzen</button>
             </form>
         </td>
     </tr>

@@ -235,6 +235,8 @@ def logs():
 @app.route("/templates", methods=["GET"])
 def templates_get():
     t = Template.query.all()
+    if not Template.query.filter_by(is_default= True).first():
+        flash("Keine Standard Template gesetzt!")
     return render_template("templates.html", templates=t, unitnames=get_unitnames())
 
 
@@ -256,14 +258,11 @@ def templates_post():
                 return redirect(url_for("templates_get"))
         t.name = template_name
         db.session.add(t)
-        db.session.commit()
-        return redirect("/templates")
     elif "delete_" in type:
         id = int(type[7:len(type)])
         if id in [t.id for t in templates]:
             t = Template.query.filter_by(id=id).first()
             db.session.delete(t)
-            db.session.commit()
         #options = common.read_options()
         #for template in templates:
         #    if template["id"] == id:
@@ -272,7 +271,18 @@ def templates_post():
         #            common.write_options(options)
         #            flash("Rausstell-Template auf default zurückgesetzt.")
         #import_template.remove_by_id(id)
-        return redirect("/templates")
+    elif "set-default_" in type:
+        id = int(type.split("_")[1])
+        if id in [t.id for t in templates]:
+            dt = Template.query.filter_by(is_default=True).first()
+            if dt:
+                dt.is_default = False
+                db.session.add(dt)
+            t = Template.query.filter_by(id=id).first()
+            t.is_default = True
+            db.session.add(t)
+    db.session.commit()
+    return redirect("/templates")
     #return redirect("/templates")
 
 

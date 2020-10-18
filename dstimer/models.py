@@ -81,6 +81,7 @@ class Template(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
     units = db.Column(db.String(255))
+    is_default = db.Column(db.Boolean, default=False)
     # relationships:
     incs = db.relationship("Incomings", backref="template", lazy="dynamic")
     evacoptions = db.relationship("Evacoption", backref="template", lazy='dynamic')
