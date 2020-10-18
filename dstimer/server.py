@@ -537,19 +537,16 @@ def options_post():
 
 @app.route("/keks_overview", methods = ["GET"])
 def keks_overview():
-    saved_kekse = []
-    for root, subdirs, files in os.walk(os.path.join(common.get_root_folder(), "keks")):
-        if len(subdirs) > 0: 
-            continue #skipping listing of subdirs of keksfolder
-        for file in files:
-            saved_kekse.append(dict(domain = root.split("\\")[-1], player_id = file.split("_")[0], player_name = common.filename_unescape(file.split("_")[1])))
-    return render_template("keks_overview.html", saved_kekse = saved_kekse)        
+    players = Player.query.all()
+    return render_template("keks_overview.html", players = players)        
 
 
 @app.route("/incomings/<domain>/<player_id>", methods=["GET"])
 def incomings_get(domain, player_id):
-    incs = incomings_handler.load_incomings(domain, world_data.get_player_name(domain, player_id), player_id)
-    incomings_handler.save_current_incs(incs)
+    player = Player.query.filter_by(domain=domain, player_id=player_id).first_or_404()
+    incs_dict = incomings_handler.load_incomings(domain, player_id)
+    incomings_handler.save_current_incs(incs_dict, domain, player_id)
+    incs = Incomings.query.filter_by(player = player).all()
     return render_template("incomings.html", incs = incs)
 
 @app.route("/inc_options/<domain>/<player_id>", methods=["GET"])

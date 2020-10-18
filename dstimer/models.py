@@ -19,11 +19,14 @@ class Incomings(db.Model):
     arrival_time = db.Column(db.DateTime, nullable=False)
     status = db.Column(db.String(64)) # 
     # relationships:
-    template_id = db.Column(db.Integer, db.ForeignKey("template.id"))
+    village_id = db.Column(db.Integer, db.ForeignKey("village.id"))
     player_id = db.Column(db.Integer, db.ForeignKey("player.id"))
 
     def __repr__(self):
         return "<Incomings id: {}, name: {}, status: {}>".format(self.inc_id, self.name, self.status)
+    
+    def get_arrival_string(self):
+        return common.unparse_timestring(self.arrival_time)
 
 class Attacks(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -83,7 +86,6 @@ class Template(db.Model):
     units = db.Column(db.String(255))
     is_default = db.Column(db.Boolean, default=False)
     # relationships:
-    incs = db.relationship("Incomings", backref="template", lazy="dynamic")
     evacoptions = db.relationship("Evacoption", backref="template", lazy='dynamic')
 
     def __repr__(self):
@@ -157,6 +159,7 @@ class Village(db.Model): #nur eigene Dörfer zum zwischenspeichern der Gruppen u
     #relationships
     player_id = db.Column(db.Integer, db.ForeignKey("player.id"))
     groups = db.relationship("Group", secondary=group_village, back_populates="villages")
+    incs = db.relationship("Incomings", backref="village", lazy="dynamic")
 
     def __repr__(self):
         return "<Village {} of {} on {}>".format(self.village_id, self.player.name, self.player.domain)

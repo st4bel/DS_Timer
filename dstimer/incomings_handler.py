@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 import logging
 from dstimer import common
-from dstimer.models import Incomings
+from dstimer.models import Incomings, Player
 from dstimer import db
 from sqlalchemy.exc import IntegrityError
 
@@ -14,13 +14,10 @@ def check_reponse(response):
     if response.url.endswith("/sid_wrong.php"):
         raise ValueError("Session is invalid")
 
-def load_incomings(domain, player, player_id):
-    keks_path = os.path.join(common.get_root_folder(), "keks", domain)
-    keks_file = os.path.join(keks_path, player_id + "_" + common.filename_escape(player))
-    with open(keks_file) as fd:
-        sid = fd.read()
+def load_incomings(domain, player_id):
+    player = Player.query.filter_by(domain=domain, player_id=player_id).first()
     with requests.Session() as session:
-        session.cookies.set("sid", sid)
+        session.cookies.set("sid", player.sid)
         session.headers.update({"user-agent": common.USER_AGENT})
 
         params = dict(screen = "overview_villages", mode = "incomings", subtype = "attacks")
@@ -77,27 +74,30 @@ def load_incomings(domain, player, player_id):
         return incomings
     return dict()
 
-def save_current_incs(incs):
+def save_current_incs(incs, domain, player_id):
     # saves incs (dict) into database, checks if already saved
+    player = Player.query.filter_by(player_id=player_id, domain = domain).first()
+    player.refresh_groups()
+    player.refresh_villages()
     for inc_id in incs:
         inc = incs[inc_id]
-        a = Incomings(
-            inc_id = int(inc["id"]),
-            name = inc["name"],
-            target_village_id = int(inc["target_village_id"]),
-            target_village_name = inc["target_village_name"],
-            source_village_id = int(inc["source_village_id"]),
-            source_village_name = inc["source_village_name"],
-            source_player_id = int(inc["source_player_id"]),
-            source_player_name = inc["source_player_name"],
-            distance = float(inc["distance"]),
-            arrival_time = inc["arrival_time"]
-        )
-        db.session.add(a)
-        try:
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback() #  if inc already in db
+        if int(inc_id) not in [i.inc_id for i in Incomings.query.all()]:
+            new_inc = Incomings(
+                inc_id = int(inc["id"]),
+                name = inc["name"],
+                target_village_id = int(inc["target_village_id"]),
+                target_village_name = inc["target_village_name"],
+                source_village_id = int(inc["source_village_id"]),
+                source_village_name = inc["source_village_name"],
+                source_player_id = int(inc["source_player_id"]),
+                source_player_name = inc["source_player_name"],
+                distance = float(inc["distance"]),
+                arrival_time = inc["arrival_time"],
+                player = player,
+                village = player.villages.filter_by(village_id = int(inc["target_village_id"])).first()
+            )
+            db.session.add(new_inc)
+    db.session.commit()
 
 def cycle():
     return

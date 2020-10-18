@@ -10,16 +10,17 @@
         <th>Spieler</th>
         <th>Entfernung</th>
         <th>Ankunft</th>
+        <th>aktive Gruppen</th>
     </tr>
-    {% for inc_id in incs %}
+    {% for inc in incs %}
     <tr>
-        <td class="col-md-1">{{ incs[inc_id].id }}</td>
-        <td class="col-md-1">{{ incs[inc_id].name }}</td>
-        <td class="col-md-2">{{ incs[inc_id].target_village_name }}</td>
-        <td class="col-md-2">{{ incs[inc_id].source_village_name }}</td>
-        <td class="col-md-2">{{ incs[inc_id].source_player_name }}</td>
-        <td class="col-md-1">{{ incs[inc_id].distance }}</td>
-        <td class="col-md-3">{{ incs[inc_id].arrival_string }}</td>
+        <td class="col-md-1">{{ inc.inc_id }}</td>
+        <td class="col-md-1">{{ inc.name }}</td>
+        <td class="col-md-2">{{ inc.target_village_name }}</td>
+        <td class="col-md-2">{{ inc.source_village_name }}</td>
+        <td class="col-md-2">{{ inc.source_player_name }}</td>
+        <td class="col-md-1">{{ inc.distance }}</td>
+        <td class="col-md-3">{{ inc.get_arrival_string() }}</td>
     </tr>
     {% endfor %}
 </table>
