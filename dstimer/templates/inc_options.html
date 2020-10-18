@@ -28,8 +28,16 @@
                     ignorieren: <input type="checkbox" name="ignore" value="{{inctype.name}}_{{group.group_id}}"><br>
                     <select name="use_template_{{group.group_id}}">
                         {% for template in templates %}
-                            <option value = "{{template.id}}" {% if inctype.evacoptions.filter_by(group=group).first().template == template %} selected="selected" {% endif %}>
-                                {{template.name}}
+                            <option value = "{{template.id}}" 
+                                {% if inctype.evacoptions.filter_by(group=group).first() %}
+                                    {% if inctype.evacoptions.filter_by(group=group).first().template == template %} 
+                                        selected="selected" 
+                                    {% endif %}>
+                                {% elif template.is_default %}
+                                    selected="selected" 
+                                {% endif %}
+                                >
+                                    {{template.name}}
                             </option>
                         {% endfor %}
                     </select>                    
