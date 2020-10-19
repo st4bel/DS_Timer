@@ -586,12 +586,18 @@ def inc_options_post(domain, player_id):
         for name in formnames:
             t_id = request.form.get(name)
             [group_id, inc_id] = name.split("_")[1:]
-            e = Evacoption(
-                group = Group.query.filter_by(group_id = group_id).first(), 
-                inctype = Inctype.query.filter_by(id = inc_id).first(),
-                template = Template.query.filter_by(id = t_id).first(),
-                is_ignored = [group_id, inc_id] in ignore 
-            )
+            group = Group.query.filter_by(group_id = group_id).first()
+            inctype = Inctype.query.filter_by(id = inc_id).first()
+
+            e = Evacoption.query.filter_by(group = group, inctype = inctype).first()
+            if not e:
+                e = Evacoption(
+                    group = group, 
+                    inctype = inctype, 
+                )
+            e.template = Template.query.filter_by(id = t_id).first()
+            e.is_ignored = [group_id, inc_id] in ignore
+            
             db.session.add(e)
                 
     elif request.form["type"] == "refresh_groups":
