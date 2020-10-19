@@ -547,7 +547,11 @@ def incomings_get(domain, player_id):
     player = Player.query.filter_by(domain=domain, player_id=player_id).first_or_404()
     incs_dict = incomings_handler.load_incomings(domain, player_id)
     incomings_handler.save_current_incs(incs_dict, domain, player_id)
+    warnings = incomings_handler.cleanup_incs(incs_dict, domain, player_id)
     incs = Incomings.query.filter_by(player = player).order_by("arrival_time").all()
+
+    for warning in warnings:
+        flash(warning)
     return render_template("incomings.html", incs = incs)
 
 @app.route("/inc_options/<domain>/<player_id>", methods=["GET"])
@@ -597,7 +601,7 @@ def inc_options_post(domain, player_id):
                 )
             e.template = Template.query.filter_by(id = t_id).first()
             e.is_ignored = [group_id, inc_id] in ignore
-            
+
             db.session.add(e)
                 
     elif request.form["type"] == "refresh_groups":

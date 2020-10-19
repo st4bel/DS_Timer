@@ -125,6 +125,19 @@ def save_current_incs(incs, domain, player_id):
         db.session.add(i)
     db.session.commit()
 
+def cleanup_incs(current_incs, domain, player_id):
+    # removes expired incs; checks if non expired incs do not anymore (e.g. canceled or village lost) 
+    player = Player.query.filter_by(player_id=player_id, domain = domain).first()
+    incs = Incomings.query.filter_by(player=player).all()
+    warnings = []
+    for inc in incs:
+        if str(inc.inc_id) not in current_incs:
+            db.session.delete(inc)
+            warnings.append("Inc mit id {} nicht gefunden.".format(inc.inc_id))
+
+    db.session.commit()
+    return warnings
+
 def decide_template(inc_id):
     inc = Incomings.query.filter_by(inc_id=inc_id).first()
     # gruppen des Zieldorfes laden, nach priorität sortieren
