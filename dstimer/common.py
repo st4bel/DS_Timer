@@ -50,12 +50,12 @@ unit_bh = {
 stat_URL = "http://ds-kalation.de/stat_receive_Timer_0.6.2.php"
 
 inc_types = [
-    dict(name = "default", displayname = "Unerkannt"),
+    dict(name = "snob", displayname = "Angriff mit AG (erkannt)"),
+    dict(name = "spy", displayname = "Angriff mit SPY-LZ (erkannt)"),
     dict(name = "small", displayname = "Kleiner Angriff"),
     dict(name = "medium", displayname = "Mittlerer Angriff"),
     dict(name = "big", displayname = "Großer Angriff"),
-    dict(name = "snob", displayname = "Angriff mit AG (erkannt)"),
-    dict(name = "spy", displayname = "Angriff mit SPY-LZ (erkannt)")
+    dict(name = "default", displayname = "Unerkannt")
 ]
 
 def get_root_folder():
