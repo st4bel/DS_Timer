@@ -143,8 +143,22 @@ def decide_template(inc_id):
     # gruppen des Zieldorfes laden, nach priorität sortieren
     groups = sorted(inc.village.groups(), key=lambda group: group.priority)
 
+    # get inctype by priority (in this case its my preconceived priority)
+    if (inc.unit_symbol is "snob") or (inc.slowest_unit is "snob"):
+        inctype_name = "snob"
+    elif (inc.unit_symbol is "spy") or (inc.slowest_unit is "spy"):
+        inctype_name = "spy"
+    else:
+        inctype_name = inc.size
+    inctype = Inctype.query.filter_by(name = inctype_name).first()
 
-
+    # looping over groups by priority to find first non ignored template
+    for group in groups:
+        e = Evacoption.query.filter_by(group = group, inctype = inctype).first()
+        if e.is_ignored:
+            continue
+        template = e.template
+    return template.id
 
 def cycle():
     return
