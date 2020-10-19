@@ -19,7 +19,8 @@ class Incomings(db.Model):
     arrival_time = db.Column(db.DateTime, nullable=False)
     status = db.Column(db.String(64)) # 
     size = db.Column(db.String(64)) # default, small, medium, big
-    unit = db.Column(db.String(64)) # spy, snob (?)
+    unit_symbol = db.Column(db.String(64)) # spy, snob (?)
+    slowest_unit = db.Column(db.String(64))
 
     # relationships:
     village_id = db.Column(db.Integer, db.ForeignKey("village.id"))
@@ -30,6 +31,30 @@ class Incomings(db.Model):
     
     def get_arrival_string(self):
         return common.unparse_timestring(self.arrival_time)
+    
+    def is_expired(self):
+        return self.arrival_time < datetime.now()
+    
+    def get_current_speed(self):
+        # return speed of Inc as if it was sent just now in minutes per distanceunit
+        speed_factor = world_data.get_unit_speed(self.player.domain) * world_data.get_world_speed(self.player.domain)
+        timediff = (self.arrival_time - datetime.now())
+        minutes = (timediff.days * 3600 * 24 + timediff.seconds) / 60 
+        return minutes * speed_factor / self.distance
+    
+    def get_slowest_unit(self):
+        # find slowest unit, which is faster than the current speed
+        stats = {k : v for k, v in sorted(import_action.get_cached_unit_info(self.player.domain).items(), key=lambda x: x[1])}
+        speed = self.get_current_speed()
+        
+        for unit in stats:
+            if speed > stats[unit]:
+                continue
+            return unit
+        return None
+
+
+
 
 class Attacks(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -233,7 +258,7 @@ class Inctype(db.Model):
     def __repr__(self):
         return "<Inctype {}, {}>".format(self.id, self.name)
 
-from dstimer import groups
+from dstimer import groups, import_action
 
 
 def init_db():

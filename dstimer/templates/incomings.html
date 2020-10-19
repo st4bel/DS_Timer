@@ -18,8 +18,8 @@
             {% if inc.size %}
             <img src="{{innocdn_url('/graphic/command/attack' + ('_'+inc.size if inc.size != 'default') + '.png')}}">
             {% endif %}
-            {% if inc.unit %}
-            <img src="{{innocdn_url('/graphic/command/' + inc.unit + '.png')}}">
+            {% if inc.unit_symbol %}
+            <img src="{{innocdn_url('/graphic/command/' + inc.unit_symbol + '.png')}}">
             {% endif %}
             {{ inc.name }}
         </td>

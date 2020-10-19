@@ -3,7 +3,7 @@ import dstimer.common as common
 import requests
 from bs4 import BeautifulSoup
 import logging
-from dstimer import common
+from dstimer import common, world_data
 from dstimer.models import Incomings, Player
 from dstimer import db
 from sqlalchemy.exc import IntegrityError
@@ -116,15 +116,21 @@ def save_current_incs(incs, domain, player_id):
         else:
             i.size = "default"
         if "unit" in inc:
-            i.unit = inc["unit"]
+            i.unit_symbol = inc["unit"]
         else:
-            i.unit = None
+            i.unit_symbol = None
+        if not i.slowest_unit:
+            i.slowest_unit = i.get_slowest_unit()
         
         db.session.add(i)
     db.session.commit()
 
 def decide_template(inc_id):
     inc = Incomings.query.filter_by(inc_id=inc_id).first()
+    # gruppen des Zieldorfes laden, nach priorität sortieren
+    groups = sorted(inc.village.groups(), key=lambda group: group.priority)
+
+
 
 
 def cycle():
