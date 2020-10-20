@@ -4,6 +4,10 @@ import dateutil.parser
 import ast
 import requests
 
+next_incs = db.Table('grouping_incs', 
+    db.Column("next_id", db.Integer, db.ForeignKey("incomings.id")),
+    db.Column("previous_id", db.Integer, db.ForeignKey("incomings.id"))
+)
 
 class Incomings(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -25,6 +29,14 @@ class Incomings(db.Model):
     # relationships:
     village_id = db.Column(db.Integer, db.ForeignKey("village.id"))
     player_id = db.Column(db.Integer, db.ForeignKey("player.id"))
+    next_incs = db.relationship( # all incs within a certain timefraim get grouped together, next inc points to all incs within that window, previous only to the first
+        "Incomings", 
+        secondary = next_incs,
+        primaryjoin = (next_incs.c.next_id == id),
+        secondaryjoin = (next_incs.c.previous_id == id),
+        backref = db.backref("privious_inc", lazy="dynamic"),
+        lazy = "dynamic"
+    )
 
     def __repr__(self):
         return "<Incomings id: {}, name: {}, status: {}>".format(self.inc_id, self.name, self.status)
