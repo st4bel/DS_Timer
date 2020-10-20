@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 import logging
 from dstimer import common, world_data
-from dstimer.models import Incomings, Player
+from dstimer.models import *
 from dstimer import db
 from sqlalchemy.exc import IntegrityError
 
