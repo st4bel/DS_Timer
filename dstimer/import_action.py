@@ -129,6 +129,10 @@ def autocomplete(action):
         action["building"] = common.read_options()["kata-target"]
     if "save_default_attack_building" not in action:
         action["save_default_attack_building"] = 0
+    if "sitter" not in action:
+        action["sitter"] = "0"
+    if "vacation" not in action:
+        action["vacation"] = "0"
 
 
 def random_id(length):
