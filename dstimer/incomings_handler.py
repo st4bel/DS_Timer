@@ -150,9 +150,9 @@ def decide_template(inc_id):
     groups = sorted(inc.village.groups, key=lambda g: g.priority)
 
     # get inctype by priority (in this case its my preconceived priority)
-    if (inc.unit_symbol is "snob") or (inc.slowest_unit is "snob"):
+    if (inc.unit_symbol == "snob") or (inc.slowest_unit == "snob"):
         inctype_name = "snob"
-    elif (inc.unit_symbol is "spy") or (inc.slowest_unit is "spy"):
+    elif (inc.unit_symbol == "spy") or (inc.slowest_unit == "spy"):
         inctype_name = "spy"
     else:
         inctype_name = inc.size
