@@ -10,6 +10,7 @@
         <th>Spieler</th>
         <th>Entfernung</th>
         <th>Ankunft</th>
+        <th>Template</th>
     </tr>
     {% for inc in incs %}
     <tr>
@@ -28,6 +29,13 @@
         <td class="col-md-2">{{ inc.source_player_name }}</td>
         <td class="col-md-1">{{ inc.distance }}</td>
         <td class="col-md-3">{{ inc.get_arrival_string() }}</td>
+        <td class="col-md-1">
+            {% if inc.template %}
+            <span class="badge alert-success">{{ inc.template.name }}</span>
+            {% else %}
+            <span class="badge alert-warning">Ignoriert</span>
+            {% endif %}
+        </td>
     </tr>
     {% endfor %}
 </table>

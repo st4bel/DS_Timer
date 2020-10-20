@@ -12,7 +12,9 @@ __stdOptions__ = {
     "min_time_diff": 150,
     "kata-target": "default",
     "evac_template": "default",
-    "evac_grouping_threshold_minutes": 1
+    "evac_grouping_threshold_minutes": 1,
+    "evac_pre_buffer_seconds": 10,
+    "evac_post_buffer_seconds": 10
 }
 
 try:

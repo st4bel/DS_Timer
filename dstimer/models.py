@@ -37,6 +37,8 @@ class Incomings(db.Model):
         backref = db.backref("previous_inc", lazy="dynamic"),
         lazy = "dynamic"
     )
+    template_id = db.Column(db.Integer, db.ForeignKey("template.id"))
+    attack_id = db.Column(db.Integer, db.ForeignKey("attack.id"))
 
     def __repr__(self):
         return "<Incomings id: {}, name: {}, status: {}>".format(self.inc_id, self.name, self.status)
@@ -88,6 +90,7 @@ class Attacks(db.Model):
     target_coord_y = db.Column(db.Integer)
     departure_time = db.Column(db.DateTime)
     arrival_time = db.Column(db.DateTime)
+    cancel_time = db.Column(db.DateTime)
     type = db.Column(db.String(64))
     force = db.Column(db.Boolean)
     #domain = db.Column(db.String(64))
@@ -101,6 +104,7 @@ class Attacks(db.Model):
     status = db.Column(db.String(64)) # scheduled, pending, failed, finished, expired
     # relationships:
     player_id = db.Column(db.Integer, db.ForeignKey("player.id"))
+    incs = db.relationship("Incomings", backref="attack", lazy='dynamic')
 
     def __repr__(self):
         return "<Attack departure: {}, status: {}>".format(self.departure_time.strftime("%m/%d/%Y, %H:%M:%S"), self.status)
@@ -137,6 +141,7 @@ class Template(db.Model):
     is_default = db.Column(db.Boolean, default=False)
     # relationships:
     evacoptions = db.relationship("Evacoption", backref="template", lazy='dynamic')
+    incs = db.relationship("Incomings", backref="template", lazy='dynamic')
 
     def __repr__(self):
         return "<Template {}>".format(self.name)

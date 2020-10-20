@@ -7,6 +7,9 @@ from dstimer import common, world_data
 from dstimer.models import *
 from dstimer import db
 from sqlalchemy.exc import IntegrityError
+import threading
+import time
+from datetime import datetime, timedelta
 
 logger = logging.getLogger("dstimer")
 
@@ -171,6 +174,9 @@ def decide_template(inc_id):
 def decide_group_template(inc_id):
     # if any template is None (ignored) than ignore all; if all are set, get template from highest priority inctype
     inc = Incomings.query.filter_by(inc_id=inc_id).first()
+    if inc.previous_inc.first():
+        return inc.previous_inc.first().template
+
     inc_group = [inc] + [i for i in inc.next_incs.order_by("arrival_time").all()]
     a = [decide_template(i.inc_id) for i in inc_group]
 
@@ -204,5 +210,73 @@ def group_incs(domain, player_id):
             db.session.add(incs[i+1])
     db.session.commit()
 
+def plan_evac_action(inc_id):
+    inc = Incomings.query.filter_by(inc_id=inc_id).first()
+    a = Attacks()
+    options = common.read_options()
+    mill = 500
+    # TODO: randomize departure and arrival time
+    a.departure_time = (inc.arrival_time - timedelta(seconds=options["evac_pre_buffer_seconds"])).replace(microsecond=mill*1000)
+    a.arrival_time = ((inc.arrival_time if len(inc.next_incs.all()) == 0 else inc.next_incs.order_by("arrival_time").all()[-1].arrival_time) + timedelta(seconds=options["evac_pre_buffer_seconds"])).replace(microsecond=mill*1000)
+    runtime = a.arrival_time - a.departure_time
+    a.cancel_time = a.departure_time + runtime/2 + timedelta(microsecond=100*1000) # problem if cancel time on microseconds = 0 (?)
+
+    a.source_id = inc.village.village_id
+    a.target_id #TODO
+    a.player = inc.player
+    a.units = inc.template.units
+    a.force = False
+    a.type = "attack"
+    a.status = "scheduled"
+
+
 def cycle():
-    return
+    players = Player.query.all()
+    for player in players:
+        if not player.is_active():
+            continue
+        loaded_incs = load_incomings(player.domain, player.player_id)
+        save_current_incs(loaded_incs, player.domain, player.player_id)
+        warnings = cleanup_incs(loaded_incs, player.domain, player.player_id)
+        group_incs(player.domain, player.player_id)
+
+        incs = incs = Incomings.query.filter_by(player = player).order_by("arrival_time").all()
+        # setting template
+        for inc in incs:
+            template_id = decide_group_template(inc.inc_id)
+            inc.template = Template.query.filter_by(id=template_id).first()
+            db.session.add(inc)
+        db.session.commit()
+
+        now= datetime.datetime.now()
+        # check, if evacuation is imminent
+        for inc in incs:
+            if inc.is_expired():
+                db.session.remove(inc)
+                db.session.commit()
+                continue
+            if inc.arrival_time - now < timedelta(minutes = 5):
+                if inc.status == "pending" or not inc.template:
+                    continue    
+                inc.status = "pending"
+                db.session.add(inc)
+                db.session.commit()
+                if inc.previous_inc.first():
+                    if inc.previous_inc.first().status == "pending":
+                        continue
+                logger.info("Planing Evacutaion for {}. Template {}".format(inc.inc_id, inc.template.name))
+                plan_evac_action(inc.inc_id)
+            else:
+                break # all other incs are further in the future
+
+class DaemonThread(threading.Thread):
+
+    def __init__(self):
+        threading.Thread.__init__(self, daemon=True)
+
+    def run(self):
+        print("Evacuate_Daemon is running")
+
+        while True:
+    	    cycle()
+            time.sleep(120)
