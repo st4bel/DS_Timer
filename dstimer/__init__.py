@@ -11,7 +11,8 @@ __stdOptions__ = {
     "LZ_reduction": {},
     "min_time_diff": 150,
     "kata-target": "default",
-    "evac_template": "default"
+    "evac_template": "default",
+    "evac_grouping_threshold_minutes": 1
 }
 
 try:

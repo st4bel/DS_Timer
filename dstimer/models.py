@@ -34,7 +34,7 @@ class Incomings(db.Model):
         secondary = next_incs,
         primaryjoin = (next_incs.c.next_id == id),
         secondaryjoin = (next_incs.c.previous_id == id),
-        backref = db.backref("privious_inc", lazy="dynamic"),
+        backref = db.backref("previous_inc", lazy="dynamic"),
         lazy = "dynamic"
     )
 
@@ -64,7 +64,17 @@ class Incomings(db.Model):
                 continue
             return unit
         return None
-
+    
+    def is_next_inc(self, inc):
+        return self.next_incs.filter(next_incs.c.previous_id == inc.id).count() > 0
+    
+    def add_next_inc(self, inc):
+        if not self.is_next_inc(inc):
+            self.next_incs.append(inc)
+    
+    def remove_next_inc(self, inc):
+        if self.is_next_inc(inc):
+            self.next_incs.remove(inc)
 
 
 
@@ -168,13 +178,13 @@ class Player(db.Model):
         return [v.village_id for v in self.villages]
     
     def refresh_groups(self, force = False):
-        if  datetime.now() - self.date_group_refresh > timedelta(minutes=5) or force:
+        if  datetime.now() - self.date_group_refresh > timedelta(minutes=1) or force:
             return groups.refresh_groups(self.domain, self.player_id)
         else:
             return []
     
     def refresh_villages(self, force = False):
-        if  datetime.now() - self.date_village_refresh > timedelta(minutes=5) or force:
+        if  datetime.now() - self.date_village_refresh > timedelta(minutes=1) or force:
             groups.refresh_villages_of_player(self.domain, self.player_id)
     
     def get_used_groups(self):

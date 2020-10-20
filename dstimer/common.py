@@ -9,7 +9,7 @@ import requests
 import hashlib
 import logging
 from version_parser import Version
-
+from datetime import timedelta
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"
 
@@ -179,3 +179,7 @@ def unparse_timestring(date):
     time_string = str(date.hour) + ":" + str(date.minute) + ":" + str(date.second) + ":" + str(int(date.microsecond / 1000)).zfill(3) # leading zeros 
 
     return day_string + " um " + time_string
+
+def get_grouping_timedelta():
+    options = read_options()
+    return timedelta(minutes=options["evac_grouping_threshold_minutes"])

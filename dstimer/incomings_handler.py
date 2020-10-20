@@ -144,10 +144,10 @@ def cleanup_incs(current_incs, domain, player_id):
     return warnings
 
 def decide_template(inc_id):
-    # return template id or None, if all cases are ignored
+    # return template id (or None, if all cases are ignored), also return Inctype id
     inc = Incomings.query.filter_by(inc_id=inc_id).first()
     # gruppen des Zieldorfes laden, nach priorität sortieren
-    groups = sorted(inc.village.groups(), key=lambda group: group.priority)
+    groups = sorted(inc.village.groups, key=lambda g: g.priority)
 
     # get inctype by priority (in this case its my preconceived priority)
     if (inc.unit_symbol is "snob") or (inc.slowest_unit is "snob"):
@@ -162,16 +162,27 @@ def decide_template(inc_id):
     # looping over groups by priority to find first non ignored template
     for group in groups:
         e = Evacoption.query.filter_by(group = group, inctype = inctype).first()
-        if e.is_ignored:
-            continue
-        template_id = e.template.id
+        if not e.is_ignored:
+            template_id = e.template.id
+            break
     
-    return template_id
+    return dict(template_id = template_id, inctype_id = inctype.id)
+
+def decide_group_template(inc_id):
+    # if any template is None (ignored) than ignore all; if all are set, get template from highest priority inctype
+    inc = Incomings.query.filter_by(inc_id=inc_id).first()
+    inc_group = [inc] + [i for i in inc.next_incs.order_by("arrival_time").all()]
+    a = [decide_template(i.inc_id) for i in inc_group]
+
+    if None in [b["template_id"] for b in a]:
+        return None 
+    
+    # sorting "a" by argument "inctype_id", returning the template of first entry
+    return sorted(a, key=lambda b: b["inctype_id"])[0]["template_id"]
 
 def group_incs(domain, player_id):
-    # grouping incs which reach the same village in quick succession.
+    # grouping incs which reach the same village in quick succession. Does not decide, which template should be used
     player = Player.query.filter_by(player_id=player_id, domain=domain).first()
-    #incs = Incomings.query.filter_by(player=player).order_by("arrival_time").all()
     villages = Village.query.filter_by(player=player)
 
     # villages with more than 1 inc:
@@ -180,10 +191,18 @@ def group_incs(domain, player_id):
         incs = Incomings.query.filter_by(village = village).order_by("arrival_time").all()
         for i in range(len(incs)-1):
             # cycling through incs checking if diff in arrival time is smaller than threshold
-            diff = incs[i].arrival_time - incs[i+1].arrival_time
-            # TODO: what if ignored incs are between?, what if different templates would be used
-
-    return
+            diff = incs[i+1].arrival_time - incs[i].arrival_time
+            if diff > common.get_grouping_timedelta():
+                continue
+                
+            # check, if incs[i] is already grouped; previous_inc points to the first inc
+            if incs[i].previous_inc.first():
+                incs[i].previous_inc.first().add_next_inc(incs[i+1])
+            else:
+                incs[i].add_next_inc(incs[i+1])
+            
+            db.session.add(incs[i+1])
+    db.session.commit()
 
 def cycle():
     return
