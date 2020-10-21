@@ -23,6 +23,7 @@ from dstimer.import_keks import check_and_save_sids
 from tcp_latency import measure_latency
 from dstimer.models import Attacks
 from dstimer import db
+from flask import flash, Markup
 
 
 logger = logging.getLogger("dstimer")
@@ -101,6 +102,33 @@ def just_do_it(session, domain, action, data, referer):
     if error is not None:
         raise ValueError(error)
 
+def get_cancel_link(session, domain, village_id, attack_id):
+    attack_name = "dst_cancel_" + str(attack_id)
+    params = dict(village=village_id, screen="place")
+    headers = dict(referer="https://" + domain + "/game.php")
+    response = session.get("https://" + domain + "/game.php", params=params, headers=headers)
+    check_reponse(response)
+    soup = BeautifulSoup(response.content, 'html.parser')
+    outgoings = soup.select("div#commands_outgoings")[0]
+    found = False
+    cancel_link = None
+    for row in outgoings.find("tr.command-row"):
+        for span in row.find("span.quickedit-label"):
+            if span.text == attack_name:
+                found = True
+                break
+        if found:
+            cancel_link = row.find("a.command-cancel")[0]["href"]
+    return (cancel_link, response.url)
+
+def cancel_attack(session, domain, village_id, referer, params):
+    headers = dict(referer = referer)
+    response = session.get("https://" + domain + "/game.php", params=params, headers=headers)
+    check_reponse(response)
+    soup = BeautifulSoup(response.content, 'html.parser')
+    error = parse_after_send_error(soup)
+    if error is not None:
+        raise ValueError(error)
 
 def parse_after_send_error(soup):
     error_box = soup.select("div[class=error_box]")
@@ -378,7 +406,50 @@ class CancelActionThread(threading.Thread):
         self.action = attack.load_action()
     
     def run(self):
-        return
+        try:
+            attack = Attacks.query.filter_by(id = self.id).first()
+            real_cancel_time = self.action["departure_time"] - self.offset - self.ping
+            with requests.Session() as session:
+                session.cookies.set("sid", attack.player.sid)
+                session.headers.update({"user-agent": common.USER_AGENT})
+
+                while real_cancel_time - datetime.datetime.now() > datetime.timedelta(seconds=5):
+                    time_left = real_cancel_time - datetime.datetime.now() - datetime.timedelta(
+                        seconds=5)
+                    if time_left.total_seconds() <= 0:
+                        break
+                    time.sleep((time_left / 2).total_seconds())
+                
+                logger.info("Preparing cancelation.")
+                (cancel_link, referer) = get_cancel_link(session, attack.player.domain, attack.source_id, attack.id)
+
+                params = dict()
+                params["village"] = attack.source_id
+                params["screen"] = "place"
+                params["id"] = cancel_link.split("id=")[1].split("&")[0]
+                params["h"] = cancel_link.split("h=")[1].split("&")[0]
+
+                while real_cancel_time - datetime.datetime.now() > datetime.timedelta(milliseconds=1):
+                    time_left = real_cancel_time - datetime.datetime.now()
+                    if time_left.total_seconds() <= 0:
+                        break
+                    time.sleep((time_left / 2).total_seconds())
+
+                logger.info("Time left: " + str(real_cancel_time - datetime.datetime.now()))
+
+
+                cancel_attack(session, attack.player.domain, attack.source_id, attack, referer, params)
+
+        except Exception as e:
+            logger.error(str(e))
+            message = Markup("Cancel evacuation failed! Visit ")
+            flash(message)
+            attack = Attacks.query.filter_by(id = self.id).first()
+            attack.status = "failed"
+            message = Markup("Cancel evacuation failed! Visit <a href='" + attack.player.domain + "/game.php?village=" + attack.source_id + "screen=place'>this link</a>.")
+            flash(message)
+            db.session.add(attack)
+            db.session.commit()
 
 def cycle():
     now = datetime.datetime.now()

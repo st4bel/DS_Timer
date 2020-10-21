@@ -140,10 +140,10 @@ def cleanup_incs(current_incs, domain, player_id):
     warnings = []
     for inc in incs:
         if str(inc.inc_id) not in current_incs:
-            db.session.delete(inc)
+    #        db.session.delete(inc)
             warnings.append("Inc mit id {} nicht gefunden.".format(inc.inc_id))
 
-    db.session.commit()
+    #db.session.commit()
     return warnings
 
 def decide_template(inc_id):
