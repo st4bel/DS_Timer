@@ -1,3 +1,4 @@
+
 from dstimer import db, common, world_data
 from datetime import datetime, timedelta
 import dateutil.parser
@@ -38,7 +39,7 @@ class Incomings(db.Model):
         lazy = "dynamic"
     )
     template_id = db.Column(db.Integer, db.ForeignKey("template.id"))
-    attack_id = db.Column(db.Integer, db.ForeignKey("attack.id"))
+    attack_id = db.Column(db.Integer, db.ForeignKey("attacks.id"))
 
     def __repr__(self):
         return "<Incomings id: {}, name: {}, status: {}>".format(self.inc_id, self.name, self.status)
@@ -133,6 +134,26 @@ class Attacks(db.Model):
         if self.vacation == None:
             action["vacation"] = "0"
         return action
+    
+    def autocomplete(self):
+        if not self.source_coord_x:
+            self.source_coord_x, self.source_coord_y = world_data.get_village_coord_from_id(self.player.domain, self.source_id)
+        if not self.target_coord_x:
+            self.target_coord_x, self.target_coord_y = world_data.get_village_coord_from_id(self.player.domain, self.target_id)
+        if not self.sitter:
+            self.sitter = "0"
+            self.vacation = "0"
+        if not self.building:
+            self.building = common.read_options()["kata-target"]
+            self.save_default_attack_building = 0
+        units_to_delete = []
+        units = self.get_units()
+        for unit, amount in units.items():
+            if import_action.is_zero(amount):
+                units_to_delete.append(unit)
+        for unit in units_to_delete:
+            del units[unit]
+        self.units = str(units)
 
 class Template(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -284,6 +305,7 @@ class Inctype(db.Model):
 
     def __repr__(self):
         return "<Inctype {}, {}>".format(self.id, self.name)
+
 
 from dstimer import groups, import_action
 
