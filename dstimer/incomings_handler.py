@@ -222,12 +222,32 @@ def plan_evac_action(inc_id):
     a.cancel_time = a.departure_time + runtime/2 + timedelta(microsecond=100*1000) # problem if cancel time on microseconds = 0 (?)
 
     a.source_id = inc.village.village_id
-    a.target_id #TODO
+    a.target_id = get_target_id(inc)
     a.player = inc.player
     a.units = inc.template.units
     a.force = False
     a.type = "attack"
     a.status = "scheduled"
+
+    a.autocomplete()
+
+    logger.info("Evacutation planned for village {} starting {}, canceling {}, returning {}".format(inc.village.get_village_name(), a.departure_time, a.cancel_time, a.arrival_time))
+
+    db.session.add(a)
+    db.session.commit()
+
+def get_target_id(inc):
+    # TODO: auswahl durch benutzer -> festes dorf, nächstes BB, "zufälliges" Eigenens, wenn ags: distance überprüfen
+    v = Village.query.filter_by(player = inc.player).all()
+
+    if v[0] is not inc.village:
+        return v[0].village_id
+    elif len(v) != 1:
+        return v[1].village_id
+    else: # if only one village, evac attack is send to attacker
+        return inc.source_village_id
+
+
 
 
 def cycle():
@@ -276,7 +296,6 @@ class DaemonThread(threading.Thread):
 
     def run(self):
         print("Evacuate_Daemon is running")
-
         while True:
             cycle()
             time.sleep(120)

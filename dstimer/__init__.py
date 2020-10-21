@@ -2,7 +2,7 @@
 import requests
 from version_parser import Version
 
-__version__ = "v0.6.6-dev"
+__version__ = "v1.0.0-dev"
 
 __key__ = "insert key here lol"
 __stdOptions__ = {
@@ -70,5 +70,6 @@ logger.addHandler(handler)
 #world_data.refresh_world_data()
 
 send_action.DaemonThread().start()
+incomings_handler.DaemonThread().start()
 
 
