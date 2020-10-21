@@ -133,6 +133,8 @@ def autocomplete(action):
         action["sitter"] = "0"
     if "vacation" not in action:
         action["vacation"] = "0"
+    if "force" not in action:
+        action["force"] = False
 
 
 def random_id(length):
