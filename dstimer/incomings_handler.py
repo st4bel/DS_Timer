@@ -268,7 +268,7 @@ def cycle():
             db.session.add(inc)
         db.session.commit()
 
-        now= datetime.datetime.now()
+        now= datetime.now()
         # check, if evacuation is imminent
         for inc in incs:
             if inc.is_expired():

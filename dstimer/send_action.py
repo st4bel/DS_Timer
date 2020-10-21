@@ -334,6 +334,10 @@ class SendActionThread_DB(threading.Thread):
                         "building"] if self.action["building"] != "default" else building
                     data["save_default_attack_building"] = self.action[
                         "save_default_attack_building"]
+                                           
+                if "cancel_time" in self.action:
+                    data["attack_name"] = "dst_cancel_" + str(self.action["id"])
+                    logger.info("Renaming attack to {}. Cancel Time is {}.".format(data["attack_name"], self.action["cancel_time"]))
 
                 logger.info("Wait for sending")
                 while real_departure - datetime.datetime.now() > datetime.timedelta(milliseconds=1):
@@ -348,7 +352,12 @@ class SendActionThread_DB(threading.Thread):
                 logger.info("Finished job")
 
                 attack = Attacks.query.filter_by(id = self.id).first()
-                attack.status = "finished"
+                if attack.cancel_time:
+                    attack.status = "cancel"
+                    thread = CancelActionThread(attack.id, self.offset, self.ping)
+                    thread.start()
+                else:
+                    attack.status = "finished"
                 db.session.add(attack)
                 db.session.commit()
 
@@ -359,6 +368,17 @@ class SendActionThread_DB(threading.Thread):
             db.session.add(attack)
             db.session.commit()
 
+class CancelActionThread(threading.Thread):
+    def __init__(self, id, offset, ping):
+        threading.Thread.__init__(self)
+        self.id = id
+        self.offset = offset
+        self.ping = ping
+        attack = Attacks.query.filter_by(id = id).first()
+        self.action = attack.load_action()
+    
+    def run(self):
+        return
 
 def cycle():
     now = datetime.datetime.now()
@@ -458,7 +478,6 @@ class DaemonThread(threading.Thread):
         while True:
             cycle()
             cycle_db()
-            incomings_handler.cycle()
             if check_sid_counter == 0:
                 check_and_save_sids()
                 check_sid_counter = random.randint(30, 90)    # every 30 to 90 minutes
