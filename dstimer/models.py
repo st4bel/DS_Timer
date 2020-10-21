@@ -133,19 +133,25 @@ class Attacks(db.Model):
         action["domain"] = self.player.domain
         if self.vacation == None:
             action["vacation"] = "0"
+        else:
+            action["vacation"] = str(self.vacation)
         return action
     
     def autocomplete(self):
         if not self.source_coord_x:
-            self.source_coord_x, self.source_coord_y = world_data.get_village_coord_from_id(self.player.domain, self.source_id)
+            self.source_coord_x = int(world_data.get_village_coord_from_id(self.player.domain, self.source_id)["x"])
+            self.source_coord_y = int(world_data.get_village_coord_from_id(self.player.domain, self.source_id)["y"])
         if not self.target_coord_x:
-            self.target_coord_x, self.target_coord_y = world_data.get_village_coord_from_id(self.player.domain, self.target_id)
+            self.target_coord_x = int(world_data.get_village_coord_from_id(self.player.domain, self.target_id)["x"])
+            self.target_coord_y = int(world_data.get_village_coord_from_id(self.player.domain, self.target_id)["y"])
         if not self.sitter:
             self.sitter = "0"
             self.vacation = "0"
         if not self.building:
             self.building = common.read_options()["kata-target"]
             self.save_default_attack_building = 0
+        if not self.force:
+            self.force = False
         units_to_delete = []
         units = self.get_units()
         for unit, amount in units.items():

@@ -33,7 +33,7 @@ def load_incomings(domain, player_id):
                 
         # getting current group id, load incomings under group "0" (alle), then again load the page under current group to not reset the group selected ingame
         current_group_id = soup1.select("strong.group-menu-item")[0]["data-group-id"]
-        logger.info(current_group_id)
+
         params = dict(screen = "overview_villages", mode = "incomings", subtype = "attacks", group = "0")
         response = session.get("https://" + domain + "/game.php", params=params, headers = headers)
         check_reponse(response)
@@ -41,7 +41,6 @@ def load_incomings(domain, player_id):
         soup = BeautifulSoup(response.content, "html.parser")
 
         if not soup.select("table#incomings_table"):
-            logger.info("no incomings")
             return dict()
 
         table = soup.select("table#incomings_table")[0]
@@ -49,7 +48,6 @@ def load_incomings(domain, player_id):
         incomings = dict()
         for row in table.select("tr.nowrap"):
             id = row.select("span.quickedit")[0]["data-id"]
-            logger.info("inc_id: "+id)
 
             inc = dict()
             inc["id"] = id
@@ -84,7 +82,7 @@ def load_incomings(domain, player_id):
         params = dict(screen = "overview_villages", mode = "incomings", subtype = "attacks", group = current_group_id)
         response = session.get("https://" + domain + "/game.php", params=params, headers = headers)
 
-
+        logger.info("Found {} incs.".format(str(len(incomings))))
         return incomings
     return dict()
 
@@ -140,10 +138,10 @@ def cleanup_incs(current_incs, domain, player_id):
     warnings = []
     for inc in incs:
         if str(inc.inc_id) not in current_incs:
-    #        db.session.delete(inc)
+            db.session.delete(inc)
             warnings.append("Inc mit id {} nicht gefunden.".format(inc.inc_id))
 
-    #db.session.commit()
+    db.session.commit()
     return warnings
 
 def decide_template(inc_id):
@@ -219,7 +217,7 @@ def plan_evac_action(inc_id):
     a.departure_time = (inc.arrival_time - timedelta(seconds=options["evac_pre_buffer_seconds"])).replace(microsecond=mill*1000)
     a.arrival_time = ((inc.arrival_time if len(inc.next_incs.all()) == 0 else inc.next_incs.order_by("arrival_time").all()[-1].arrival_time) + timedelta(seconds=options["evac_pre_buffer_seconds"])).replace(microsecond=mill*1000)
     runtime = a.arrival_time - a.departure_time
-    a.cancel_time = a.departure_time + runtime/2 + timedelta(microsecond=100*1000) # problem if cancel time on microseconds = 0 (?)
+    a.cancel_time = a.departure_time + runtime/2 + timedelta(microseconds=100*1000) # problem if cancel time on microseconds = 0 (?)
 
     a.source_id = inc.village.village_id
     a.target_id = get_target_id(inc)
@@ -258,6 +256,8 @@ def cycle():
         loaded_incs = load_incomings(player.domain, player.player_id)
         save_current_incs(loaded_incs, player.domain, player.player_id)
         warnings = cleanup_incs(loaded_incs, player.domain, player.player_id)
+        for warning in warnings:
+            print(warning)
         group_incs(player.domain, player.player_id)
 
         incs = incs = Incomings.query.filter_by(player = player).order_by("arrival_time").all()
@@ -272,7 +272,7 @@ def cycle():
         # check, if evacuation is imminent
         for inc in incs:
             if inc.is_expired():
-                db.session.remove(inc)
+                db.session.delete(inc)
                 db.session.commit()
                 continue
             if inc.arrival_time - now < timedelta(minutes = 5):
@@ -285,6 +285,7 @@ def cycle():
                     if inc.previous_inc.first().status == "pending":
                         continue
                 logger.info("Planing Evacutaion for {}. Template {}".format(inc.inc_id, inc.template.name))
+                #print("Planning Evacutaion")
                 plan_evac_action(inc.inc_id)
             else:
                 break # all other incs are further in the future
@@ -297,5 +298,7 @@ class DaemonThread(threading.Thread):
     def run(self):
         print("Evacuate_Daemon is running")
         while True:
+            #print("Evacuate_Daemon cycle")
+            logger.info("Evacuate_Daemon cycle")
             cycle()
-            time.sleep(120)
+            time.sleep(60)

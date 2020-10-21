@@ -13,7 +13,7 @@ __stdOptions__ = {
     "kata-target": "default",
     "evac_template": "default",
     "evac_grouping_threshold_minutes": 1,
-    "evac_pre_buffer_seconds": 10,
+    "evac_pre_buffer_seconds": 30,
     "evac_post_buffer_seconds": 10
 }
 
@@ -68,7 +68,6 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 #world_data.refresh_world_data()
-
 send_action.DaemonThread().start()
 incomings_handler.DaemonThread().start()
 

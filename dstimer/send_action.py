@@ -36,10 +36,10 @@ def check_reponse(response):
 
 def get_place_screen(session, domain, village_id, vacation):
     params = dict(village=village_id, screen="place")
-    if vacation != "0":
+    if str(vacation) != "0":
         logger.info("vacation_mode")
         params["t"] = vacation
-        headers = dict(referer="https://" + domain + "/game.php?t=" + vacation)
+        headers = dict(referer="https://" + domain + "/game.php?t=" + str(vacation))
     else:
         headers = dict(referer="https://" + domain + "/game.php")
     response = session.get("https://" + domain + "/game.php", params=params, headers=headers)
@@ -58,15 +58,15 @@ def get_place_screen(session, domain, village_id, vacation):
 def get_confirm_screen(session, domain, form, units, target_x, target_y, type, vacation, referer):
     building = common.read_options()["kata-target"]
     params = {"village": form["source_village"], "screen": "place", "try": "confirm"}
-    if vacation != "0":
-        params["t"] = vacation
+    if str(1) != "0":
+        params["t"] = str(vacation)
     payload = form.copy()
     if type == "attack":
         del payload["support"]
     else:
         del payload["attack"]
-    payload["x"] = target_x
-    payload["y"] = target_y
+    payload["x"] = str(target_x)
+    payload["y"] = str(target_y)
     for unit in units:
         payload[unit] = units[unit]
 
@@ -112,17 +112,18 @@ def get_cancel_link(session, domain, village_id, attack_id):
     outgoings = soup.select("div#commands_outgoings")[0]
     found = False
     cancel_link = None
-    for row in outgoings.find("tr.command-row"):
-        for span in row.find("span.quickedit-label"):
-            if span.text == attack_name:
+    for row in outgoings.select("tr.command-row"):
+        for span in row.select("span.quickedit-label"):
+            if span.text.strip() == attack_name:
                 found = True
                 break
         if found:
-            cancel_link = row.find("a.command-cancel")[0]["href"]
+            cancel_link = row.select("a.command-cancel")[0]["href"]
     return (cancel_link, response.url)
 
 def cancel_attack(session, domain, village_id, referer, params):
     headers = dict(referer = referer)
+    params["action"] = "cancel"
     response = session.get("https://" + domain + "/game.php", params=params, headers=headers)
     check_reponse(response)
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -346,7 +347,7 @@ class SendActionThread_DB(threading.Thread):
                 original_speed = dstimer.import_action.speed(self.action["units"],
                                                              self.action["type"], stats)
                 current_speed = dstimer.import_action.speed(units, self.action["type"], stats)
-                if original_speed != current_speed:
+                if original_speed != current_speed and not self.action["cancel_time"]:
                     raise ValueError(
                         "Unit speed changed from {0} to {1} with units in village {2}, user format {3} and calculated {4}"
                         .format(original_speed, current_speed, actual_units, self.action["units"],
@@ -363,7 +364,7 @@ class SendActionThread_DB(threading.Thread):
                     data["save_default_attack_building"] = self.action[
                         "save_default_attack_building"]
                                            
-                if "cancel_time" in self.action:
+                if self.action["cancel_time"]:
                     data["attack_name"] = "dst_cancel_" + str(self.action["id"])
                     logger.info("Renaming attack to {}. Cancel Time is {}.".format(data["attack_name"], self.action["cancel_time"]))
 
@@ -438,7 +439,7 @@ class CancelActionThread(threading.Thread):
                 logger.info("Time left: " + str(real_cancel_time - datetime.datetime.now()))
 
 
-                cancel_attack(session, attack.player.domain, attack.source_id, attack, referer, params)
+                cancel_attack(session, attack.player.domain, attack.source_id, referer, params)
 
         except Exception as e:
             logger.error(str(e))

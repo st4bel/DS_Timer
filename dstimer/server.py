@@ -545,11 +545,10 @@ def keks_overview():
 @app.route("/incomings/<domain>/<player_id>", methods=["GET"])
 def incomings_get(domain, player_id):
     player = Player.query.filter_by(domain=domain, player_id=player_id).first_or_404()
-    warnings = incomings_handler.cleanup_incs(incs_dict, domain, player_id)
+
     incs = Incomings.query.filter_by(player = player).order_by("arrival_time").all()
 
-    for warning in warnings:
-        flash(warning)
+
     return render_template("incomings.html", incs = incs)
 
 @app.route("/inc_options/<domain>/<player_id>", methods=["GET"])
