@@ -443,6 +443,10 @@ class CancelActionThread(threading.Thread):
                 cancel_attack(session, attack.player.domain, attack.source_id, referer, params)
                 logger.info("canceling finished at: {}".format(datetime.datetime.now()))
 
+                attack.status = "finished"
+                db.session.add(attack)
+                db.session.commit()
+
         except Exception as e:
             logger.error(str(e))
             message = Markup("Cancel evacuation failed! Visit ")
