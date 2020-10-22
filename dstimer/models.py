@@ -86,9 +86,11 @@ class Attacks(db.Model):
     source_id = db.Column(db.Integer)
     source_coord_x = db.Column(db.Integer)
     source_coord_y = db.Column(db.Integer)
+    source_name = db.Column(db.String(64))
     target_id = db.Column(db.Integer)
     target_coord_x = db.Column(db.Integer)
     target_coord_y = db.Column(db.Integer)
+    target_name = db.Column(db.String(64))
     departure_time = db.Column(db.DateTime)
     arrival_time = db.Column(db.DateTime)
     cancel_time = db.Column(db.DateTime)
@@ -152,6 +154,10 @@ class Attacks(db.Model):
             self.save_default_attack_building = 0
         if not self.force:
             self.force = False
+        if not self.source_name:
+            self.source_name = world_data.get_village_name_from_id(self.player.domain, self.source_id)
+        if not self.target_name:
+            self.target_name = world_data.get_village_name_from_id(self.player.domain, self.target_id)
         units_to_delete = []
         units = self.get_units()
         for unit, amount in units.items():

@@ -554,7 +554,7 @@ class DaemonThread(threading.Thread):
         print("Daemon is running")
         check_sid_counter = 0
         while True:
-            cycle()
+            #cycle()
             cycle_db()
             if check_sid_counter == 0:
                 check_and_save_sids()

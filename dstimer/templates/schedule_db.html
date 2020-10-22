@@ -2,108 +2,88 @@
 {% block title %}Schedule{% endblock %}
 {% block header %}
 <script type="text/javascript">
-  function createEditInterface(id) {
-    var row = $("#row_" + id);
-    $("td.departure_time", row).append($("<br>")).append($("<input>").attr("name", "departure_time").attr("type", "datetime-local").attr("style", "width: 160px").val(function () {
-      var text = $("td.departure_time", row).text();
-      if (text.split(".").length > 1) {
-        return text.substring(0, text.length - 3);
-      }
-      return text
-    }));
-    $("td.arrival_time", row).append($("<br>")).append($("<input>").attr("name", "arrival_time").attr("type", "datetime-local").attr("style", "width: 160px").val(function () {
-      var text = $("td.arrival_time", row).text();
-      if (text.split(".").length > 1) {
-        return text.substring(0, text.length - 3);
-      }
-      return text
-    }));
 
-  }
 </script>
 {% endblock %}
 {% block content %}
 
-{% for name in player %}
-<h2>{{name}}</h2>
+<form method="post">
 <table class="table">
   <tr>
-    <th><a href="/schedule?player={{name}}&sort=player&reverse={{rev}}">Spieler</a></th>
-    <th><a href="/schedule?player={{name}}&sort=departure_time&reverse={{rev}}">Abschicken</a></th>
-    <th><a href="/schedule?player={{name}}&sort=arrival_time&reverse={{rev}}">Ankunft</a></th>
+    <th><a href="/schedule">Spieler</a></th>
+    <th><a href="/schedule">Abschicken</a></th>
+    <th><a href="/schedule">Ankunft</a></th>
     <th></th>
     <th></th>
-    <th><a href="/schedule?player={{name}}&sort=source_coord&reverse={{rev}}">Start</a></th>
-    <th><a href="/schedule?player={{name}}&sort=target_coord&reverse={{rev}}">Ziel</a></th>
+    <th><a href="/schedule">Start</a></th>
+    <th><a href="/schedule">Ziel</a></th>
     <th>Einheiten</th>
     <th>Gebäude</th>
     <th>Status</th>
+    <th>Edit</th>
     <th>
-      <form action="" method="post">
-        <button type="submit" name="type" value="delete__all" class="btn btn-default">Löschen</button>
-      </form>
+      <button type="submit" name="type" value="delete__all" class="btn btn-default">Alle</button>
+      <button type="submit" name="type" value="delete__selected" class="btn btn-default">Auswahl</button>
     </th>
   </tr>
-  {% for action in actions %}
-  {% if name == action.player %}
-  <tr id="row_{{action.id}}">
-    <td><a href="https://{{ action.domain }}/game.php" rel="noreferrer"><span class="badge">{{action.world }}</span></a>
-      {{ action.player }}</td>
-    <td class="departure_time">{{ action.departure_time }}</td>
-    <td class="arrival_time">{{ action.arrival_time }}</td>
-    <td>
-      {% if action.type == "attack" %}
-      <img src="{{innocdn_url('/graphic/command/' + action.type + action.size + '.png')}}">
-      {% else %}
-      <img src="{{innocdn_url('/graphic/command/' + action.type + '.png')}}">
-      {% endif %}
-    </td>
-    <td class="force">{% if action.force %}force!{% endif %}</td>
+  {% for attack in attacks %}
+  <tr id="row_{{attack.id}}">
+    <td><a href="https://{{ attack.player.domain }}/game.php" rel="noreferrer"><span class="badge">{{attack.player.domain.split(".")[0] }}</span></a>
+      {{ attack.player.name }}</td>
+    <td class="departure_time">{{ attack.departure_time }}</td>
+    <td class="arrival_time">{{ attack.arrival_time }}</td>
+    <td><img src="{{innocdn_url('/graphic/command/' + attack.type + '.png')}}"></td>
+    <td class="force">{% if attack.force %}force!{% endif %}</td>
     <td class="source">
-      <a href="https://{{action.domain}}/game.php?screen=map&x={{ action.source_coord.x }}&y={{ action.source_coord.y }}&beacon"
+      <a href="https://{{attack.player.domain}}/game.php?screen=map&x={{ attack.source_coord_x }}&y={{ attack.source_coord_y }}&beacon"
         rel="noreferrer">
         <img src="{{ innocdn_url('/graphic/icons/map2.png') }}">
       </a>
-      <a href="https://{{action.domain}}/game.php?screen=info_village&id={{action.source_id}}" rel="noreferrer">
-        {{ action.source_village_name }} {{ action.source_coord.x }}|{{ action.source_coord.y }}
+      <a href="https://{{attack.player.domain}}/game.php?screen=info_village&id={{attack.source_id}}" rel="noreferrer">
+        {{ attack.source_name }} {{ attack.source_coord_x }}|{{ attack.source_coord_y }}
       </a>
     </td>
     <td class="target">
-      <a href="https://{{action.domain}}/game.php?screen=map&x={{ action.target_coord.x }}&y={{ action.target_coord.y }}&beacon"
+      <a href="https://{{attack.player.domain}}/game.php?screen=map&x={{ attack.target_coord_x }}&y={{ attack.target_coord_y }}&beacon"
         rel="noreferrer">
         <img src="{{ innocdn_url('/graphic/icons/map2.png') }}">
       </a>
-      <a href="https://{{action.domain}}/game.php?screen=info_village&id={{action.target_id}}" rel="noreferrer">
-        {{ action.target_village_name }} {{ action.target_coord.x }}|{{ action.target_coord.y }}
+      <a href="https://{{attack.player.domain}}/game.php?screen=info_village&id={{attack.target_id}}" rel="noreferrer">
+        {{ attack.target_name }} {{ attack.target_coord_x }}|{{ attack.target_coord_y }}
       </a>
     </td>
     <td class="units">
-      {% for unit, amount in action.units|dictsort %}
+      {% for unit, amount in attack.get_units()|dictsort %}
       <span class="badge alert-success" title="{{unit}}">{{ amount }} <img
           src="{{ innocdn_url('/graphic/unit/unit_' + unit + '.png') }}"></span>
       {% endfor %}
     </td>
     <td>
-      {% if "catapult" in action.units and action.building != "default" %}
-      <span class="badge alert-success" title="{{ action.building }}"><img
-          src="{{ innocdn_url('/graphic/buildings/' + action.building + '.png') }}" alt="{{ action.building }}"></span>
+      {% if "catapult" in attack.get_units() and attack.building != "default" %}
+      <span class="badge alert-success" title="{{ attack.building }}"><img
+          src="{{ innocdn_url('/graphic/buildings/' + attack.building + '.png') }}" alt="{{ attack.building }}"></span>
       {% endif %}
     </td>
     <td>
-      <span class="badge alert-{% if action.status == 'scheduled' %}primary{% elif action.status == 'finished'%}success{% elif action.status == 'pending'%}warning{% else %}danger{% endif %}">{{ action.status }}</span>
+      <span class="badge alert-{% if attack.status == 'scheduled' %}primary{% elif attack.status == 'finished'%}success{% elif attack.status == 'pending'%}warning{% else %}danger{% endif %}">{{ attack.status }}</span>
+      {% if attack.incs.first() %}
+        <a href="/edit_inc/{{ attack.incs.first().id }}"><span class="badge alert-warning">evac</span></a>
+      {% endif %}
     </td>
     <td>
-      <form action="" method="post">
-        <button type="submit" name="type" value="delete_{{action.id}}" class="btn btn-default">Löschen</button>
-        <button type="submit" name="type" value="edit_{{action.id}}" class="btn btn-default">Edit</button>
-      </form>
-      <!--
-                <button onclick="createEditInterface('{{ action.id }}')" type="submit" name="type" value="edit_{{action.id}}" class="btn btn-default">Edit</button>
-                -->
+      <button type="submit" name="type" value="edit_{{attack.id}}" class="btn btn-default">Edit</button>
+    </td>
+    <td>
+      <button type="submit" name="type" value="delete_{{attack.id}}" class="btn btn-default">Löschen</button>
+      <input type="checkbox" name="delete" value="{{attack.id}}">
     </td>
   </tr>
-  {% endif %}
+  <tr style="display: none;">
+    <td>
+      hey
+    </td>
+  </tr>
   {% endfor %}
 </table>
-{% endfor %}
+</form>
 {% endblock %}
