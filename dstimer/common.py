@@ -181,5 +181,6 @@ def unparse_timestring(date):
     return day_string + " um " + time_string
 
 def get_grouping_timedelta():
+    # returns the time which is needed to send another evacuation attack after an one is already rolled out
     options = read_options()
-    return timedelta(minutes=options["evac_grouping_threshold_minutes"])
+    return timedelta(seconds=int(options["evac_pre_buffer_seconds"]) + int(options["evac_pre_buffer_seconds"]) + int(options["evac_angst_seconds"]))
