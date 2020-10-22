@@ -122,6 +122,7 @@ def get_cancel_link(session, domain, village_id, attack_id):
     return (cancel_link, response.url)
 
 def cancel_attack(session, domain, village_id, referer, params):
+    logger.info("Canceling...")
     headers = dict(referer = referer)
     params["action"] = "cancel"
     response = session.get("https://" + domain + "/game.php", params=params, headers=headers)
@@ -409,7 +410,7 @@ class CancelActionThread(threading.Thread):
     def run(self):
         try:
             attack = Attacks.query.filter_by(id = self.id).first()
-            real_cancel_time = self.action["departure_time"] - self.offset - self.ping
+            real_cancel_time = self.action["cancel_time"] - self.offset - self.ping
             with requests.Session() as session:
                 session.cookies.set("sid", attack.player.sid)
                 session.headers.update({"user-agent": common.USER_AGENT})
@@ -440,6 +441,7 @@ class CancelActionThread(threading.Thread):
 
 
                 cancel_attack(session, attack.player.domain, attack.source_id, referer, params)
+                logger.info("canceling finished at: {}".format(datetime.datetime.now()))
 
         except Exception as e:
             logger.error(str(e))

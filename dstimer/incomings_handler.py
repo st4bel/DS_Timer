@@ -82,7 +82,6 @@ def load_incomings(domain, player_id):
         params = dict(screen = "overview_villages", mode = "incomings", subtype = "attacks", group = current_group_id)
         response = session.get("https://" + domain + "/game.php", params=params, headers = headers)
 
-        logger.info("Found {} incs.".format(str(len(incomings))))
         return incomings
     return dict()
 
@@ -215,7 +214,7 @@ def plan_evac_action(inc_id):
     mill = 500
     # TODO: randomize departure and arrival time
     a.departure_time = (inc.arrival_time - timedelta(seconds=options["evac_pre_buffer_seconds"])).replace(microsecond=mill*1000)
-    a.arrival_time = ((inc.arrival_time if len(inc.next_incs.all()) == 0 else inc.next_incs.order_by("arrival_time").all()[-1].arrival_time) + timedelta(seconds=options["evac_pre_buffer_seconds"])).replace(microsecond=mill*1000)
+    a.arrival_time = ((inc.arrival_time if len(inc.next_incs.all()) == 0 else inc.next_incs.order_by("arrival_time").all()[-1].arrival_time) + timedelta(seconds=options["evac_post_buffer_seconds"])).replace(microsecond=mill*1000)
     runtime = a.arrival_time - a.departure_time
     a.cancel_time = a.departure_time + runtime/2 + timedelta(microseconds=100*1000) # problem if cancel time on microseconds = 0 (?)
 
@@ -275,7 +274,7 @@ def cycle():
                 db.session.delete(inc)
                 db.session.commit()
                 continue
-            if inc.arrival_time - now < timedelta(minutes = 5):
+            if inc.arrival_time - now < timedelta(minutes = 10):
                 if inc.status == "pending" or not inc.template:
                     continue    
                 inc.status = "pending"
@@ -285,7 +284,7 @@ def cycle():
                     if inc.previous_inc.first().status == "pending":
                         continue
                 logger.info("Planing Evacutaion for {}. Template {}".format(inc.inc_id, inc.template.name))
-                #print("Planning Evacutaion")
+
                 plan_evac_action(inc.inc_id)
             else:
                 break # all other incs are further in the future
@@ -298,7 +297,6 @@ class DaemonThread(threading.Thread):
     def run(self):
         print("Evacuate_Daemon is running")
         while True:
-            #print("Evacuate_Daemon cycle")
-            logger.info("Evacuate_Daemon cycle")
+
             cycle()
             time.sleep(60)
