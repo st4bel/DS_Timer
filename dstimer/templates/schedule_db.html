@@ -2,12 +2,82 @@
 {% block title %}Schedule{% endblock %}
 {% block header %}
 <script type="text/javascript">
-
+  function toogle_filter(){
+    $("#filter_options").toggle();
+  }
 </script>
 {% endblock %}
 {% block content %}
 
+<h2>Filter</h2><button onclick="toogle_filter()" class="btn btn-default">Toogle</button>
 <form method="post">
+<div id="filter_options" style="display: none;">
+  <table>
+    <tr>
+      <th>Start-Dorf</th>
+      <th>Ziel-Dorf</th>
+      <th>Ziel-Spieler</th>
+      <th>Einheit</th>
+      <th>Status</th>
+      <th>Raussteller</th>
+    </tr>
+    <tr>
+      <td>
+        <select name="filter_by_source_id">
+          <option value="default">Auswählen</option>
+          {% for source_id in sources %}
+            <option value="source_id">{{sources[source_id]}}</option>
+          {% endfor %}
+        </select>
+      </td>
+      <td>
+        <select name="filter_by_target_id">
+          <option value="default">Auswählen</option>
+          {% for target_id in targets %}
+            <option value="target_id">{{targets[target_id]}}</option>
+          {% endfor %}
+        </select>
+      </td>
+      <td>
+        <select name="filter_by_target_player_id">
+          <option value="default">Auswählen</option>
+          {% for player_id in target_players %}
+            <option value="player_id">{{target_players[player_id]}}</option>
+          {% endfor %}
+        </select>
+      </td>
+      <td>
+        <select name="filter_by_unit">
+          <option value="default">Auswählen</option>
+          {% for unit in units%}
+            <option value="unit">{{unit}}</option>
+          {% endfor %}
+        </select>
+      </td>
+      <td>
+        <select name="filter_by_status">
+          <option value="default">Auswählen</option>
+          <option value="scheduled">scheduled</option>
+          <option value="pending">pending</option>
+          <option value="failed">failed</option>
+          <option value="finished">finished</option>
+          <option value="expired">expired</option>
+          <option value="cancel">cancel</option>
+        </select>
+      </td>
+      <td>
+        <select name="filter_by_evac">
+          <option value="default">Auswählen</option>
+          <option value="0">Normal</option>
+          <option value="1">Rausstell-Att</option>
+        </select>
+      </td>
+    </tr>
+  </table>
+  <button type="submit" name="type" value="apply_filter" class="btn btn-default">Übernehmen</button>
+</div>
+
+<h2>Schedule</h2>
 <table class="table">
   <tr>
     <th><a href="/schedule">Spieler</a></th>

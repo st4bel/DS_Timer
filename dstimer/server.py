@@ -77,26 +77,28 @@ def get_scheduled_actions(folder="schedule"):
                 actions.append(action)
     return player, actions
 
-def get_scheduled_actions_db(): #platzhalter funktion um abfrage db zu testen
-    attacks = Attacks.query.all()
-    actions = []
-    player = []
-    if len(attacks) == 0: 
-        return player, actions
-    village_data = world_data.get_village_data(attacks[0].player.domain) #platzhalter siehe oben
-    for attack in attacks:
-        action = attack.load_action()
-        for dataset in village_data:
-            if action["source_id"] == int(dataset[0]):
-                action["source_village_name"] = world_data.unquote_name(dataset[1])
-            if action["target_id"] == int(dataset[0]):
-                action["target_village_name"] = world_data.unquote_name(dataset[1])
-        action["world"] = action["domain"].partition(".")[0]
-        action["size"] = import_action.get_attack_size(action["units"])
-        if action["player"] not in player:
-            player.append(action["player"])
-        actions.append(action)
-    return player, actions
+def get_scheduled_data_db(attacks): #platzhalter funktion um abfrage db zu testen
+    sources = dict()
+    targets = dict()
+    target_players = dict()
+    if attacks:
+        village_data = dict()
+        for attack in attacks:
+            if attack.source_id not in sources:
+                sources[attack.source_id] = attack.source_name
+            if attack.target_id not in targets:
+                targets[attack.target_id] = attack.target_name
+            if attack.player.domain not in village_data:
+                village_data[attack.player.domain] = world_data.get_village_data(attack.player.domain)
+            target_player_id = None
+            for dataset in village_data[attack.player.domain]:
+                if attack.target_id == int(dataset[0]):
+                    target_player_id = int(dataset[4])
+            if target_player_id:
+                if target_player_id not in target_players:
+                    target_players[target_player_id] = world_data.get_player_name(attack.player.domain, target_player_id)
+    return sources, targets, target_players
+
 
 def get_unitnames():
     return common.unitnames
@@ -155,10 +157,17 @@ def schedule():
     return render_template("schedule.html", actions=actions, player=player, rev=rev)
 
 @app.route("/schedule_db", methods=["GET"])
-def schedule_db():
+def schedule_db(filter_by = dict()):
     #player, actions = get_scheduled_actions_db()
     attacks = Attacks.query.all()
-    return render_template("schedule_db.html", attacks = attacks)
+    sources, targets, target_players = get_scheduled_data_db(attacks)
+    return render_template("schedule_db.html", attacks = attacks, units = common.unitnames, sources = sources, targets = targets, target_players = target_players)
+
+@app.route("/schedule_db", methods=["POST"])
+def schedule_db_post():
+    type = request.form["type"]
+    
+    return
 
 @app.route("/schedule", methods=["POST"])
 def schedule_post():

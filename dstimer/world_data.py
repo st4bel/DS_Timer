@@ -99,7 +99,7 @@ def get_player_name(domain, player_id):
     file = os.path.join(common.get_root_folder(), "world_data", domain, "player.txt")
     data = readfile_norm(file)
     for dataset in data:
-        if player_id == str(dataset[0]):
+        if str(player_id) == str(dataset[0]):
             return unquote_name(dataset[1])
     return None
 
