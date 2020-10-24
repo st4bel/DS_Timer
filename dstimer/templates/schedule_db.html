@@ -179,7 +179,7 @@
       </table>
     </td>
     <td>
-      <span>Template</span><br>
+      <label for="edit_template_{{attack.id}}">Template</label><br>
       <select name="edit_template_{{attack.id}}">
         <option value="default">Auswählen</option>
         {% for template in templates%}
@@ -188,7 +188,7 @@
       </select>
     </td>
     <td colspan="2"><!--building-->
-      <span>Gebäude</span><br>
+      <label for="edit_building_{{attack.id}}">Gebäude</label><br>
       <select name="edit_building_{{attack.id}}">
         <option value="default">Auswählen</option>
         {% for building in buildings%}

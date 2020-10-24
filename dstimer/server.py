@@ -193,7 +193,7 @@ def schedule_db():
 @app.route("/schedule_db", methods=["POST"])
 def schedule_db_post():
     type = request.form["type"]
-    current_filter_by = filter_by = ast.literal_eval(request.args.get('filter_by') if request.args.get('filter_by') else "{}")
+    current_filter_by = ast.literal_eval(request.args.get('filter_by') if request.args.get('filter_by') else "{}")
     filter_by = dict()
     if "apply_filter" in type:
         for filter in [name for name in request.form if "filter_" in name]:
@@ -328,9 +328,11 @@ def logs():
 @app.route("/templates", methods=["GET"])
 def templates_get():
     t = Template.query.all()
+    name = request.args.get('name') if request.args.get('name') else ""
+    units = ast.literal_eval(request.args.get('units') if request.args.get('units') else "{}")
     if not Template.query.filter_by(is_default= True).first():
         flash("Keine Standard Template gesetzt!")
-    return render_template("templates.html", templates=t, unitnames=get_unitnames())
+    return render_template("templates.html", templates=t, unitnames=get_unitnames(), current_name = name, current_units = units)
 
 
 @app.route("/templates", methods=["POST"])
@@ -338,17 +340,17 @@ def templates_post():
     units = get_unitnames()
     templates = Template.query.all()
     type = request.form["type"]
-    if type == "create_template":
+    if type == "new_template":
         template_units = {}
         for name in units:
-            template_units[name] = request.form[name]
+            template_units[name] = request.form.get("new_template_unit_"+name)
         t = Template()
         t.set_units(template_units)
-        template_name = request.form["newname"]
+        template_name = request.form.get("new_template_name")
         for template in templates:
             if template_name == template.name:
                 flash("Template name already used.")
-                return redirect(url_for("templates_get"))
+                return redirect(url_for("templates_get", name=template_name, units = template_units))
         t.name = template_name
         db.session.add(t)
     elif "delete_" in type:
@@ -356,14 +358,6 @@ def templates_post():
         if id in [t.id for t in templates]:
             t = Template.query.filter_by(id=id).first()
             db.session.delete(t)
-        #options = common.read_options()
-        #for template in templates:
-        #    if template["id"] == id:
-        #        if options["evac_template"] == template["name"]:
-        #            options["evac_template"] = "default"
-        #            common.write_options(options)
-        #            flash("Rausstell-Template auf default zurückgesetzt.")
-        #import_template.remove_by_id(id)
     elif "set-default_" in type:
         id = int(type.split("_")[1])
         if id in [t.id for t in templates]:
@@ -374,10 +368,24 @@ def templates_post():
             t = Template.query.filter_by(id=id).first()
             t.is_default = True
             db.session.add(t)
+    elif "edit_template_" in type:
+        id = type.split("_")[2]
+        t = Template.query.filter_by(id=int(id)).first()
+        template_units = dict()
+        for name in units:
+            template_units[name] = request.form.get("new_template_unit_"+name)
+        t.set_units(template_units)
+        template_name = request.form.get("new_template_name")
+        if template_name != t.name:
+            for template in templates:
+                if template_name == template.name:
+                    flash("Template name already used.")
+                    return redirect(url_for("templates_get", name=template_name, units = template_units))
+        t.name = template_name
+        db.session.add(t)
+
     db.session.commit()
     return redirect("/templates")
-    #return redirect("/templates")
-
 
 @app.route("/show/<domain>/<type>/<id>", methods=["GET"])    #TODO domain
 def show(domain, type, id):
