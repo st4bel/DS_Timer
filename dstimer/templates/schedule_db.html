@@ -178,7 +178,17 @@
         </tr>
       </table>
     </td>
-    <td colspan="3"><!--building-->
+    <td>
+      <span>Template</span><br>
+      <select name="edit_template_{{attack.id}}">
+        <option value="default">Auswählen</option>
+        {% for template in templates%}
+          <option value="{{template.id}}" {% if template.id == attack.template.id %}selected="selected"{% endif %}>{{template.name}}</option>
+        {% endfor %}
+      </select>
+    </td>
+    <td colspan="2"><!--building-->
+      <span>Gebäude</span><br>
       <select name="edit_building_{{attack.id}}">
         <option value="default">Auswählen</option>
         {% for building in buildings%}

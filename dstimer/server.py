@@ -163,6 +163,7 @@ def schedule():
 @app.route("/schedule_db", methods=["GET"])
 def schedule_db():
     attacks = Attacks.query.order_by("departure_time").all()
+    templates = Template.query.all()
     sources, targets, stati = get_scheduled_data_db(attacks)
     filter_by = ast.literal_eval(request.args.get('filter_by') if request.args.get('filter_by') else "{}")
     order_by = request.args.get('order_by')
@@ -187,7 +188,7 @@ def schedule_db():
         if "arrival_time" == order_by:
             attacks = sorted(attacks, key=lambda a: a.arrival_time)
 
-    return render_template("schedule_db.html", attacks = attacks, units = common.unitnames, sources = sources, targets = targets, stati = stati, filter_by = filter_by, buildings = common.buildingnames)
+    return render_template("schedule_db.html", attacks = attacks, units = common.unitnames, sources = sources, targets = targets, stati = stati, filter_by = filter_by, buildings = common.buildingnames, templates = templates)
 
 @app.route("/schedule_db", methods=["POST"])
 def schedule_db_post():
@@ -213,7 +214,10 @@ def schedule_db_post():
     elif "edit_" in type:
         id = type.split("_")[1]
         attack = Attacks.query.filter_by(id = int(id)).first()
-       
+        
+        if request.form.get("edit_template_"+id) != "default":
+            attack.template = Template.query.filter_by(id = int(request.form.get("edit_template_"+id))).first()
+
         units = dict()
         for unit in common.unitnames:
             units[unit] = int(request.form.get("edit_unit_"+unit+"_"+id))

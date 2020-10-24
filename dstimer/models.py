@@ -108,6 +108,7 @@ class Attacks(db.Model):
     # relationships:
     player_id = db.Column(db.Integer, db.ForeignKey("player.id"))
     incs = db.relationship("Incomings", backref="attack", lazy='dynamic')
+    template_id = db.Column(db.Integer, db.ForeignKey("template.id"))
 
     def __repr__(self):
         return "<Attack departure: {}, status: {}>".format(self.departure_time.strftime("%m/%d/%Y, %H:%M:%S"), self.status)
@@ -119,6 +120,8 @@ class Attacks(db.Model):
         return self.source_id is not None and self.target_id is not None and not self.is_expired() and self.player_id is not None and self.unit is not None and self.domain is not None and self.type is not None
     
     def get_units(self):
+        if self.template:
+            return self.template.get_compressed_units()
         return ast.literal_eval(self.units)
 
     def load_action(self):
@@ -180,6 +183,7 @@ class Template(db.Model):
     # relationships:
     evacoptions = db.relationship("Evacoption", backref="template", lazy='dynamic')
     incs = db.relationship("Incomings", backref="template", lazy='dynamic')
+    attacks = db.relationship("Attacks", backref="template", lazy='dynamic')
 
     def __repr__(self):
         return "<Template {}>".format(self.name)
@@ -191,6 +195,16 @@ class Template(db.Model):
                 units[unit] = ""
         return units
     
+    def get_compressed_units(self):
+        units_to_delete = []
+        units = self.get_units()
+        for unit, amount in units.items():
+            if import_action.is_zero(amount):
+                units_to_delete.append(unit)
+        for unit in units_to_delete:
+            del units[unit]
+        return units
+
     def set_units(self, unit_dict):
         self.units = str(unit_dict)
     
