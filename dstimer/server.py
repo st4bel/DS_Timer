@@ -187,7 +187,7 @@ def schedule_db():
         if "arrival_time" == order_by:
             attacks = sorted(attacks, key=lambda a: a.arrival_time)
 
-    return render_template("schedule_db.html", attacks = attacks, units = common.unitnames, sources = sources, targets = targets, stati = stati, filter_by = filter_by)
+    return render_template("schedule_db.html", attacks = attacks, units = common.unitnames, sources = sources, targets = targets, stati = stati, filter_by = filter_by, buildings = common.buildingnames)
 
 @app.route("/schedule_db", methods=["POST"])
 def schedule_db_post():
@@ -204,12 +204,45 @@ def schedule_db_post():
         for attack in attacks:
             db.session.delete(attack)
     elif "delete__selected" in type:
-        for a_id in request.form.getlist("delete"):
+        for a_id in request.form.getlist("selected"):
             attack = Attacks.query.filter_by(id = int(a_id)).first()
             db.session.delete(attack)
     elif "delete_" in type:
         attack = Attacks.query.filter_by(id = int(type.split("_")[1])).first()
         db.session.delete(attack)
+    elif "edit_" in type:
+        id = type.split("_")[1]
+        attack = Attacks.query.filter_by(id = int(id)).first()
+       
+        units = dict()
+        for unit in common.unitnames:
+            units[unit] = int(request.form.get("edit_unit_"+unit+"_"+id))
+        
+        attack.units = str(units)
+
+        departure = dateutil.parser.parse(request.form.get("edit_departure_"+id))
+        arrival = dateutil.parser.parse(request.form.get("edit_arrival_"+id))
+
+        if departure != attack.departure_time or arrival != attack.arrival_time:
+            duration = import_action.runtime(
+                import_action.speed(attack.get_units(), attack.type, import_action.get_cached_unit_info(attack.player.domain)),
+                import_action.distance(dict(x=attack.source_coord_x, y=attack.source_coord_y), dict(x=attack.target_coord_x, y=attack.target_coord_y)), attack.player.domain)
+
+            if departure != attack.departure_time:
+                attack.departure_time = departure
+                attack.arrival_time = attack.departure_time + duration
+            else:
+                attack.arrival_time = arrival
+                attack.departure_time = attack.arrival_time - duration
+        
+        attack.building = request.form.get("edit_building_"+id)
+
+        if attack.status != "scheduled" and not attack.is_expired():
+            attack.status = "scheduled"
+        
+        attack.autocomplete()
+        db.session.add(attack)
+
     db.session.commit()
 
     return redirect(url_for("schedule_db", filter_by = current_filter_by))
@@ -493,7 +526,6 @@ def edit_action_get(id):
     return render_template("edit_action.html", players=players, action=action,
                            unitnames=get_unitnames(), templates=get_templates(),
                            buildings=get_buildingnames())
-
 
 @app.route("/edit_action/<id>", methods=["POST"])
 def edit_action_post(id):

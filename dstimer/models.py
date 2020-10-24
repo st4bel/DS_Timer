@@ -120,7 +120,7 @@ class Attacks(db.Model):
     
     def get_units(self):
         return ast.literal_eval(self.units)
-    
+
     def load_action(self):
         action = dict(self.__dict__)
         action["source_coord"] = dict()
@@ -166,6 +166,11 @@ class Attacks(db.Model):
         for unit in units_to_delete:
             del units[unit]
         self.units = str(units)
+    
+    def get_target_player(self):
+        id = world_data.get_village_owner(self.player.domain, self.target_id)
+        name = world_data.get_player_name(self.player.domain, id)
+        return dict(player_id=id, name=name)
 
 class Template(db.Model):
     id = db.Column(db.Integer, primary_key=True)

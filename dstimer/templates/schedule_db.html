@@ -5,6 +5,14 @@
   function toogle_filter(){
     $("#filter_options").toggle();
   }
+  function toogle_edit(id){
+    $(".edit_attack:visible").each(function(){
+      if ($(this).attr("id") != "edit_" + id){ // only show one edit row at the same time
+        $(this).toggle()
+      }
+    })
+    $("#edit_"+id).toggle();
+  }
 </script>
 {% endblock %}
 {% block content %}
@@ -139,16 +147,47 @@
       {% endif %}
     </td>
     <td>
-      <button type="submit" name="type" value="edit_{{attack.id}}" class="btn btn-default">Edit</button>
+      <button type="button" onclick="toogle_edit({{attack.id}})" class="btn btn-default">Edit</button>
     </td>
     <td>
       <button type="submit" name="type" value="delete_{{attack.id}}" class="btn btn-default">Löschen</button>
-      <input type="checkbox" name="delete" value="{{attack.id}}">
+      <input type="checkbox" name="selected" value="{{attack.id}}">
     </td>
   </tr>
   <tr style="display: none;">
     <td>
       hey
+    </td>
+  </tr>
+  <tr style="display: none;" id="edit_{{attack.id}}" class="edit_attack">
+    <td colspan="2"><!--departure-->
+      <input name="edit_departure_{{attack.id}}" type="datetime-local" step="0.001" id="time" style="width: 180px" value="{{attack.departure_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}}">
+    </td>
+    <td colspan="3"><!--arrival-->
+      <input name="edit_arrival_{{attack.id}}" type="datetime-local" step="0.001" id="time" style="width: 180px" value="{{attack.arrival_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}}">
+    </td>
+    <td colspan="3"><!--units-->
+      <table>
+        <tr>
+          {% for unit in units %}
+          <td>
+            <img src="{{ innocdn_url('/graphic/unit/unit_' + unit + '.png') }}">
+            <input name="edit_unit_{{unit}}_{{attack.id}}" style="width: 40px" type="text" value="{% if unit in attack.get_units() %}{{attack.get_units()[unit]}}{% else %}0{% endif %}">
+          </td>
+          {% endfor %}
+        </tr>
+      </table>
+    </td>
+    <td colspan="3"><!--building-->
+      <select name="edit_building_{{attack.id}}">
+        <option value="default">Auswählen</option>
+        {% for building in buildings%}
+          <option value="{{building}}" {% if building == attack.building %}selected="selected"{% endif %}>{{building}}</option>
+        {% endfor %}
+      </select>
+    </td>
+    <td><!--submit-->
+      <button type="submit" name="type" value="edit_{{attack.id}}" class="btn btn-default">Übernehmen</button>
     </td>
   </tr>
   {% endfor %}
