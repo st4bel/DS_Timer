@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, flash, url_for, sen
 from flask.json import jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import desc
-import os
+import os, ast
 import json
 import dateutil.parser
 from datetime import datetime
@@ -77,27 +77,31 @@ def get_scheduled_actions(folder="schedule"):
                 actions.append(action)
     return player, actions
 
-def get_scheduled_data_db(attacks): #platzhalter funktion um abfrage db zu testen
+def get_scheduled_data_db(attacks):
+    # returns data by which a filter could be apllied
     sources = dict()
     targets = dict()
-    target_players = dict()
+    #target_players = dict()
+    stati  = []
     if attacks:
         village_data = dict()
         for attack in attacks:
-            if attack.source_id not in sources:
-                sources[attack.source_id] = attack.source_name
-            if attack.target_id not in targets:
-                targets[attack.target_id] = attack.target_name
+            if str(attack.source_id) not in sources:
+                sources[str(attack.source_id)] = attack.source_name
+            if str(attack.target_id) not in targets:
+                targets[str(attack.target_id)] = attack.target_name
             if attack.player.domain not in village_data:
                 village_data[attack.player.domain] = world_data.get_village_data(attack.player.domain)
-            target_player_id = None
-            for dataset in village_data[attack.player.domain]:
-                if attack.target_id == int(dataset[0]):
-                    target_player_id = int(dataset[4])
-            if target_player_id:
-                if target_player_id not in target_players:
-                    target_players[target_player_id] = world_data.get_player_name(attack.player.domain, target_player_id)
-    return sources, targets, target_players
+            #target_player_id = None
+            #for dataset in village_data[attack.player.domain]:
+            #    if attack.target_id == int(dataset[0]):
+            #        target_player_id = int(dataset[4])
+            #if target_player_id:
+            #    if target_player_id not in target_players:
+            #        target_players[target_player_id] = world_data.get_player_name(attack.player.domain, target_player_id)
+            if attack.status not in stati:
+                stati.append(attack.status)
+    return sources, targets, stati
 
 
 def get_unitnames():
@@ -157,17 +161,58 @@ def schedule():
     return render_template("schedule.html", actions=actions, player=player, rev=rev)
 
 @app.route("/schedule_db", methods=["GET"])
-def schedule_db(filter_by = dict()):
-    #player, actions = get_scheduled_actions_db()
-    attacks = Attacks.query.all()
-    sources, targets, target_players = get_scheduled_data_db(attacks)
-    return render_template("schedule_db.html", attacks = attacks, units = common.unitnames, sources = sources, targets = targets, target_players = target_players)
+def schedule_db():
+    attacks = Attacks.query.order_by("departure_time").all()
+    sources, targets, stati = get_scheduled_data_db(attacks)
+    filter_by = ast.literal_eval(request.args.get('filter_by') if request.args.get('filter_by') else "{}")
+    order_by = request.args.get('order_by')
+    if filter_by:
+        unit = None
+        evac = None
+        if "unit" in filter_by:
+            unit = filter_by["unit"] # cant filter by unit directly. 
+            del(filter_by["unit"])
+        if "evac" in filter_by:
+            evac = filter_by["evac"]
+            del(filter_by["evac"])
+
+        attacks = Attacks.query.filter_by(**filter_by).order_by("departure_time").all()
+
+        if unit:
+            attacks = [attack for attack in attacks if unit in attack.get_units()]
+        if evac == "1":
+            attacks = [attack for attack in attacks if attack.incs.all()]
+    
+    if order_by: # jaja noch sehr lui haft
+        if "arrival_time" == order_by:
+            attacks = sorted(attacks, key=lambda a: a.arrival_time)
+
+    return render_template("schedule_db.html", attacks = attacks, units = common.unitnames, sources = sources, targets = targets, stati = stati, filter_by = filter_by)
 
 @app.route("/schedule_db", methods=["POST"])
 def schedule_db_post():
     type = request.form["type"]
-    
-    return
+    current_filter_by = filter_by = ast.literal_eval(request.args.get('filter_by') if request.args.get('filter_by') else "{}")
+    filter_by = dict()
+    if "apply_filter" in type:
+        for filter in [name for name in request.form if "filter_" in name]:
+            if request.form.get(filter) != "default":
+                filter_by[filter.split("filter_by_")[1]] = request.form.get(filter)
+        return redirect(url_for("schedule_db", filter_by=filter_by))
+    elif "delete__all" in type:
+        attacks = Attacks.query.filter_by(**current_filter_by).all()
+        for attack in attacks:
+            db.session.delete(attack)
+    elif "delete__selected" in type:
+        for a_id in request.form.getlist("delete"):
+            attack = Attacks.query.filter_by(id = int(a_id)).first()
+            db.session.delete(attack)
+    elif "delete_" in type:
+        attack = Attacks.query.filter_by(id = int(type.split("_")[1])).first()
+        db.session.delete(attack)
+    db.session.commit()
+
+    return redirect(url_for("schedule_db", filter_by = current_filter_by))
 
 @app.route("/schedule", methods=["POST"])
 def schedule_post():

@@ -11,12 +11,12 @@
 
 <h2>Filter</h2><button onclick="toogle_filter()" class="btn btn-default">Toogle</button>
 <form method="post">
-<div id="filter_options" style="display: none;">
+<div id="filter_options" style="{% if not filter_by %}display: none;{% endif %}">
   <table>
     <tr>
       <th>Start-Dorf</th>
       <th>Ziel-Dorf</th>
-      <th>Ziel-Spieler</th>
+     <!-- <th>Ziel-Spieler</th>-->
       <th>Einheit</th>
       <th>Status</th>
       <th>Raussteller</th>
@@ -26,7 +26,7 @@
         <select name="filter_by_source_id">
           <option value="default">Auswählen</option>
           {% for source_id in sources %}
-            <option value="source_id">{{sources[source_id]}}</option>
+            <option value="{{source_id}}" {% if source_id == filter_by['source_id'] %}selected="selected"{% endif %}>{{sources[source_id]}}</option>
           {% endfor %}
         </select>
       </td>
@@ -34,35 +34,33 @@
         <select name="filter_by_target_id">
           <option value="default">Auswählen</option>
           {% for target_id in targets %}
-            <option value="target_id">{{targets[target_id]}}</option>
+            <option value="{{target_id}}" {% if target_id == filter_by['target_id'] %}selected="selected"{% endif %}>{{targets[target_id]}}</option>
           {% endfor %}
         </select>
       </td>
+ <!--       currently no trivial way to filter by target player.  
       <td>
         <select name="filter_by_target_player_id">
           <option value="default">Auswählen</option>
           {% for player_id in target_players %}
-            <option value="player_id">{{target_players[player_id]}}</option>
+            <option value="{{player_id}}">{{target_players[player_id]}}</option>
           {% endfor %}
         </select>
-      </td>
+      </td>-->
       <td>
         <select name="filter_by_unit">
           <option value="default">Auswählen</option>
           {% for unit in units%}
-            <option value="unit">{{unit}}</option>
+            <option value="{{unit}}" {% if unit == filter_by['unit'] %}selected="selected"{% endif %}>{{unit}}</option>
           {% endfor %}
         </select>
       </td>
       <td>
         <select name="filter_by_status">
           <option value="default">Auswählen</option>
-          <option value="scheduled">scheduled</option>
-          <option value="pending">pending</option>
-          <option value="failed">failed</option>
-          <option value="finished">finished</option>
-          <option value="expired">expired</option>
-          <option value="cancel">cancel</option>
+          {% for status in stati %}
+            <option value="{{ status }}" {% if status in filter_by['status'] %}selected="selected"{% endif %}>{{ status }}</option>
+          {% endfor %}
         </select>
       </td>
       <td>
@@ -80,13 +78,13 @@
 <h2>Schedule</h2>
 <table class="table">
   <tr>
-    <th><a href="/schedule">Spieler</a></th>
-    <th><a href="/schedule">Abschicken</a></th>
-    <th><a href="/schedule">Ankunft</a></th>
+    <th>Spieler</th>
+    <th><a href="/schedule_db?order_by=departure_time">Abschicken</a></th>
+    <th><a href="/schedule_db?order_by=arrival_time">Ankunft</a></th>
     <th></th>
     <th></th>
-    <th><a href="/schedule">Start</a></th>
-    <th><a href="/schedule">Ziel</a></th>
+    <th>Start</th>
+    <th>Ziel</th>
     <th>Einheiten</th>
     <th>Gebäude</th>
     <th>Status</th>

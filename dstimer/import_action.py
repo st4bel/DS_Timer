@@ -317,6 +317,7 @@ def add_attack_to_db(action):
         type = action["type"], 
         status = "scheduled"
     )
+    a.autocomplete()
     if not a.is_expired():
         db.session.add(a)
         db.session.commit()
