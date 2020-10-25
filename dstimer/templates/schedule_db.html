@@ -5,6 +5,9 @@
   function toogle_filter(){
     $("#filter_options").toggle();
   }
+  function toogle_complex_actions(){
+    $("#complex_options").toggle();
+  }
   function toogle_edit(id){
     $(".edit_attack:visible").each(function(){
       if ($(this).attr("id") != "edit_" + id){ // only show one edit row at the same time
@@ -32,14 +35,27 @@
     }
   }
 
+  function toogle_row_highlight(id, type) {
+    $("#row_"+id).toggleClass("highlight")
+  }
+
+  function mark_all() {
+    $(".mark").click()
+  }
+
 </script>
+<style>
+  .highlight {
+    background: lightgrey;
+  }
+</style>
 {% endblock %}
 {% block content %}
 
-<h2>Filter</h2><button onclick="toogle_filter()" class="btn btn-default">Toogle</button>
+<a href="#" onclick="toogle_filter()"><h2>Filter</h2></a>
 <form method="post">
 <div id="filter_options" style="{% if not filter_by %}display: none;{% endif %}">
-  <table>
+  <table class="table"> 
     <tr>
       <th>Start-Dorf</th>
       <th>Ziel-Dorf</th>
@@ -100,9 +116,68 @@
     </tr>
   </table>
   <button type="submit" name="type" value="apply_filter" class="btn btn-default">Übernehmen</button>
+  <a href="/schedule_db">Zurücksetzen</a>
+</div>
+
+<a href="#" onclick="toogle_complex_actions()"><h2>Komplexe Aktionen</h2></a>
+<div style="display: none;" id="complex_options">
+  Folgende Aktionen auf alle markierten Angriffe ausführen:
+  <table class="table table-bordered">
+    <tr>
+      <th colspan="4">Verschieben um:</th>
+      <th>Template setzen:</th>
+      <th>Katapult Ziel setzen:</th>
+    </tr>
+    <tr>
+      <td align="right" width="60px">
+      <div>
+          h:
+          <input type="text" name="move_by_hours" value="0" style="width: 32px">
+        </div>
+      </td>
+      <td align="right" width="60px">
+        <div>
+          m:
+          <input type="text" name="move_by_minutes" value="0" style="width: 32px">
+        </div>
+      </td>
+      <td align="right" width="60px">
+        <div>
+          s:
+          <input type="text" name="move_by_seconds" value="0" style="width: 32px">
+        </div>
+      </td>
+      <td align="right" width="70px">
+        <div>
+          ms:
+          <input type="text" name="move_by_ms" value="000" style="width: 32px">
+        </div>
+      </td>
+      <td align="center" width="100px">
+        <select name="set_template_all" class="">
+          <option value="default">Auswählen</option>
+          {% for template in templates%}
+            <option value="{{template.id}}" >{{template.name}}</option>
+          {% endfor %}
+        </select>
+      </td>
+      <td align="center" width="110px">
+        <select name="set_building_all">
+          <option value="default">Auswählen</option>
+          {% for building in buildings%}
+            <option value="{{building}}">{{building}}</option>
+          {% endfor %}
+        </select>
+      </td>
+    </tr>
+  </table>
+  <button type="submit" name="type" value="apply_complex" class="btn btn-default">Anwenden</button>
 </div>
 
 <h2>Schedule</h2>
+Löschen:
+<button type="submit" name="type" value="delete__all" class="btn btn-default">Alle</button>
+<button type="submit" name="type" value="delete__selected" class="btn btn-default">Auswahl</button>
 <table class="table">
   <tr>
     <th>Spieler</th>
@@ -116,9 +191,10 @@
     <th>Gebäude</th>
     <th>Status</th>
     <th>Edit</th>
+    <th>Löschen</th>
     <th>
-      <button type="submit" name="type" value="delete__all" class="btn btn-default">Alle</button>
-      <button type="submit" name="type" value="delete__selected" class="btn btn-default">Auswahl</button>
+      Markieren
+      <button type="button" class="btn btn-default" onclick="mark_all()">Alle</button>
     </th>
   </tr>
   {% for attack in attacks %}
@@ -173,7 +249,9 @@
     </td>
     <td>
       <button type="submit" name="type" value="delete_{{attack.id}}" class="btn btn-default">Löschen</button>
-      <input type="checkbox" name="selected" value="{{attack.id}}">
+    </td>
+    <td>
+      <input class="mark" type="checkbox" name="selected" value="{{attack.id}}" onchange="toogle_row_highlight({{attack.id}}, 'primary')">
     </td>
   </tr>
   <tr style="display: none;">
@@ -218,7 +296,7 @@
         {% endfor %}
       </select>
     </td>
-    <td><!--submit-->
+    <td colspan="2"><!--submit-->
       <button type="submit" name="type" value="edit_{{attack.id}}" class="btn btn-default">Übernehmen</button>
     </td>
   </tr>

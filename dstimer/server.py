@@ -5,7 +5,7 @@ from sqlalchemy import desc
 import os, ast
 import json
 import dateutil.parser
-from datetime import datetime
+from datetime import datetime, timedelta
 from dstimer import import_action
 from dstimer import import_template
 from dstimer import import_keks
@@ -254,7 +254,26 @@ def schedule_db_post():
         
         attack.autocomplete()
         db.session.add(attack)
-
+    elif "apply_complex" in type:
+        diff = timedelta(
+            hours = int(request.form.get("move_by_hours")),
+            minutes = int(request.form.get("move_by_minutes")),
+            seconds = int(request.form.get("move_by_seconds")),
+            microseconds = int(request.form.get("move_by_ms"))*1000
+        )
+        template = request.form.get("set_template_all")
+        building = request.form.get("set_building_all")
+    
+        for a_id in request.form.getlist("selected"):
+            attack = Attacks.query.filter_by(id = int(a_id)).first()
+            attack.departure_time = attack.departure_time + diff
+            attack.arrival_time = attack.arrival_time + diff
+            if template != "default":
+                attack.template = Template.query.filter_by(id = int(template)).first()
+            if building != "default":
+                attack.building = building
+            db.session.add(attack)
+            
     db.session.commit()
 
     return redirect(url_for("schedule_db", filter_by = current_filter_by))
