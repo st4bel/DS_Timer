@@ -13,6 +13,25 @@
     })
     $("#edit_"+id).toggle();
   }
+  function set_template(id) {
+    // setting tamplate to default, because units got inserted manually
+    $(".select-template.id-"+id).val("default");
+  }
+
+  function paste_template(id) {
+    template = $(".select-template.id-"+id).val()
+    if (template != "default") {
+      $(".edit-unit.id-"+id).each(function() {
+        unitname = $(this).attr("name").split("_")[2]
+        amount = $(".template-help.template-id-"+template+"."+unitname).text().trim()
+        if (amount==""){
+          amount = "0"
+        }
+        $(this).val(amount)
+      })
+    }
+  }
+
 </script>
 {% endblock %}
 {% block content %}
@@ -145,6 +164,9 @@
       {% if attack.incs.first() %}
         <a href="/edit_inc/{{ attack.incs.first().id }}"><span class="badge alert-warning">evac</span></a>
       {% endif %}
+      {% if attack.template %}
+      <a href="/templates"><span class="badge alert-success">{{attack.template.name}}</span></a>
+      {% endif %}
     </td>
     <td>
       <button type="button" onclick="toogle_edit({{attack.id}})" class="btn btn-default">Edit</button>
@@ -172,7 +194,7 @@
           {% for unit in units %}
           <td>
             <img src="{{ innocdn_url('/graphic/unit/unit_' + unit + '.png') }}">
-            <input name="edit_unit_{{unit}}_{{attack.id}}" style="width: 40px" type="text" value="{% if unit in attack.get_units() %}{{attack.get_units()[unit]}}{% else %}0{% endif %}">
+            <input class="edit-unit {{unit}} id-{{attack.id}}" onchange="set_template({{attack.id}})" name="edit_unit_{{unit}}_{{attack.id}}" style="width: 40px" type="text" value="{% if unit in attack.get_units() %}{{attack.get_units()[unit]}}{% else %}0{% endif %}">
           </td>
           {% endfor %}
         </tr>
@@ -180,7 +202,7 @@
     </td>
     <td>
       <label for="edit_template_{{attack.id}}">Template</label><br>
-      <select name="edit_template_{{attack.id}}">
+      <select onchange="paste_template({{attack.id}})" name="edit_template_{{attack.id}}" class="select-template id-{{attack.id}}">
         <option value="default">Auswählen</option>
         {% for template in templates%}
           <option value="{{template.id}}" {% if template.id == attack.template.id %}selected="selected"{% endif %}>{{template.name}}</option>
@@ -203,4 +225,15 @@
   {% endfor %}
 </table>
 </form>
+<!-- Hidden content -->
+<div style="display: none;">
+  hey
+  {% for template in templates %}
+   {% for unit in units %}
+    <span class="template-help {{unit}} template-id-{{ template.id }}">
+      {{ template.get_units()[unit] }}
+    </span>
+    {% endfor %} 
+  {% endfor %}
+</div>
 {% endblock %}

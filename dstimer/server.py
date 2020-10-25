@@ -220,9 +220,17 @@ def schedule_db_post():
 
         units = dict()
         for unit in common.unitnames:
-            units[unit] = int(request.form.get("edit_unit_"+unit+"_"+id))
+            units[unit] = int(request.form.get("edit_unit_"+unit+"_"+id) if request.form.get("edit_unit_"+unit+"_"+id) != "" else 0)
         
+        if attack.template:
+            if attack.template.get_units() != units:
+                #template currently set, but now units changed manually -> delete relationship to template
+                attack.template = None
+
         attack.units = str(units)
+
+        if request.form.get("edit_template_"+id) != "default":
+            attack.template = Template.query.filter_by(id = int(request.form.get("edit_template_"+id))).first()
 
         departure = dateutil.parser.parse(request.form.get("edit_departure_"+id))
         arrival = dateutil.parser.parse(request.form.get("edit_arrival_"+id))

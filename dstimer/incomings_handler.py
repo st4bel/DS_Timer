@@ -299,4 +299,4 @@ class DaemonThread(threading.Thread):
         while True:
 
             cycle()
-            time.sleep(60)
+            time.sleep(300)
