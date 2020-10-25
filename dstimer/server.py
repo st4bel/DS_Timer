@@ -82,7 +82,8 @@ def get_scheduled_data_db(attacks):
     sources = dict()
     targets = dict()
     #target_players = dict()
-    stati  = []
+    stati  = ["active", "expired", "failed"]
+    
     if attacks:
         village_data = dict()
         for attack in attacks:
@@ -99,8 +100,8 @@ def get_scheduled_data_db(attacks):
             #if target_player_id:
             #    if target_player_id not in target_players:
             #        target_players[target_player_id] = world_data.get_player_name(attack.player.domain, target_player_id)
-            if attack.status not in stati:
-                stati.append(attack.status)
+            #if attack.status not in stati:
+            #    stati.append(attack.status)
     return sources, targets, stati
 
 
@@ -168,21 +169,30 @@ def schedule_db():
     filter_by = ast.literal_eval(request.args.get('filter_by') if request.args.get('filter_by') else "{}")
     order_by = request.args.get('order_by')
     if filter_by:
-        unit = None
-        evac = None
+        query_filter_by = dict()
+        # cant filter by unit, status, evac directly. 
+        if "source_id" in filter_by:
+            query_filter_by["source_id"] = filter_by["source_id"]
+        if "target_id" in filter_by:
+            query_filter_by["target_id"] = filter_by["target_id"]
+
+        attacks = Attacks.query.filter_by(**query_filter_by).order_by("departure_time").all()
+
         if "unit" in filter_by:
-            unit = filter_by["unit"] # cant filter by unit directly. 
-            del(filter_by["unit"])
+            attacks = [attack for attack in attacks if filter_by["unit"] in attack.get_units()]
         if "evac" in filter_by:
-            evac = filter_by["evac"]
-            del(filter_by["evac"])
+            if filter_by["evac"] == "1":
+                attacks = [attack for attack in attacks if attack.incs.all()]
 
-        attacks = Attacks.query.filter_by(**filter_by).order_by("departure_time").all()
-
-        if unit:
-            attacks = [attack for attack in attacks if unit in attack.get_units()]
-        if evac == "1":
-            attacks = [attack for attack in attacks if attack.incs.all()]
+    if "status" not in filter_by:
+        attacks = [attack for attack in attacks if not attack.is_expired()]
+    else:
+        if filter_by["status"] == "active":
+            attacks = [attack for attack in attacks if not attack.is_expired()]
+        elif filter_by["status"] == "expired":
+            attacks = [attack for attack in attacks if attack.is_expired()]
+        else:
+            attacks = [attack for attack in attacks if attack.status == "failed"]
     
     if order_by: # jaja noch sehr lui haft
         if "arrival_time" == order_by:
