@@ -248,7 +248,7 @@ def get_target_id(inc):
 
 
 def cycle():
-    players = Player.query.all()
+    players = Player.query.filter_by(evac_activated = True).all()
     for player in players:
         if not player.is_active():
             continue

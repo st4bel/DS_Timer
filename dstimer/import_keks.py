@@ -2,6 +2,7 @@ import requests
 import json
 import os
 import re
+from datetime import datetime
 from dstimer import common
 from bs4 import BeautifulSoup
 import logging
@@ -47,11 +48,13 @@ def write_keks_db(keks, id, name):
     player = Player.query.filter_by(player_id = id, domain = keks["domain"]).first()
     if player:
         player.sid = keks["sid"]
+        player.sid_datetime = datetime.now()
     else:
         player = Player(
             name = name,
             player_id = id,
-            sid = keks["sid"], 
+            sid = keks["sid"],
+            sid_datetime = datetime.now(), 
             domain = keks["domain"]
         )
         all_group = Group(

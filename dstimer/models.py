@@ -214,8 +214,10 @@ class Player(db.Model):
     player_id = db.Column(db.Integer)
     domain = db.Column(db.String(64))
     sid = db.Column(db.String(255))
+    sid_datetime = db.Column(db.DateTime)
     date_group_refresh = db.Column(db.DateTime, default=datetime.now())
     date_village_refresh = db.Column(db.DateTime, default=datetime.now())
+    evac_activated = db.Column(db.Boolean, default=False)
     # relationships:
     attacks = db.relationship("Attacks", backref="player", lazy='dynamic')
     incs = db.relationship("Incomings", backref="player", lazy='dynamic')
