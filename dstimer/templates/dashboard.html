@@ -58,10 +58,10 @@
                         </a>
                     </td>
                     <td>
-                        {% for type in incs %}
+                        {% for type in incs[player.id] %}
                         <a href="{{ url_for('incomings_get', domain = player.domain, player_id = player.player_id) }}">
-                            <span class="badge {% if incs[type] == 0 %}alert-success{% elif incs[type] <= 10 %}alert_warning{% else %}alert-danger{% endif %}">
-                                {{ type }} {{ incs[type] }}
+                            <span class="badge {% if incs[player.id][type] == 0 %}alert-success{% elif incs[player.id][type] <= 10 %}alert-warning{% else %}alert-danger{% endif %}">
+                                {{ type }} {{ incs[player.id][type] }}
                             </span>
                         </a>
                         {% endfor %}

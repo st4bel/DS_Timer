@@ -2,7 +2,15 @@
 {% block title %}Raussteller Optionen{% endblock %}
 {% block content %}
 <h3>Raussteller Optionen für {{ player.name }} ({{ player.domain }})</h3>
+<div>
+    Raussteller ist {% if player.evac_activated %} 
+    <span class="badge alert-success">aktiv</span>
+    {% else %}
+    <span class="badge alert-danger">inaktiv</span>
+    {% endif %}
+</div>
 <form action="", method="post">
+    <button type="submit" name="type" value="activate" class="btn btn-default">De/Aktivieren</button>
 <table class="table">
     <tr>
         <th class="col-md-3">Angriffsarten</th>

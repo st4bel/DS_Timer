@@ -742,6 +742,9 @@ def inc_options_post(domain, player_id):
     elif request.form["type"] == "refresh_groups":
         p.refresh_groups(1)
 
+    elif request.form["type"] == "activate":
+        p.evac_activated = not p.evac_activated
+
     db.session.commit()
     return redirect(url_for("inc_options", domain=domain, player_id=player_id))
 
@@ -767,7 +770,7 @@ def dashboard_get():
             expired = {"NO" : NO_expired, "badge" : "alert-warning", "filter_by" : str(dict(status = "expired"))},
             failed = {"NO" : NO_failed, "badge" : "alert-danger", "filter_by" : str(dict(status = "failed"))}
         )
-        incs = dict(
+        incs[player.id] = dict(
             incs = NO_incs,
             ignored = NO_ignored_incs
         )
