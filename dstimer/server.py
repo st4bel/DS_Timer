@@ -82,7 +82,7 @@ def get_scheduled_data_db(attacks):
     sources = dict()
     targets = dict()
     #target_players = dict()
-    stati  = ["active", "expired", "failed"]
+    stati  = ["active", "finished","expired", "failed"]
     
     if attacks:
         village_data = dict()
@@ -190,7 +190,9 @@ def schedule_db():
         if filter_by["status"] == "active":
             attacks = [attack for attack in attacks if not attack.is_expired()]
         elif filter_by["status"] == "expired":
-            attacks = [attack for attack in attacks if attack.is_expired()]
+            attacks = [attack for attack in attacks if attack.status == "expired"]
+        elif filter_by["status"] == "finished":
+            attacks = [attack for attack in attacks if attack.status == "finished"]
         else:
             attacks = [attack for attack in attacks if attack.status == "failed"]
     
@@ -319,7 +321,7 @@ def import_action_post():
             import_keks.import_from_text(text)
             check_and_save_sids()
             world_data.refresh_world_data()
-        return redirect("/schedule", code=302)
+        return redirect("/dashboard", code=302)
     except Exception as e:
         flash("{}: {}".format(type(e).__name__, e))
         return redirect(url_for("import_action_get", text=text))
@@ -742,4 +744,34 @@ def inc_options_post(domain, player_id):
 
     db.session.commit()
     return redirect(url_for("inc_options", domain=domain, player_id=player_id))
-    
+
+@app.route("/dashboard", methods=["GET"])
+def dashboard_get():
+    players = Player.query.all()
+    atts = dict()
+    incs = dict()
+    for player in players:
+        attacks = Attacks.query.filter_by(player=player).all()
+        incomings = Incomings.query.filter_by(player=player).all()
+        # counting amount of scheduled+pending, finished, exprired, failed atts
+        NO_active = len([attack for attack in attacks if not attack.is_expired()]) 
+        NO_finished = len([attack for attack in attacks if attack.status == "finished"])
+        NO_expired = len([attack for attack in attacks if attack.status == "expired"])
+        NO_failed = len([attack for attack in attacks if attack.status == "failed"])
+        NO_incs = len(incomings)
+        NO_ignored_incs = len([incoming for incoming in incomings if not incoming.template])
+
+        atts[player.id] = dict(
+            active = {"NO" : NO_active, "badge" : "", "filter_by" : str(dict(status = "active"))},
+            finished = {"NO" : NO_finished, "badge" : "alert-success", "filter_by" : str(dict(status = "finished"))},
+            expired = {"NO" : NO_expired, "badge" : "alert-warning", "filter_by" : str(dict(status = "expired"))},
+            failed = {"NO" : NO_failed, "badge" : "alert-danger", "filter_by" : str(dict(status = "failed"))}
+        )
+        incs = dict(
+            incs = NO_incs,
+            ignored = NO_ignored_incs
+        )
+    if not Template.query.filter_by(is_default= True).first():
+        flash("Keine Standard Template gesetzt!")
+
+    return render_template("dashboard.html", players=players, atts=atts, incs = incs)
