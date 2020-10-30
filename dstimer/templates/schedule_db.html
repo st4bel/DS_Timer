@@ -254,11 +254,6 @@ Löschen:
       <input class="mark" type="checkbox" name="selected" value="{{attack.id}}" onchange="toogle_row_highlight({{attack.id}}, 'primary')">
     </td>
   </tr>
-  <tr style="display: none;">
-    <td>
-      hey
-    </td>
-  </tr>
   <tr style="display: none;" id="edit_{{attack.id}}" class="edit_attack">
     <td colspan="2"><!--departure-->
       <input name="edit_departure_{{attack.id}}" type="datetime-local" step="0.001" id="time" style="width: 180px" value="{{attack.departure_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}}">

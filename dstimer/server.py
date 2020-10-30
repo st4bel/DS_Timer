@@ -104,6 +104,38 @@ def get_scheduled_data_db(attacks):
             #    stati.append(attack.status)
     return sources, targets, stati
 
+def get_incomings_data(incs):
+    # returns data by which a filter could be apllied
+    sources = dict()
+    targets = dict()
+    source_players = dict()
+    names = []
+    units = []
+    templates = dict()
+
+    if incs:
+        for inc in incs:
+            if str(inc.source_village_id) not in sources:
+                sources[str(inc.source_village_id)] = inc.source_village_name
+            if str(inc.target_village_id) not in targets:
+                targets[str(inc.target_village_id)] = inc.target_village_name
+            if str(inc.source_player_id) not in source_players:
+                source_players[str(inc.source_player_id)] = inc.source_player_name
+            if inc.slowest_unit not in units:
+                units.append(inc.slowest_unit)
+            if inc.name not in names:
+                names.append(inc.name)
+            if str(inc.template.id) not in templates:
+                templates[str(inc.template.id)] = inc.template.name
+    data = dict(
+        sources=sources,
+        targets=targets,
+        source_players=source_players,
+        units=units, 
+        names=names,
+        templates=templates)
+    return data
+
 
 def get_unitnames():
     return common.unitnames
@@ -683,11 +715,23 @@ def keks_overview():
 @app.route("/incomings/<domain>/<player_id>", methods=["GET"])
 def incomings_get(domain, player_id):
     player = Player.query.filter_by(domain=domain, player_id=player_id).first_or_404()
-
     incs = Incomings.query.filter_by(player = player).order_by("arrival_time").all()
+    filter_by = ast.literal_eval(request.args.get('filter_by') if request.args.get('filter_by') else "{}")
+    data = get_incomings_data(incs)
+    return render_template("incomings.html", incs = incs, filter_by = filter_by, data = data)
 
+@app.route("/incomings/<domain>/<player_id>", methods=["POST"])
+def incomings_post(domain, player_id):
+    type = request.form["type"]
 
-    return render_template("incomings.html", incs = incs)
+    current_filter_by = ast.literal_eval(request.args.get('filter_by') if request.args.get('filter_by') else "{}")
+    filter_by = dict()
+    if "apply_filter" in type:
+        for filter in [name for name in request.form if "filter_" in name]:
+            if request.form.get(filter) != "default" and request.form.get(filter) != "":
+                filter_by[filter.split("filter_by_")[1]] = request.form.get(filter)
+        return redirect(url_for("incomings_get", domain = domain, player_id = player_id, filter_by=filter_by))
+    return redirect(url_for("incomings_get", domain = domain, player_id = player_id, filter_by = current_filter_by))
 
 @app.route("/inc_options/<domain>/<player_id>", methods=["GET"])
 def inc_options(domain, player_id):

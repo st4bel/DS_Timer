@@ -297,6 +297,8 @@ class DaemonThread(threading.Thread):
     def run(self):
         print("Evacuate_Daemon is running")
         while True:
-
-            cycle()
-            time.sleep(300)
+            try:
+                cycle()
+            except Exception as e:
+                logger.error(str(e))
+            time.sleep(60)
