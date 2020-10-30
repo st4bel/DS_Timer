@@ -125,8 +125,11 @@ def get_incomings_data(incs):
                 units.append(inc.slowest_unit)
             if inc.name not in names:
                 names.append(inc.name)
-            if str(inc.template.id) not in templates:
-                templates[str(inc.template.id)] = inc.template.name
+            if inc.template:
+                if str(inc.template.id) not in templates:
+                    templates[str(inc.template.id)] = inc.template.name
+            elif "None" not in templates:
+                templates["None"] = "Ignoriert"
     data = dict(
         sources=sources,
         targets=targets,
@@ -718,6 +721,22 @@ def incomings_get(domain, player_id):
     incs = Incomings.query.filter_by(player = player).order_by("arrival_time").all()
     filter_by = ast.literal_eval(request.args.get('filter_by') if request.args.get('filter_by') else "{}")
     data = get_incomings_data(incs)
+    if filter_by:
+        if "source_id" in filter_by:
+            incs = [inc for inc in incs if inc.source_village_id == int(filter_by["source_id"])]
+        if "target_id" in filter_by:
+            incs = [inc for inc in incs if inc.target_village_id == int(filter_by["target_id"])]
+        if "source_player_id" in filter_by:
+            incs = [inc for inc in incs if inc.source_player_id == int(filter_by["source_player_id"])]
+        if "slowest_unit" in filter_by:
+            incs = [inc for inc in incs if inc.slowest_unit == filter_by["slowest_unit"]]
+        if "template" in filter_by:
+            if filter_by["template"] != "None":
+                incs = [inc for inc in incs if inc.template if inc.template.id == filter_by["template"]]
+            else:
+                incs = [inc for inc in incs if not inc.template]
+        if "name" in filter_by:
+            incs = [inc for inc in incs if filter_by["name"] in inc.name]
     return render_template("incomings.html", incs = incs, filter_by = filter_by, data = data)
 
 @app.route("/incomings/<domain>/<player_id>", methods=["POST"])

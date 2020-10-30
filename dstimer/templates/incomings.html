@@ -31,7 +31,7 @@
       </tr>
       <tr>
         <td>
-         <input type="text" name="filter_by_name" list="source_player_list">
+         <input type="text" name="filter_by_name" list="source_player_list" {% if filter_by['name'] %}value="{{filter_by['name']}}"{% endif%}>
          <datalist id="source_player_list">
            {% for name in data['names'] %}
             <option value="{{ name }}"></option>
@@ -58,7 +58,7 @@
           <select name="filter_by_source_player_id">
             <option value="default">Auswählen</option>
             {% for player_id in data['source_players'] %}
-              <option value="{{player_id}}">{{data['source_players'][player_id]}}</option>
+              <option value="{{player_id}}" {% if player_id == filter_by['source_player_id'] %}selected="selected"{% endif %}>{{data['source_players'][player_id]}}</option>
             {% endfor %}
           </select>
         </td>
@@ -66,7 +66,7 @@
           <select name="filter_by_slowest_unit">
             <option value="default">Auswählen</option>
             {% for unit in data['units']%}
-              <option value="{{unit}}" {% if unit == filter_by['unit'] %}selected="selected"{% endif %}>{{unit}}</option>
+              <option value="{{unit}}" {% if unit == filter_by['slowest_unit'] %}selected="selected"{% endif %}>{{unit}}</option>
             {% endfor %}
           </select>
         </td>
@@ -74,7 +74,7 @@
           <select name="filter_by_template">
             <option value="default">Auswählen</option>
             {% for template_id in data['templates'] %}
-              <option value="{{ template_id }}" {% if status in filter_by['template'] %}selected="selected"{% endif %}>{{ data['templates'][template_id] }}</option>
+              <option value="{{ template_id }}" {% if template_id in filter_by['template'] %}selected="selected"{% endif %}>{{ data['templates'][template_id] }}</option>
             {% endfor %}
           </select>
         </td>
