@@ -27,8 +27,9 @@ class Incomings(db.Model):
     unit_symbol = db.Column(db.String(64)) # spy, snob (?)
     slowest_unit = db.Column(db.String(64))
     # manually override evacuation decisions: template, 
-    manual_override = db.Column(db.String(255), default="[]")
-    evac_options = db.Column(db.String(255), default = str(dict()))
+    evac_departure = db.Column(db.DateTime)
+    evac_return = db.Column(db.DateTime)
+    manual_template = db.Column(db.Boolean, default=False)
 
     # relationships:
     village_id = db.Column(db.Integer, db.ForeignKey("village.id"))
@@ -81,23 +82,6 @@ class Incomings(db.Model):
     def remove_next_inc(self, inc):
         if self.is_next_inc(inc):
             self.next_incs.remove(inc)
-    
-    def set_manual_override(self, keyword):
-        a = eval(self.manual_override)
-        if keyword not in a:
-            a.append(keyword)
-    
-    def get_manual_override(self, keyword = None):
-        a = eval(self.manual_override)
-        if not keyword:
-            return a
-        else:
-            return keyword in a
-
-    def get_evac_options(self):
-        return ast.literal_eval(self.evac_options)
-
-
 
 class Attacks(db.Model):
     id = db.Column(db.Integer, primary_key=True)
