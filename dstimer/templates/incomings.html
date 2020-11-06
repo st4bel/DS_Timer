@@ -5,8 +5,17 @@
   function toogle_filter(){
     $("#filter_options").toggle();
   }
-  
-
+  function toogle_row_highlight(id, type) {
+    $("#row_"+id).toggleClass("highlight")
+  }
+  function toogle_edit(id){
+    $(".edit_inc:visible").each(function(){
+      if ($(this).attr("id") != "edit_" + id){ // only show one edit row at the same time
+        $(this).toggle()
+      }
+    })
+    $("#edit_"+id).toggle();
+  }
 </script>
 <style>
   .highlight {
@@ -101,13 +110,14 @@
         <th>Entfernung</th>
         <th>Ankunft</th>
         <th>Template</th>
+        <th>Options</th>
     </tr>
     {% for inc in incs %}
-    <tr>
+    <tr id="row_{{inc.id}}">
         <td class="col-md-1">{{ inc.inc_id }}</td>
         <td class="col-md-1">
             {% if inc.size %}
-            <img src="{{innocdn_url('/graphic/command/attack' + ('_'+inc.size if inc.size != 'default') + '.png')}}">
+            <img src="{{innocdn_url('/graphic/command/attack' + ('_'+inc.size if inc.size != 'default' else '') + '.png')}}">
             {% endif %}
             {% if inc.unit_symbol %}
             <img src="{{innocdn_url('/graphic/command/' + inc.unit_symbol + '.png')}}">
@@ -128,6 +138,17 @@
             <span class="badge alert-warning">Ignoriert</span>
             {% endif %}
         </td>
+        <td>
+          <button type="button" onclick="toogle_edit({{inc.id}})" class="btn btn-default">Edit</button>
+          <input class="mark" type="checkbox" name="selected" value="{{inc.id}}" onchange="toogle_row_highlight({{inc.id}}, 'primary')">
+        </td>
+    </tr>
+    <tr style="display: none;" id="edit_{{inc.id}}" class="edit_inc">
+      <td><!--departure-->
+      </td>
+      <td><!--return-->
+      </td>
+      
     </tr>
     <tr style="display: none;" id="info_{{inc.id}}">
         <td><!--relevante gruppen-->
@@ -144,4 +165,5 @@
     </tr>
     {% endfor %}
 </table>
+
 {% endblock %}
