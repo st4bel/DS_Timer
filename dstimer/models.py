@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import dateutil.parser
 import ast
 import requests
-from random import random
+import random
 
 next_incs = db.Table('grouping_incs', 
     db.Column("next_id", db.Integer, db.ForeignKey("incomings.id")),
@@ -88,10 +88,10 @@ class Incomings(db.Model):
         options = common.read_options()
         if not self.evac_departure or not self.evac_return:
             # setting planned evac departure and return time to default values
-            micro = random() * 1000 * 1000
+            micro = random.randint(200, 800) * 1000
             self.evac_departure = (self.arrival_time - timedelta(seconds=options["evac_pre_buffer_seconds"])).replace(microsecond=micro)
             self.evac_return = ((self.arrival_time if len(self.next_incs.all()) == 0 else self.next_incs.order_by("arrival_time").all()[-1].arrival_time) + timedelta(seconds=options["evac_post_buffer_seconds"])).replace(microsecond=micro)
-            
+
 
 
 class Attacks(db.Model):
@@ -220,7 +220,9 @@ class Template(db.Model):
 
     def set_units(self, unit_dict):
         self.units = str(unit_dict)
-    
+
+player_refreshtime = timedelta(minutes = 1)
+
 class Player(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
@@ -228,8 +230,8 @@ class Player(db.Model):
     domain = db.Column(db.String(64))
     sid = db.Column(db.String(255))
     sid_datetime = db.Column(db.DateTime)
-    date_group_refresh = db.Column(db.DateTime, default=datetime.now())
-    date_village_refresh = db.Column(db.DateTime, default=datetime.now())
+    date_group_refresh = db.Column(db.DateTime, default=datetime.now() - player_refreshtime)
+    date_village_refresh = db.Column(db.DateTime, default=datetime.now() - player_refreshtime)
     evac_activated = db.Column(db.Boolean, default=False)
     # relationships:
     attacks = db.relationship("Attacks", backref="player", lazy='dynamic')
@@ -250,13 +252,13 @@ class Player(db.Model):
         return [v.village_id for v in self.villages]
     
     def refresh_groups(self, force = False):
-        if  datetime.now() - self.date_group_refresh > timedelta(minutes=1) or force:
+        if  datetime.now() - self.date_group_refresh > player_refreshtime or force:
             return groups.refresh_groups(self.domain, self.player_id)
         else:
             return []
     
     def refresh_villages(self, force = False):
-        if  datetime.now() - self.date_village_refresh > timedelta(minutes=1) or force:
+        if  datetime.now() - self.date_village_refresh > player_refreshtime or force:
             groups.refresh_villages_of_player(self.domain, self.player_id)
     
     def get_used_groups(self):

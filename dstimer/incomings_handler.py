@@ -309,7 +309,7 @@ def create_test_inc(domain, player_id, source_id, target_id, arrival_time, inc_i
     village = player.villages.filter_by(village_id = target_id).first()
     i = Incomings(
         inc_id = inc_id,
-        name = "Angriff"
+        name = "Angriff",
         target_village_id = target_id,
         target_village_name = world_data.get_village_name_from_id(domain, target_id),
         source_village_id = source_id,

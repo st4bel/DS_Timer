@@ -24,7 +24,7 @@
 </style>
 {% endblock %}
 {% block content %}
-
+<a href="{{ url_for('add_inc', domain = player.domain, player_id = player.player_id) }}">add_test_inc</a>
 <a href="#" onclick="toogle_filter()"><h2>Filter</h2></a>
 <form method="post">
   <div id="filter_options" style="{% if not filter_by %}display: none;{% endif %}">

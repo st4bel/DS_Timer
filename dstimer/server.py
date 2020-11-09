@@ -738,7 +738,7 @@ def incomings_get(domain, player_id):
                 incs = [inc for inc in incs if not inc.template]
         if "name" in filter_by:
             incs = [inc for inc in incs if filter_by["name"] in inc.name]
-    return render_template("incomings.html", incs = incs, filter_by = filter_by, data = data, templates = templates)
+    return render_template("incomings.html", player = player, incs = incs, filter_by = filter_by, data = data, templates = templates)
 
 @app.route("/incomings/<domain>/<player_id>", methods=["POST"])
 def incomings_post(domain, player_id):
@@ -842,3 +842,19 @@ def dashboard_get():
         flash("Keine Standard Template gesetzt!")
 
     return render_template("dashboard.html", players=players, atts=atts, incs = incs)
+
+@app.route("/add_inc/<domain>/<player_id>", methods=["GET"])
+def add_inc(domain, player_id):
+    player = Player.query.filter_by(domain = domain, player_id = player_id).first()
+    villages = Village.query.filter_by(player = player).all()
+    return render_template("add_inc.html", player = player, villages = villages, now = datetime.now()+timedelta(minutes=1))
+
+@app.route("/add_inc/<domain>/<player_id>", methods=["POST"])
+def add_inc_post(domain, player_id):
+    source_id = request.form.get("source")
+    target_id = request.form.get("target")
+    arrival = dateutil.parser.parse(request.form.get("arrival"))
+    inc_id = 684
+    incomings_handler.create_test_inc(domain, player_id, source_id, target_id, arrival, inc_id)
+    return redirect(url_for("incomings_get", domain = domain, player_id = player_id))
+
