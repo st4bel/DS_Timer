@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import dateutil.parser
 import ast
 import requests
+from random import random
 
 next_incs = db.Table('grouping_incs', 
     db.Column("next_id", db.Integer, db.ForeignKey("incomings.id")),
@@ -82,6 +83,16 @@ class Incomings(db.Model):
     def remove_next_inc(self, inc):
         if self.is_next_inc(inc):
             self.next_incs.remove(inc)
+    
+    def autocomplete(self):
+        options = common.read_options()
+        if not self.evac_departure or not self.evac_return:
+            # setting planned evac departure and return time to default values
+            micro = random() * 1000 * 1000
+            self.evac_departure = (self.arrival_time - timedelta(seconds=options["evac_pre_buffer_seconds"])).replace(microsecond=micro)
+            self.evac_return = ((self.arrival_time if len(self.next_incs.all()) == 0 else self.next_incs.order_by("arrival_time").all()[-1].arrival_time) + timedelta(seconds=options["evac_post_buffer_seconds"])).replace(microsecond=micro)
+            
+
 
 class Attacks(db.Model):
     id = db.Column(db.Integer, primary_key=True)

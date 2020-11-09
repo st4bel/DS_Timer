@@ -719,6 +719,7 @@ def keks_overview():
 def incomings_get(domain, player_id):
     player = Player.query.filter_by(domain=domain, player_id=player_id).first_or_404()
     incs = Incomings.query.filter_by(player = player).order_by("arrival_time").all()
+    templates = Template.query.all()
     filter_by = ast.literal_eval(request.args.get('filter_by') if request.args.get('filter_by') else "{}")
     data = get_incomings_data(incs)
     if filter_by:
@@ -737,7 +738,7 @@ def incomings_get(domain, player_id):
                 incs = [inc for inc in incs if not inc.template]
         if "name" in filter_by:
             incs = [inc for inc in incs if filter_by["name"] in inc.name]
-    return render_template("incomings.html", incs = incs, filter_by = filter_by, data = data)
+    return render_template("incomings.html", incs = incs, filter_by = filter_by, data = data, templates = templates)
 
 @app.route("/incomings/<domain>/<player_id>", methods=["POST"])
 def incomings_post(domain, player_id):

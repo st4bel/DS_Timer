@@ -143,12 +143,27 @@
           <input class="mark" type="checkbox" name="selected" value="{{inc.id}}" onchange="toogle_row_highlight({{inc.id}}, 'primary')">
         </td>
     </tr>
+    <!--edit-------------------------------------------------------------->
     <tr style="display: none;" id="edit_{{inc.id}}" class="edit_inc">
       <td><!--departure-->
+        <label for="edit_departure_{{inc.id}}">Abschick</label>
+        <input name="edit_departure_{{inc.id}}" type="datetime-local" step="0.001" id="time" style="width: 180px" value="{{inc.evac_departure.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}}">
       </td>
       <td><!--return-->
+        <label for="edit_return_{{inc.id}}">Rückkehr</label>
+        <input name="edit_return_{{inc.id}}" type="datetime-local" step="0.001" id="time" style="width: 180px" value="{{inc.evac_return.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}}">
       </td>
-      
+      <td><!--template-->
+        <label for="edit_template_{{inc.id}}">Template</label><br>
+        <select name="edit_template_{{inc.id}}" class="select-template id-{{inc.id}}">
+          <option value="default">Auswählen</option>
+            {% for template in templates%}
+              <option value="{{template.id}}" {% if template.id == inc.template.id %}selected="selected"{% endif %}>{{template.name}}</option>
+            {% endfor %}
+        </select>
+      </td>
+      <td><!--ignore-->
+      </td>
     </tr>
     <tr style="display: none;" id="info_{{inc.id}}">
         <td><!--relevante gruppen-->

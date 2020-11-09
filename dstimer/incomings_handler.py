@@ -112,6 +112,7 @@ def save_current_incs(incs, domain, player_id):
                 player = player,
                 village = village
             )
+            i.autocomplete()
         else:
             i = Incomings.query.filter_by(inc_id = int(inc_id)).first()
             i.name = inc["name"]
@@ -302,3 +303,26 @@ class DaemonThread(threading.Thread):
             except Exception as e:
                 logger.error(str(e))
             time.sleep(60)
+
+def create_test_inc(domain, player_id, source_id, target_id, arrival_time, inc_id):
+    player=Player.query.filter_by(player_id = player_id, domain = domain).first()
+    village = player.villages.filter_by(village_id = target_id).first()
+    i = Incomings(
+        inc_id = inc_id,
+        name = "Angriff"
+        target_village_id = target_id,
+        target_village_name = world_data.get_village_name_from_id(domain, target_id),
+        source_village_id = source_id,
+        source_village_name = world_data.get_village_name_from_id(domain, source_id),
+        source_player_id = 123456,
+        source_player_name = "test_player",
+        distance = 5.6,
+        arrival_time = arrival_time,
+        player = player,
+        village = village,
+        size = "default",
+        slowest_unit = "ram"
+    )
+    i.autocomplete()
+    db.session.add(i)
+    db.session.commit()
