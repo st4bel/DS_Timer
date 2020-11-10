@@ -10,3 +10,4 @@ version_parser==1.0.0
 werkzeug<1.0
 flask_cors>=3.0.0
 tcp-latency>=0.0.8
+psutil==5.7.3
