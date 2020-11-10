@@ -14,4 +14,5 @@ cacert.pem
 *yer.py
 *.pyc
 updates
-*.PNG
+*.png
+

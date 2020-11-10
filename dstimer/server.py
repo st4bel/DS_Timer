@@ -362,9 +362,16 @@ def import_action_post():
         return redirect(url_for("import_action_get", text=text))
 
 
+@app.route("/autoimport", methods=["POST"])
+def autoimport_action_post():
+    req_data = request.get_json()
+    import_action.import_from_tampermonkey(action=req_data)
+    return req_data
+
+
 @app.route("/wb")
 def wb_get():
-    return render_template("workbench_import.html")
+    return render_template("workbench_import.html", buildings=get_buildingnames())
 
 
 @app.route("/wb", methods=["POST"])
@@ -372,18 +379,14 @@ def wb_post():
     try:
         text = request.form["text"]
         keks_path = os.path.join(common.get_root_folder(), "keks")
-        players = []
-        for folder in os.listdir(keks_path):
-            for file in os.listdir(os.path.join(keks_path, folder)):
-                s_file = file.split("_", 1)
-                playername = common.filename_unescape(s_file[1])
-        if playername == None:
-            playername = request.form["playername"]
+        playername = ""#request.form["playername"]
         if request.form["type"] == "wb_template":
             import_template.import_from_workbench(text)
             return redirect("/templates")
-        elif request.form["type"] == "wb_action":
-            import_action.import_wb_action(text, playername)
+        elif request.form["type"] == "wb_text":
+            import_action.import_wb_action(text, playername, request.form.get("catapult_target"), request.form.get("action_type"))
+        elif request.form["type"] == "wb_html":
+            import_action.import_from_workbench_html(text, request.form.get("catapult_target"), request.form.get("action_type"))
         return redirect("/schedule", code=302)
     except Exception as e:
         flash(str(e))

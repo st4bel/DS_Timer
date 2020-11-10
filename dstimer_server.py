@@ -11,7 +11,6 @@ import webbrowser
 #from version_parser import Version
 
 
-
 common.create_folder_structure()
 
 os.environ['TZ'] = 'Europe/Berlin'
@@ -33,7 +32,13 @@ world_data.refresh_world_data()
     #    webbrowser.open("http://127.0.0.1:" + str(args.port), new=2)
 
 #    send_action.DaemonThread().start()   
+=======
+#def https_app(**kwargs):
+#    server.app.run(ssl_context='adhoc', **kwargs)
+
 if __name__ == "__main__":
+    from multiprocessing import Process
+
     parser = argparse.ArgumentParser(description="Attack Helper for Die Staemme")
     parser.add_argument("--host", help="Bind the server on this address", default="127.0.0.1")
     parser.add_argument("--port", help="Bind the server on this port", default=5000)
@@ -49,3 +54,11 @@ if __name__ == "__main__":
     world_data.refresh_world_data()
 
     app.run(host=args.host, port=args.port)
+
+    #if args.open_browser:
+        #webbrowser.open("http://127.0.0.1:" + str(args.port), new=2)
+
+    #send_action.DaemonThread().start()
+    #Process(target=https_app, kwargs=dict(host=args.host, port=args.port+443), daemon=True).start()
+    #server.app.run(host=args.host, port=args.port)
+

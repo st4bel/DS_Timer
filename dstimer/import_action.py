@@ -13,6 +13,8 @@ from dstimer import common, world_data, db
 from dstimer.intelli_unit import get_bh_all
 from dstimer.models import Attacks, Player
 from flask import flash
+from bs4 import BeautifulSoup
+
 
 logger = logging.getLogger("dstimer")
 
@@ -97,6 +99,10 @@ def get_LZ_factor(action):
 
 def autocomplete(action):
     """Add missing information about an action like departure time"""
+    if "source_coord" not in action:
+        action["source_coord"] = world_data.get_village_coord_from_id(action["domain"], action["source_id"])
+    if "target_coord" not in action:
+        action["target_coord"] = world_data.get_village_coord_from_id(action["domain"], action["target_id"])
     action["source_coord"]["x"] = int(action["source_coord"]["x"])
     action["source_coord"]["y"] = int(action["source_coord"]["y"])
     action["target_coord"]["x"] = int(action["target_coord"]["x"])
@@ -125,6 +131,12 @@ def autocomplete(action):
         action["building"] = common.read_options()["kata-target"]
     if "save_default_attack_building" not in action:
         action["save_default_attack_building"] = 0
+    if "sitter" not in action:
+        action["sitter"] = "0"
+    if "vacation" not in action:
+        action["vacation"] = "0"
+    if "force" not in action:
+        action["force"] = False
 
 
 def random_id(length):
@@ -167,17 +179,29 @@ def import_from_text(text, rand_mill=False):
 
 
 
-def import_wb_action(text, name):
+def import_from_tampermonkey(action):
+    autocomplete(action)
+    filename = dateutil.parser.parse(
+        action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + random_id(6) + ".txt"
+
+    directory = os.path.join(common.get_root_folder(), "schedule")
+    file = os.path.join(directory, filename)
+    with open(file, "w") as fd:
+        json.dump(action, fd, indent=4)
+
+
+def import_wb_action(text, name, catapult_target="default", action_type = "attack"):
     #splitting text for [*]
     s = text.split("[/**]")
     actions_text = s[1].split("[/*]")
     action = {}
     for action_text in actions_text[:-1]:
         columns = action_text.split("[|]")
-        if "Angriff" in columns[1]:
-            action["type"] = "attack"
-        else:
-            action["type"] = "support"
+        #if "Angriff" in columns[1]:
+        #    action["type"] = "attack"
+        #else:
+        #    action["type"] = "support"
+        action["type"] = action_type
         action["source_coord"] = {}
         action["target_coord"] = {}
         action["source_coord"]["x"] = columns[3].split("|")[0].split("]")[1]
@@ -204,12 +228,19 @@ def import_wb_action(text, name):
             action["units"] = get_troups_from_template(columns[1].split("(")[1].split(")")[0])
         else:
             action["units"] = get_troups_from_template(columns[1])
-        logger.info(action["units"])
-        action["player"] = name
-        action["player_id"] = world_data.get_player_id(action["domain"], action["player"])
+
+        if name != "":
+            action["player"] = name
+            action["player_id"] = world_data.get_player_id(action["domain"], action["player"])
+        else: 
+            action["player_id"] = world_data.get_village_owner(action["domain"], action["source_id"])
+            action["player"] = world_data.get_player_name(action["domain"], action["player_id"])
+            name = action["player"]
+        
         action["force"] = False
         action["vacation"] = "0"
         action["sitter"] = "0"
+        action["building"] = catapult_target
         if "arrival_time" in action:
             del action["arrival_time"]    # no arrival time in workbench export
         autocomplete(action)
@@ -220,6 +251,52 @@ def import_wb_action(text, name):
         file = os.path.join(directory, filename)
         with open(file, "w") as fd:
             json.dump(action, fd, indent=4)
+
+def import_from_workbench_html(text, catapult_target, action_type = "attack"):
+    soup = BeautifulSoup(text, "html.parser")
+    links = soup.find_all("a")
+    dep_times = soup.find_all("td", {"class": "time_left"})
+    counter = 0
+    for link in links:
+   #     link = links[counter]
+    #    dep_time = demp_times
+    #    counter = counter + 1
+        if link.text == "Versammlungsplatz":
+            dep_time = dep_times[counter]
+            counter = counter + 1
+            action = dict()
+            action["units"] = dict()
+            link_href = link["href"].split("/")
+            action["domain"] = link_href[2]
+            params = link_href[-1].split("?")[1].split("&")
+            for param in params:
+                arg = param.split("=")
+                if "village" in arg[0]:
+                    action["source_id"] = arg[1]
+                elif "target" in arg[0]:
+                    action["target_id"] = arg[1]
+                else:
+                    for unit in common.unitnames:
+                        if unit in arg[0]:
+                            action["units"][unit] = arg[1]
+            action["player_id"] = world_data.get_village_owner(action["domain"], action["source_id"])
+            action["player"] = world_data.get_player_name(action["domain"], action["player_id"])
+            action["building"] = catapult_target
+            action["departure_time"] = datetime.strptime(dep_time.text, "%d.%m.%Y %H:%M:%S").isoformat()
+            action["type"] = action_type
+            autocomplete(action)
+
+            directory = os.path.join(common.get_root_folder(), "schedule")
+            filename = dateutil.parser.parse(action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + random_id(6) + ".txt"
+            file = os.path.join(directory, filename)
+            with open(file, "w") as fd:
+                json.dump(action, fd, indent=4)
+            
+            
+
+
+
+
 
 
 def import_from_ui(action, rand_mill=False, id=None):

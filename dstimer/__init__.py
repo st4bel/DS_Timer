@@ -2,7 +2,9 @@
 import requests
 from version_parser import Version
 
+
 __version__ = "v1.0.0-dev0.1"
+
 
 __key__ = "insert key here lol"
 __stdOptions__ = {
