@@ -32,7 +32,7 @@ world_data.refresh_world_data()
     #    webbrowser.open("http://127.0.0.1:" + str(args.port), new=2)
 
 #    send_action.DaemonThread().start()   
-=======
+
 #def https_app(**kwargs):
 #    server.app.run(ssl_context='adhoc', **kwargs)
 
