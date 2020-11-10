@@ -11,7 +11,7 @@ import dateutil.parser
 import random, string
 from dstimer import common, world_data, db
 from dstimer.intelli_unit import get_bh_all
-from dstimer.models import Attacks, Player
+from dstimer.models import Attacks, Player, Template
 from flask import flash
 from bs4 import BeautifulSoup
 
@@ -108,6 +108,8 @@ def autocomplete(action):
     action["target_coord"]["x"] = int(action["target_coord"]["x"])
     action["target_coord"]["y"] = int(action["target_coord"]["y"])
 
+    if "units" not in action:
+        action["units"] = dict()
     units_to_delete = []
     for unit, amount in action["units"].items():
         if is_zero(amount):
@@ -225,9 +227,11 @@ def import_wb_action(text, name, catapult_target="default", action_type = "attac
             action["departure_time"] += "." + random_milliseconds(100)
 
         if "(" in columns[1]:
-            action["units"] = get_troups_from_template(columns[1].split("(")[1].split(")")[0])
+        #    action["units"] = get_troups_from_template(columns[1].split("(")[1].split(")")[0])
+            action["template_name"] = columns[1].split("(")[1].split(")")[0]
         else:
-            action["units"] = get_troups_from_template(columns[1])
+        #    action["units"] = get_troups_from_template(columns[1])
+            action["template_name"] = columns[1]
 
         if name != "":
             action["player"] = name
@@ -244,13 +248,14 @@ def import_wb_action(text, name, catapult_target="default", action_type = "attac
         if "arrival_time" in action:
             del action["arrival_time"]    # no arrival time in workbench export
         autocomplete(action)
-        filename = dateutil.parser.parse(
-            action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + random_id(6) + ".txt"
+        #filename = dateutil.parser.parse(
+        #    action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + random_id(6) + ".txt"
 
-        directory = os.path.join(common.get_root_folder(), "schedule")
-        file = os.path.join(directory, filename)
-        with open(file, "w") as fd:
-            json.dump(action, fd, indent=4)
+        #directory = os.path.join(common.get_root_folder(), "schedule")
+        #file = os.path.join(directory, filename)
+        #with open(file, "w") as fd:
+        #    json.dump(action, fd, indent=4)
+        add_attack_to_db(action)
 
 def import_from_workbench_html(text, catapult_target, action_type = "attack"):
     soup = BeautifulSoup(text, "html.parser")
@@ -286,18 +291,13 @@ def import_from_workbench_html(text, catapult_target, action_type = "attack"):
             action["type"] = action_type
             autocomplete(action)
 
-            directory = os.path.join(common.get_root_folder(), "schedule")
-            filename = dateutil.parser.parse(action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + random_id(6) + ".txt"
-            file = os.path.join(directory, filename)
-            with open(file, "w") as fd:
-                json.dump(action, fd, indent=4)
+            #directory = os.path.join(common.get_root_folder(), "schedule")
+            #filename = dateutil.parser.parse(action["departure_time"]).strftime("%Y-%m-%dT%H-%M-%S-%f") + "_" + random_id(6) + ".txt"
+            #file = os.path.join(directory, filename)
+            #with open(file, "w") as fd:
+            #    json.dump(action, fd, indent=4)
+            add_attack_to_db(action)
             
-            
-
-
-
-
-
 
 def import_from_ui(action, rand_mill=False, id=None):
     autocomplete(action)
@@ -388,12 +388,21 @@ def add_attack_to_db(action):
         player = player,
         building = action["building"],
         save_default_attack_building = action["save_default_attack_building"],
-        units = str(action["units"]),
         force = False, 
         #domain = action["domain"], 
         type = action["type"], 
         status = "scheduled"
     )
+
+    a.units = str(action["units"])
+
+    if "template_name" in action:
+        try:
+            a.template = Template.query.filter_by(name=action["template_name"]).first()
+        except:
+            flash("Template mit Namen {} nicht gefunden".format(action["template_name"]))
+            return
+
     a.autocomplete()
     if not a.is_expired():
         db.session.add(a)

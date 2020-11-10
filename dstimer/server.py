@@ -387,7 +387,7 @@ def wb_post():
             import_action.import_wb_action(text, playername, request.form.get("catapult_target"), request.form.get("action_type"))
         elif request.form["type"] == "wb_html":
             import_action.import_from_workbench_html(text, request.form.get("catapult_target"), request.form.get("action_type"))
-        return redirect("/schedule", code=302)
+        return redirect("/schedule_db", code=302)
     except Exception as e:
         flash(str(e))
         #return redirect(url_for("wb_get", text=text))
