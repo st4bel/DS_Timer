@@ -119,7 +119,7 @@ def autocomplete(action):
     unit_info = get_cached_unit_info(action["domain"])
 
     duration = runtime(
-        speed(action["units"], action["type"], unit_info) / get_LZ_factor(action),
+        speed(action["units"], action["type"], unit_info) ,
         distance(action["source_coord"], action["target_coord"]), action["domain"])
     if "departure_time" not in action:
         action["departure_time"] = (dateutil.parser.parse(action["arrival_time"]) -
@@ -227,10 +227,10 @@ def import_wb_action(text, name, catapult_target="default", action_type = "attac
             action["departure_time"] += "." + random_milliseconds(100)
 
         if "(" in columns[1]:
-        #    action["units"] = get_troups_from_template(columns[1].split("(")[1].split(")")[0])
+            action["units"] = get_troups_from_template(columns[1].split("(")[1].split(")")[0])
             action["template_name"] = columns[1].split("(")[1].split(")")[0]
         else:
-        #    action["units"] = get_troups_from_template(columns[1])
+            action["units"] = get_troups_from_template(columns[1])
             action["template_name"] = columns[1]
 
         if name != "":
@@ -327,12 +327,8 @@ def import_from_ui(action, rand_mill=False, id=None):
 
 
 def get_troups_from_template(template_name):
-    path = os.path.join(os.path.expanduser("~"), ".dstimer", "templates")
-    for filename in os.listdir(path):
-        if os.path.isfile(os.path.join(path, filename)) and filename[:-16] == template_name:
-            with open(os.path.join(path, filename)) as fd:
-                units = json.load(fd)
-            return units
+    t = Template.query.filter_by(name=template_name).first()
+    return t.get_units()
     raise NameError('Vorlage "' + template_name + '" nicht vorhanden.')
 
 

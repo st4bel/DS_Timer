@@ -558,11 +558,13 @@ class DaemonThread(threading.Thread):
         print("Daemon is running")
         check_sid_counter = 0
         while True:
-            #cycle()
-            cycle_db()
+            try:
+                cycle_db()
+            except Exception as e:
+                logger.warning(e)
             if check_sid_counter == 0:
                 check_and_save_sids()
                 check_sid_counter = random.randint(30, 90)    # every 30 to 90 minutes
             else:
                 check_sid_counter -= 1
-            time.sleep(1)
+            time.sleep(30)
