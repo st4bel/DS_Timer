@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block title %}Keks Übersicht{% endblock %}
+{% block content %}
+<table class="table">
+    <tr>
+        <th>domain</th>
+        <th>Name</th>
+        <th>Session aktiv</th>
+        <th>link</th>
+    </tr>
+    {% for player in players %}
+    <tr>
+        <td class="col-md-1">{{ player.domain }}</td>
+        <td class="col-md-2">{{ player.name }}</td>
+        <td class="col-md-1">{{ player.is_active() }}</td>
+        <td class="col-md-1">
+            <a href="/incomings/{{ player.domain }}/{{ player.player_id }}">incomings</a>
+            <a href="/inc_options/{{ player.domain }}/{{ player.player_id }}">inc_opt</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

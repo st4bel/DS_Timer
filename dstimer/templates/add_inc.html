@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block title %}add inc{% endblock %}
+{% block content %}
+<h1>adding inc</h1>
+<form method = "post">
+    <label for="source">source</label>
+    <select name="source">
+      <option value="default">Auswählen</option>
+      {% for village in villages %}
+        <option value="{{village.village_id}}">{{village.village_id}}</option>
+      {% endfor %}
+    </select>
+    <label for="target">target</label>
+    <select name="target">
+      <option value="default">Auswählen</option>
+      {% for village in villages %}
+        <option value="{{village.village_id}}">{{village.village_id}}</option>
+      {% endfor %}
+    </select>
+    <label for="arrival">Ankunft</label>
+    <input name="arrival" type="datetime-local" step="0.001" id="time" style="width: 180px" value="{{now.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}}">
+    <button type="submit" name="type" value="add" class="btn btn-default">Übernehmen</button>
+</form>
+{% endblock %}

@@ -1,0 +1,312 @@
+{% extends "layout.html" %}
+{% block title %}Schedule{% endblock %}
+{% block header %}
+<script type="text/javascript">
+  function toogle_filter(){
+    $("#filter_options").toggle();
+  }
+  function toogle_complex_actions(){
+    $("#complex_options").toggle();
+  }
+  function toogle_edit(id){
+    $(".edit_attack:visible").each(function(){
+      if ($(this).attr("id") != "edit_" + id){ // only show one edit row at the same time
+        $(this).toggle()
+      }
+    })
+    $("#edit_"+id).toggle();
+  }
+  function set_template(id) {
+    // setting tamplate to default, because units got inserted manually
+    $(".select-template.id-"+id).val("default");
+  }
+
+  function paste_template(id) {
+    template = $(".select-template.id-"+id).val()
+    if (template != "default") {
+      $(".edit-unit.id-"+id).each(function() {
+        unitname = $(this).attr("name").split("_")[2]
+        amount = $(".template-help.template-id-"+template+"."+unitname).text().trim()
+        if (amount==""){
+          amount = "0"
+        }
+        $(this).val(amount)
+      })
+    }
+  }
+
+  function toogle_row_highlight(id, type) {
+    $("#row_"+id).toggleClass("highlight")
+  }
+
+  function mark_all() {
+    $(".mark").click()
+  }
+
+</script>
+<style>
+  .highlight {
+    background: lightgrey;
+  }
+</style>
+{% endblock %}
+{% block content %}
+
+<a href="#" onclick="toogle_filter()"><h2>Filter</h2></a>
+<form method="post">
+<div id="filter_options" style="{% if not filter_by %}display: none;{% endif %}">
+  <table class="table"> 
+    <tr>
+      <th>Start-Dorf</th>
+      <th>Ziel-Dorf</th>
+     <!-- <th>Ziel-Spieler</th>-->
+      <th>Einheit</th>
+      <th>Status</th>
+      <th>Raussteller</th>
+    </tr>
+    <tr>
+      <td>
+        <select name="filter_by_source_id">
+          <option value="default">Auswählen</option>
+          {% for source_id in sources %}
+            <option value="{{source_id}}" {% if source_id == filter_by['source_id'] %}selected="selected"{% endif %}>{{sources[source_id]}}</option>
+          {% endfor %}
+        </select>
+      </td>
+      <td>
+        <select name="filter_by_target_id">
+          <option value="default">Auswählen</option>
+          {% for target_id in targets %}
+            <option value="{{target_id}}" {% if target_id == filter_by['target_id'] %}selected="selected"{% endif %}>{{targets[target_id]}}</option>
+          {% endfor %}
+        </select>
+      </td>
+ <!--       currently no trivial way to filter by target player.  
+      <td>
+        <select name="filter_by_target_player_id">
+          <option value="default">Auswählen</option>
+          {% for player_id in target_players %}
+            <option value="{{player_id}}">{{target_players[player_id]}}</option>
+          {% endfor %}
+        </select>
+      </td>-->
+      <td>
+        <select name="filter_by_unit">
+          <option value="default">Auswählen</option>
+          {% for unit in units%}
+            <option value="{{unit}}" {% if unit == filter_by['unit'] %}selected="selected"{% endif %}>{{unit}}</option>
+          {% endfor %}
+        </select>
+      </td>
+      <td>
+        <select name="filter_by_status">
+          <option value="default">Auswählen</option>
+          {% for status in stati %}
+            <option value="{{ status }}" {% if status in filter_by['status'] %}selected="selected"{% endif %}>{{ status }}</option>
+          {% endfor %}
+        </select>
+      </td>
+      <td>
+        <select name="filter_by_evac">
+          <option value="default">Auswählen</option>
+          <option value="0">Normal</option>
+          <option value="1">Rausstell-Att</option>
+        </select>
+      </td>
+    </tr>
+  </table>
+  <button type="submit" name="type" value="apply_filter" class="btn btn-default">Übernehmen</button>
+  <a href="/schedule_db">Zurücksetzen</a>
+</div>
+
+<a href="#" onclick="toogle_complex_actions()"><h2>Komplexe Aktionen</h2></a>
+<div style="display: none;" id="complex_options">
+  Folgende Aktionen auf alle markierten Angriffe ausführen:
+  <table class="table table-bordered">
+    <tr>
+      <th colspan="4">Verschieben um:</th>
+      <th>Template setzen:</th>
+      <th>Katapult Ziel setzen:</th>
+    </tr>
+    <tr>
+      <td align="right" width="60px">
+      <div>
+          h:
+          <input type="text" name="move_by_hours" value="0" style="width: 32px">
+        </div>
+      </td>
+      <td align="right" width="60px">
+        <div>
+          m:
+          <input type="text" name="move_by_minutes" value="0" style="width: 32px">
+        </div>
+      </td>
+      <td align="right" width="60px">
+        <div>
+          s:
+          <input type="text" name="move_by_seconds" value="0" style="width: 32px">
+        </div>
+      </td>
+      <td align="right" width="70px">
+        <div>
+          ms:
+          <input type="text" name="move_by_ms" value="000" style="width: 32px">
+        </div>
+      </td>
+      <td align="center" width="100px">
+        <select name="set_template_all" class="">
+          <option value="default">Auswählen</option>
+          {% for template in templates%}
+            <option value="{{template.id}}" >{{template.name}}</option>
+          {% endfor %}
+        </select>
+      </td>
+      <td align="center" width="110px">
+        <select name="set_building_all">
+          <option value="default">Auswählen</option>
+          {% for building in buildings%}
+            <option value="{{building}}">{{building}}</option>
+          {% endfor %}
+        </select>
+      </td>
+    </tr>
+  </table>
+  <button type="submit" name="type" value="apply_complex" class="btn btn-default">Anwenden</button>
+</div>
+
+<h2>Schedule</h2>
+Löschen:
+<button type="submit" name="type" value="delete__all" class="btn btn-default">Alle</button>
+<button type="submit" name="type" value="delete__selected" class="btn btn-default">Auswahl</button>
+<table class="table">
+  <tr>
+    <th>Spieler</th>
+    <th><a href="/schedule_db?order_by=departure_time">Abschicken</a></th>
+    <th><a href="/schedule_db?order_by=arrival_time">Ankunft</a></th>
+    <th></th>
+    <th></th>
+    <th>Start</th>
+    <th>Ziel</th>
+    <th>Einheiten</th>
+    <th>Gebäude</th>
+    <th>Status</th>
+    <th>Edit</th>
+    <th>Löschen</th>
+    <th>
+      Markieren
+      <button type="button" class="btn btn-default" onclick="mark_all()">Alle</button>
+    </th>
+  </tr>
+  {% for attack in attacks %}
+  <tr id="row_{{attack.id}}">
+    <td><a href="https://{{ attack.player.domain }}/game.php" rel="noreferrer"><span class="badge">{{attack.player.domain.split(".")[0] }}</span></a>
+      {{ attack.player.name }}</td>
+    <td class="departure_time">{{ attack.departure_time }}</td>
+    <td class="arrival_time">{{ attack.arrival_time }}</td>
+    <td><img src="{{innocdn_url('/graphic/command/' + attack.type + '.png')}}"></td>
+    <td class="force">{% if attack.force %}force!{% endif %}</td>
+    <td class="source">
+      <a href="https://{{attack.player.domain}}/game.php?screen=map&x={{ attack.source_coord_x }}&y={{ attack.source_coord_y }}&beacon"
+        rel="noreferrer">
+        <img src="{{ innocdn_url('/graphic/icons/map2.png') }}">
+      </a>
+      <a href="https://{{attack.player.domain}}/game.php?screen=info_village&id={{attack.source_id}}" rel="noreferrer">
+        {{ attack.source_name }} {{ attack.source_coord_x }}|{{ attack.source_coord_y }}
+      </a>
+    </td>
+    <td class="target">
+      <a href="https://{{attack.player.domain}}/game.php?screen=map&x={{ attack.target_coord_x }}&y={{ attack.target_coord_y }}&beacon"
+        rel="noreferrer">
+        <img src="{{ innocdn_url('/graphic/icons/map2.png') }}">
+      </a>
+      <a href="https://{{attack.player.domain}}/game.php?screen=info_village&id={{attack.target_id}}" rel="noreferrer">
+        {{ attack.target_name }} {{ attack.target_coord_x }}|{{ attack.target_coord_y }}
+      </a>
+    </td>
+    <td class="units">
+      {% for unit, amount in attack.get_units()|dictsort %}
+      <span class="badge alert-success" title="{{unit}}">{{ amount }} <img
+          src="{{ innocdn_url('/graphic/unit/unit_' + unit + '.png') }}"></span>
+      {% endfor %}
+    </td>
+    <td>
+      {% if "catapult" in attack.get_units() and attack.building != "default" %}
+      <span class="badge alert-success" title="{{ attack.building }}"><img
+          src="{{ innocdn_url('/graphic/buildings/' + attack.building + '.png') }}" alt="{{ attack.building }}"></span>
+      {% endif %}
+    </td>
+    <td>
+      <span class="badge alert-{% if attack.status == 'scheduled' %}primary{% elif attack.status == 'finished'%}success{% elif attack.status == 'pending'%}warning{% else %}danger{% endif %}">{{ attack.status }}</span>
+      {% if attack.incs.first() %}
+        <a href="/edit_inc/{{ attack.incs.first().id }}"><span class="badge alert-warning">evac</span></a>
+      {% endif %}
+      {% if attack.template %}
+      <a href="/templates"><span class="badge alert-success">{{attack.template.name}}</span></a>
+      {% endif %}
+    </td>
+    <td>
+      <button type="button" onclick="toogle_edit({{attack.id}})" class="btn btn-default">Edit</button>
+    </td>
+    <td>
+      <button type="submit" name="type" value="delete_{{attack.id}}" class="btn btn-default">Löschen</button>
+    </td>
+    <td>
+      <input class="mark" type="checkbox" name="selected" value="{{attack.id}}" onchange="toogle_row_highlight({{attack.id}}, 'primary')">
+    </td>
+  </tr>
+  <tr style="display: none;" id="edit_{{attack.id}}" class="edit_attack">
+    <td colspan="2"><!--departure-->
+      <input name="edit_departure_{{attack.id}}" type="datetime-local" step="0.001" id="time" style="width: 180px" value="{{attack.departure_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}}">
+    </td>
+    <td colspan="3"><!--arrival-->
+      <input name="edit_arrival_{{attack.id}}" type="datetime-local" step="0.001" id="time" style="width: 180px" value="{{attack.arrival_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}}">
+    </td>
+    <td colspan="3"><!--units-->
+      <table>
+        <tr>
+          {% for unit in units %}
+          <td>
+            <img src="{{ innocdn_url('/graphic/unit/unit_' + unit + '.png') }}">
+            <input class="edit-unit {{unit}} id-{{attack.id}}" onchange="set_template({{attack.id}})" name="edit_unit_{{unit}}_{{attack.id}}" style="width: 40px" type="text" value="{% if unit in attack.get_units() %}{{attack.get_units()[unit]}}{% else %}0{% endif %}">
+          </td>
+          {% endfor %}
+        </tr>
+      </table>
+    </td>
+    <td>
+      <label for="edit_template_{{attack.id}}">Template</label><br>
+      <select onchange="paste_template({{attack.id}})" name="edit_template_{{attack.id}}" class="select-template id-{{attack.id}}">
+        <option value="default">Auswählen</option>
+        {% for template in templates%}
+          <option value="{{template.id}}" {% if template.id == attack.template.id %}selected="selected"{% endif %}>{{template.name}}</option>
+        {% endfor %}
+      </select>
+    </td>
+    <td colspan="2"><!--building-->
+      <label for="edit_building_{{attack.id}}">Gebäude</label><br>
+      <select name="edit_building_{{attack.id}}">
+        <option value="default">Auswählen</option>
+        {% for building in buildings%}
+          <option value="{{building}}" {% if building == attack.building %}selected="selected"{% endif %}>{{building}}</option>
+        {% endfor %}
+      </select>
+    </td>
+    <td colspan="2"><!--submit-->
+      <button type="submit" name="type" value="edit_{{attack.id}}" class="btn btn-default">Übernehmen</button>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+</form>
+<!-- Hidden content -->
+<div style="display: none;">
+  hey
+  {% for template in templates %}
+   {% for unit in units %}
+    <span class="template-help {{unit}} template-id-{{ template.id }}">
+      {{ template.get_units()[unit] }}
+    </span>
+    {% endfor %} 
+  {% endfor %}
+</div>
+{% endblock %}

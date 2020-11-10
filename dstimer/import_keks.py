@@ -2,10 +2,13 @@ import requests
 import json
 import os
 import re
+from datetime import datetime
 from dstimer import common
 from bs4 import BeautifulSoup
 import logging
-from dstimer import world_data
+from dstimer.models import Player, Group
+from dstimer import world_data, db
+
 
 logger = logging.getLogger("dstimer")
 FORMAT = re.compile(r"\[([a-zA-Z\.\-0-9]+)\|([a-zA-Z0-9%:]+)\|([a-zA-Z0-9]{8})\]")
@@ -29,7 +32,7 @@ def player_id_from_keks(keks):
         if line.strip().startswith("TribalWars.updateGameData("):
             game_data = json.loads(line[line.index("(") + 1:line.rindex(")")])
             return (game_data["player"]["id"], game_data["player"]["name"])
-    return None
+    return None, None
 
 
 def write_keks(keks, id, name):
@@ -41,6 +44,30 @@ def write_keks(keks, id, name):
     with open(file, "w") as fd:
         fd.write(keks["sid"])
 
+def write_keks_db(keks, id, name):
+    player = Player.query.filter_by(player_id = id, domain = keks["domain"]).first()
+    if player:
+        player.sid = keks["sid"]
+        player.sid_datetime = datetime.now()
+    else:
+        player = Player(
+            name = name,
+            player_id = id,
+            sid = keks["sid"],
+            sid_datetime = datetime.now(), 
+            domain = keks["domain"]
+        )
+        all_group = Group(
+            name = "Alle",
+            group_id = 0, 
+            is_used = True, 
+            priority = 1,
+            player = player
+        )
+        db.session.add(all_group)
+    db.session.add(player)
+    db.session.commit()
+    
 
 def import_from_text(text):
     keks = parse_keks(text)
@@ -50,6 +77,7 @@ def import_from_text(text):
     if id is None:
         raise ValueError("Session is expired or invalid")
     write_keks(keks, id, name)
+    write_keks_db(keks, id, name)
     world_data.refresh_world_data()
     common.send_stats(common.create_stats(player_id=id, domain=keks["domain"]))
 

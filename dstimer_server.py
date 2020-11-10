@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-from dstimer import server, send_action, common, world_data
+#from dstimer import server
+from dstimer import send_action, common, world_data, db, app
 import logging
 from logging import handlers
 import os, sys
@@ -10,9 +11,30 @@ import webbrowser
 #from version_parser import Version
 
 
-def https_app(**kwargs):
-    server.app.run(ssl_context='adhoc', **kwargs)
+common.create_folder_structure()
 
+os.environ['TZ'] = 'Europe/Berlin'
+
+    # init logger
+#log_dir = os.path.join(common.get_root_folder(), "logs")    #C:\Users\<username>\.dstimer\logs
+#os.makedirs(log_dir, exist_ok=True)
+#log_path = os.path.join(log_dir, "dstimer.log")
+#logger = logging.getLogger("dstimer")
+#logger.setLevel(logging.DEBUG)
+#handler = handlers.TimedRotatingFileHandler(log_path, when="D")
+#formatter = jsonlogger.JsonFormatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+#handler.setFormatter(formatter)
+#logger.addHandler(handler)
+
+world_data.refresh_world_data()
+
+    #if args.open_browser:
+    #    webbrowser.open("http://127.0.0.1:" + str(args.port), new=2)
+
+#    send_action.DaemonThread().start()   
+=======
+#def https_app(**kwargs):
+#    server.app.run(ssl_context='adhoc', **kwargs)
 
 if __name__ == "__main__":
     from multiprocessing import Process
@@ -25,31 +47,18 @@ if __name__ == "__main__":
     parser.add_argument("--open-browser", help="Open browser tab with dashboard after startup",
                         action="store_true")
     args = parser.parse_args()
-
     if "getuid" in dir(os) and os.getuid() == 0 and not args.allow_root:
         print("Starting DS_Timer as root or with sudo is disabled. Use --allow-root")
         sys.exit(1)
-
-    common.create_folder_structure()
-
-    os.environ['TZ'] = 'Europe/Berlin'
-
-    # init logger
-    log_dir = os.path.join(common.get_root_folder(), "logs")    #C:\Users\<username>\.dstimer\logs
-    os.makedirs(log_dir, exist_ok=True)
-    log_path = os.path.join(log_dir, "dstimer.log")
-    logger = logging.getLogger("dstimer")
-    logger.setLevel(logging.DEBUG)
-    handler = handlers.TimedRotatingFileHandler(log_path, when="D")
-    formatter = jsonlogger.JsonFormatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
+    
     world_data.refresh_world_data()
 
-    if args.open_browser:
-        webbrowser.open("http://127.0.0.1:" + str(args.port), new=2)
+    app.run(host=args.host, port=args.port)
 
-    send_action.DaemonThread().start()
+    #if args.open_browser:
+        #webbrowser.open("http://127.0.0.1:" + str(args.port), new=2)
+
+    #send_action.DaemonThread().start()
     #Process(target=https_app, kwargs=dict(host=args.host, port=args.port+443), daemon=True).start()
-    server.app.run(host=args.host, port=args.port)
+    #server.app.run(host=args.host, port=args.port)
+

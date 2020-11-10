@@ -32,11 +32,13 @@
       </div>
       <div id="navbar" class="collapse navbar-collapse">
         <ul class="nav navbar-nav">
-          <li><a href="/schedule">Schedule</a></li>
+          <li><a href="/dashboard">Dashboard</a></li>
+          <li><a href="/schedule_db">Schedule</a></li>
           <li><a href="/import">Import</a></li>
           <li><a href="/wb">Workbench</a></li>
           <li><a href="/new_attack">New Att</a></li>
           <li><a href="/templates">Templates</a></li>
+          <li><a href="/keks_overview">Kekse</a></li>
           <li><a href="/options">Optionen</a></li>
           <li><a href="/logs">Logs</a></li>
         </ul>
@@ -100,6 +102,15 @@
     </div>
     {% endif %}
     {% endwith %}
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="flashes">
+         {% for message in messages %}
+          <div class="alert alert-warning">{{ message }}</div>
+         {% endfor %}
+     </ul>
+   {% endif %}
+  {% endwith %}
     {% block content %}{% endblock %}
   </div>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"

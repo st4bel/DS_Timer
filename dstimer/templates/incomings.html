@@ -1,0 +1,184 @@
+{% extends "layout.html" %}
+{% block title %}Incomings{% endblock %}
+{% block header %}
+<script type="text/javascript">
+  function toogle_filter(){
+    $("#filter_options").toggle();
+  }
+  function toogle_row_highlight(id, type) {
+    $("#row_"+id).toggleClass("highlight")
+  }
+  function toogle_edit(id){
+    $(".edit_inc:visible").each(function(){
+      if ($(this).attr("id") != "edit_" + id){ // only show one edit row at the same time
+        $(this).toggle()
+      }
+    })
+    $("#edit_"+id).toggle();
+  }
+</script>
+<style>
+  .highlight {
+    background: lightgrey;
+  }
+</style>
+{% endblock %}
+{% block content %}
+<a href="{{ url_for('add_inc', domain = player.domain, player_id = player.player_id) }}">add_test_inc</a>
+<a href="#" onclick="toogle_filter()"><h2>Filter</h2></a>
+<form method="post">
+  <div id="filter_options" style="{% if not filter_by %}display: none;{% endif %}">
+    <table class="table"> 
+      <tr>
+        <th>Name</th>
+        <th>Ziel</th>
+        <th>Herkunft</th>
+        <th>Spieler</th>
+        <th>Langsamste Einheit</th>
+        <th>Template</th>
+        <th>Manuell</th>
+      </tr>
+      <tr>
+        <td>
+         <input type="text" name="filter_by_name" list="source_player_list" {% if filter_by['name'] %}value="{{filter_by['name']}}"{% endif%}>
+         <datalist id="source_player_list">
+           {% for name in data['names'] %}
+            <option value="{{ name }}"></option>
+           {% endfor %}
+         </datalist>
+        </td>
+        <td>
+          <select name="filter_by_target_id">
+            <option value="default">Auswählen</option>
+            {% for target_id in data['targets'] %}
+              <option value="{{target_id}}" {% if target_id == filter_by['target_id'] %}selected="selected"{% endif %}>{{data['targets'][target_id]}}</option>
+            {% endfor %}
+          </select>
+        </td>
+        <td>
+            <select name="filter_by_source_id">
+                <option value="default">Auswählen</option>
+                {% for source_id in data['sources'] %}
+                  <option value="{{source_id}}" {% if source_id == filter_by['source_id'] %}selected="selected"{% endif %}>{{data['sources'][source_id]}}</option>
+                {% endfor %}
+            </select>  
+        </td>
+        <td>
+          <select name="filter_by_source_player_id">
+            <option value="default">Auswählen</option>
+            {% for player_id in data['source_players'] %}
+              <option value="{{player_id}}" {% if player_id == filter_by['source_player_id'] %}selected="selected"{% endif %}>{{data['source_players'][player_id]}}</option>
+            {% endfor %}
+          </select>
+        </td>
+        <td>
+          <select name="filter_by_slowest_unit">
+            <option value="default">Auswählen</option>
+            {% for unit in data['units']%}
+              <option value="{{unit}}" {% if unit == filter_by['slowest_unit'] %}selected="selected"{% endif %}>{{unit}}</option>
+            {% endfor %}
+          </select>
+        </td>
+        <td>
+          <select name="filter_by_template">
+            <option value="default">Auswählen</option>
+            {% for template_id in data['templates'] %}
+              <option value="{{ template_id }}" {% if template_id in filter_by['template'] %}selected="selected"{% endif %}>{{ data['templates'][template_id] }}</option>
+            {% endfor %}
+          </select>
+        </td>
+        <td>
+          <select name="filter_by_manuell">
+            <option value="default">Auswählen</option>
+            <option value="0">Automatisch generiert</option>
+            <option value="1">Manuell</option>
+          </select>
+        </td>
+      </tr>
+    </table>
+    <button type="submit" name="type" value="apply_filter" class="btn btn-default">Übernehmen</button>
+    <a href="/schedule_db">Zurücksetzen</a>
+  </div>
+</form>
+<table class="table">
+    <tr>
+        <th>Angriffs-ID</th>
+        <th>Name</th>
+        <th>Ziel</th>
+        <th>Herkunft</th>
+        <th>Spieler</th>
+        <th>Entfernung</th>
+        <th>Ankunft</th>
+        <th>Template</th>
+        <th>Options</th>
+    </tr>
+    {% for inc in incs %}
+    <tr id="row_{{inc.id}}">
+        <td class="col-md-1">{{ inc.inc_id }}</td>
+        <td class="col-md-1">
+            {% if inc.size %}
+            <img src="{{innocdn_url('/graphic/command/attack' + ('_'+inc.size if inc.size != 'default' else '') + '.png')}}">
+            {% endif %}
+            {% if inc.unit_symbol %}
+            <img src="{{innocdn_url('/graphic/command/' + inc.unit_symbol + '.png')}}">
+            {% endif %}
+            {{ inc.name }}
+        </td>
+        <td class="col-md-2">{{ inc.target_village_name }}</td>
+        <td class="col-md-2">{{ inc.source_village_name }}</td>
+        <td class="col-md-2">{{ inc.source_player_name }}</td>
+        <td class="col-md-1">
+            {{ inc.distance }} ({{inc.slowest_unit}})
+        </td>
+        <td class="col-md-3">{{ inc.get_arrival_string() }}</td>
+        <td class="col-md-1">
+            {% if inc.template %}
+            <span class="badge alert-success">{{ inc.template.name }}</span>
+            {% else %}
+            <span class="badge alert-warning">Ignoriert</span>
+            {% endif %}
+        </td>
+        <td>
+          <button type="button" onclick="toogle_edit({{inc.id}})" class="btn btn-default">Edit</button>
+          <input class="mark" type="checkbox" name="selected" value="{{inc.id}}" onchange="toogle_row_highlight({{inc.id}}, 'primary')">
+        </td>
+    </tr>
+    <!--edit-------------------------------------------------------------->
+    <tr style="display: none;" id="edit_{{inc.id}}" class="edit_inc">
+      <td><!--departure-->
+        <label for="edit_departure_{{inc.id}}">Abschick</label>
+        <input name="edit_departure_{{inc.id}}" type="datetime-local" step="0.001" id="time" style="width: 180px" value="{{inc.evac_departure.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}}">
+      </td>
+      <td><!--return-->
+        <label for="edit_return_{{inc.id}}">Rückkehr</label>
+        <input name="edit_return_{{inc.id}}" type="datetime-local" step="0.001" id="time" style="width: 180px" value="{{inc.evac_return.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}}">
+      </td>
+      <td><!--template-->
+        <label for="edit_template_{{inc.id}}">Template</label><br>
+        <select name="edit_template_{{inc.id}}" class="select-template id-{{inc.id}}">
+          <option value="default">Auswählen</option>
+            {% for template in templates%}
+              <option value="{{template.id}}" {% if template.id == inc.template.id %}selected="selected"{% endif %}>{{template.name}}</option>
+            {% endfor %}
+        </select>
+      </td>
+      <td><!--ignore-->
+      </td>
+    </tr>
+    <tr style="display: none;" id="info_{{inc.id}}">
+        <td><!--relevante gruppen-->
+            {% for group in inc.village.groups%}
+                [{{ group.name }}]
+            {% endfor %}
+        </td>
+        <td><!--manual override-->
+            
+        </td>
+        <td><!--evac_options-->
+            {{ inc.evac_options }}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

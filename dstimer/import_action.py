@@ -9,10 +9,12 @@ import logging
 from datetime import timedelta, datetime
 import dateutil.parser
 import random, string
-from dstimer import common, world_data
+from dstimer import common, world_data, db
 from dstimer.intelli_unit import get_bh_all
+from dstimer.models import Attacks, Player
+from flask import flash
 from bs4 import BeautifulSoup
-#import numpy as np
+
 
 logger = logging.getLogger("dstimer")
 
@@ -170,8 +172,11 @@ def import_from_text(text, rand_mill=False):
 
         directory = os.path.join(common.get_root_folder(), "schedule")
         file = os.path.join(directory, filename)
-        with open(file, "w") as fd:
-            json.dump(action, fd, indent=4)
+        #with open(file, "w") as fd:
+        #    json.dump(action, fd, indent=4)
+        add_attack_to_db(action)
+
+
 
 
 def import_from_tampermonkey(action):
@@ -360,3 +365,36 @@ def check_LZ(LZ):
     except:
         return {}
     return LZ
+
+
+def add_attack_to_db(action):
+    autocomplete(action)
+    try:
+        player = Player.query.filter_by(domain = action["domain"], player_id = int(action["player_id"])).first()
+    except:
+        flash("Spieler {} auf Server {} nicht gefunden. Bitte zuerst Keks importieren!".format(action["player"], action["domain"]))
+        return
+    a = Attacks(
+        departure_time = dateutil.parser.parse(action["departure_time"]),
+        arrival_time = dateutil.parser.parse(action["arrival_time"]),
+        source_id = action["source_id"],
+        source_coord_x = action["source_coord"]["x"],
+        source_coord_y = action["source_coord"]["y"],
+        target_id = action["target_id"],
+        target_coord_x = action["target_coord"]["x"],
+        target_coord_y = action["target_coord"]["y"],
+        #player_id = int(action["player_id"]),
+        #player = action["player"],
+        player = player,
+        building = action["building"],
+        save_default_attack_building = action["save_default_attack_building"],
+        units = str(action["units"]),
+        force = False, 
+        #domain = action["domain"], 
+        type = action["type"], 
+        status = "scheduled"
+    )
+    a.autocomplete()
+    if not a.is_expired():
+        db.session.add(a)
+        db.session.commit()

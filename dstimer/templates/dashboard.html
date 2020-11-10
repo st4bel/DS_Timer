@@ -1,0 +1,86 @@
+{% extends "layout.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<form action="" method="post">
+    <button type="submit" name="type" value="restart" class="btn btn-default">Neustart</button>
+</form>
+<h2>Dashboard</h2>
+
+{% if players != [] %}
+<table class="table">
+    <tr>
+        <th>
+            Spielername
+        </th>
+        <th>
+            Aktiv?
+        </th>
+        <th>
+            Schedule
+        </th>
+        <th>
+            Raussteller
+        </th>
+    </tr>
+    {% for player in players %}
+    <tr>
+        <td>
+            {{ player.name }} ({{ player.domain.split(".")[0] }})
+        </td>
+        <td>
+            {% if player.is_active() %}
+                aktiv
+            {% else %}
+                <a href="/import">inaktiv</a>
+            {% endif %}
+            ({{ player.sid_datetime.strftime("%d.%m. um %H:%M") }})
+        </td>
+        <td>
+            <table>
+                <tr>
+                    {% for att_status in atts[player.id] %}
+                    <td>
+                        <a href="{{ url_for('schedule_db', filter_by =  atts[player.id][att_status]['filter_by']) }}">
+                            <span class="badge {{ atts[player.id][att_status]['badge'] }}">
+                                {{ att_status }} {{ atts[player.id][att_status]['NO'] }}
+                            </span>
+                        </a>
+                    </td>
+                    {% endfor %}
+                </tr>
+            </table>        
+        </td>
+        <td>
+            <table>
+                <tr>
+                    <td>
+                        <a href="{{ url_for('incomings_get', domain = player.domain, player_id = player.player_id) }}">
+                            <span class="badge {% if player.evac_activated %}alert-success{% else %}alert-warning{% endif %}">
+                                {% if player.evac_activated %}aktiv{% else %}inaktiv{% endif %}
+                            </span>
+                        </a>
+                    </td>
+                    <td>
+                        {% for type in incs[player.id] %}
+                        <a href="{{ url_for('incomings_get', domain = player.domain, player_id = player.player_id) }}">
+                            <span class="badge {% if incs[player.id][type] == 0 %}alert-success{% elif incs[player.id][type] <= 10 %}alert-warning{% else %}alert-danger{% endif %}">
+                                {{ type }} {{ incs[player.id][type] }}
+                            </span>
+                        </a>
+                        {% endfor %}
+                    </td>
+                    <td align="right" width="70px">
+                        <a href="{{ url_for('inc_options', domain=player.domain, player_id = player.player_id) }}">
+                            Optionen
+                        </a>
+                    </td>
+                </tr>
+            </table> 
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+    <a href="/import"><h3>Keks importieren</h3></a>
+{% endif %}
+{% endblock %} 

@@ -99,7 +99,7 @@ def get_player_name(domain, player_id):
     file = os.path.join(common.get_root_folder(), "world_data", domain, "player.txt")
     data = readfile_norm(file)
     for dataset in data:
-        if player_id == str(dataset[0]):
+        if str(player_id) == str(dataset[0]):
             return unquote_name(dataset[1])
     return None
 
@@ -156,7 +156,6 @@ def get_village_coord_from_id(domain, id):
         if dataset[0] == str(id):
             return dict(x = dataset[2], y = dataset[3])
     return None
-
 
 def get_village_data(domain):
     file = os.path.join(common.get_root_folder(), "world_data", domain, "village.txt")

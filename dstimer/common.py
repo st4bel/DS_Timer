@@ -4,11 +4,12 @@ from dstimer import __stdOptions__, __key__, __version__
 import json
 from dstimer import world_data
 import math
-from datetime import datetime
+import datetime
 import requests
 import hashlib
 import logging
 from version_parser import Version
+from datetime import timedelta
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"
 
@@ -48,6 +49,14 @@ unit_bh = {
 }
 stat_URL = "http://ds-kalation.de/stat_receive_Timer_0.6.2.php"
 
+inc_types = [
+    dict(name = "snob", displayname = "Angriff mit AG (erkannt)"),
+    dict(name = "spy", displayname = "Angriff mit SPY-LZ (erkannt)"),
+    dict(name = "small", displayname = "Kleiner Angriff"),
+    dict(name = "medium", displayname = "Mittlerer Angriff"),
+    dict(name = "big", displayname = "Großer Angriff"),
+    dict(name = "default", displayname = "Unerkannt")
+]
 
 def get_root_folder():
     return os.path.join(os.path.expanduser("~"), ".dstimer")
@@ -121,7 +130,7 @@ def create_stats(player_id, domain):
     h.update(bytes(player_id + __key__, "utf-8"))
     stats = {
         "p": int(points),
-        "ts": str(int((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds())),
+        "ts": str(int((datetime.datetime.utcnow() - datetime.datetime(1970, 1, 1)).total_seconds())),
         "pl": h.hexdigest(),
         "a": __version__ + ": cookie_set",
         "s": domain
@@ -132,3 +141,46 @@ def create_stats(player_id, domain):
 def send_stats(stats):
     response = requests.get(url=stat_URL, params=stats)
     return response
+
+def parse_timestring(date_string):
+    # heute um 22:43:54:442, etc zu datetime
+    now = datetime.datetime.now()
+    date_string = date_string.split(" um ")
+    date = datetime.datetime.today()
+    if "morgen" in date_string[0]: # heute: do nothing, morgen: add one, specific date, set
+        date = date + datetime.timedelta(days=1)
+    elif "heute" not in date_string[0]:
+        date = date.replace(month=int(date_string[0].split("am ")[1].split(".")[1]), day=int(date_string[0].split("am ")[1].split(".")[0]))
+        if now.month > date.month: # falls im nächsten jahr
+            date = date.replace(year=date.year + 1)
+
+    time = date_string[1].split(":")
+
+    date = date.replace(hour = int(time[0]), minute = int(time[1]), second = int(time[2]))
+
+    if len(time) > 3: #milliseconds 
+        date = date.replace(microsecond=int(time[3])*1000)
+    else:
+        date = date.replace(microsecond=0)
+    
+    return date
+
+def unparse_timestring(date):
+    # datetime zu heute um 22:43:54:442, etc
+    now = datetime.datetime.now()
+    day_string = ""
+    if now.date() == date.date():
+        day_string = "heute"
+    elif now.date() + datetime.timedelta(days=1) == date.date():
+        day_string = "morgen"
+    else:
+        day_string = "am " + str(date.day) + "." + str(date.month) + "."
+
+    time_string = str(date.hour) + ":" + str(date.minute) + ":" + str(date.second) + ":" + str(int(date.microsecond / 1000)).zfill(3) # leading zeros 
+
+    return day_string + " um " + time_string
+
+def get_grouping_timedelta():
+    # returns the time which is needed to send another evacuation attack after an one is already rolled out
+    options = read_options()
+    return timedelta(seconds=int(options["evac_pre_buffer_seconds"]) + int(options["evac_pre_buffer_seconds"]) + int(options["evac_angst_seconds"]))

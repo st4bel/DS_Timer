@@ -1,122 +1,22 @@
 {% extends "layout.html" %}
 {% block title %}Templates{% endblock %}
 {% block header %}
-
+<script type="text/javascript">
+    function edit_template(id) {
+        $(".unit.id-"+id).each(function(){
+            $(".new_unit."+this.title).val(this.textContent)
+        });
+        $("#new_template_name").val($(".name.id-"+id).text());
+        $("#new_template_submit").val("edit_template_"+id)
+        $(".template-row").each(function() {
+            $(this).css("background-color", "white")
+        })
+        $(".template-row.id-"+id).css("background-color", "#d5d8dc")
+    }
+  </script>
 {% endblock %}
 {% block content %}
 
-<h2>Vorlage erstellen</h2>
-<div id="div_new_template">
-    <form action="" method="post">
-        <div align="left">
-            <label for="newname">Name</label>
-            <input id="newname" name="newname" type="text"><br><br>
-        </div>
-        <table>
-            <tbody>
-                <tr>
-                    <td valign="top">
-                        <table class="table" width="100%">
-                            <tbody>
-                                <tr>
-                                    <th>Infanterie</th>
-                                </tr>
-                                <tr>
-                                    <td><img src="{{ innocdn_url('/graphic/unit/unit_spear.png') }}" title="Speerträger"
-                                            alt="" class=""><input id="unit_input_spear" name="spear" type="text"
-                                            style="width: 40px"></td>
-                                </tr>
-                                <tr>
-                                    <td><img src="{{ innocdn_url('/graphic/unit/unit_sword.png') }}"
-                                            title="Schwertkämpfer" alt="" class=""><input id="unit_input_sword"
-                                            name="sword" type="text" style="width: 40px"></td>
-                                </tr>
-                                <tr>
-                                    <td><img src="{{ innocdn_url('/graphic/unit/unit_axe.png') }}" title="Axtkämpfer"
-                                            alt="" class=""><input id="unit_input_axe" name="axe" type="text"
-                                            style="width: 40px"></td>
-                                </tr>
-                                <tr>
-                                    <td><img src="{{ innocdn_url('/graphic/unit/unit_archer.png') }}"
-                                            title="Bogenschützen" alt="" class=""><input id="unit_input_archer"
-                                            name="archer" type="text" style="width: 40px"></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </td>
-                    <td valign="top">
-                        <table class="table" width="100%">
-                            <tbody>
-                                <tr>
-                                    <th>Kavallerie</th>
-                                </tr>
-                                <tr>
-                                    <td><img src="{{ innocdn_url('/graphic/unit/unit_spy.png') }}" title="Späher" alt=""
-                                            class=""><input id="unit_input_spy" name="spy" type="text"
-                                            style="width: 40px"></td>
-                                </tr>
-                                <tr>
-                                    <td><img src="{{ innocdn_url('/graphic/unit/unit_light.png') }}"
-                                            title="Leichte Kavallerie" alt="" class=""><input id="unit_input_light"
-                                            name="light" type="text" style="width: 40px"></td>
-                                </tr>
-                                <tr>
-                                    <td><img src="{{ innocdn_url('/graphic/unit/unit_marcher.png') }}"
-                                            title="Berittene Bogenschützen" alt="" class=""><input
-                                            id="unit_input_marcher" name="marcher" type="text" style="width: 40px"></td>
-                                </tr>
-                                <tr>
-                                    <td><img src="{{ innocdn_url('/graphic/unit/unit_heavy.png') }}"
-                                            title="Schwere Kavallerie" alt="" class=""><input id="unit_input_heavy"
-                                            name="heavy" type="text" style="width: 40px"></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </td>
-                    <td valign="top">
-                        <table class="table" width="100%">
-                            <tbody>
-                                <tr>
-                                    <th>Belagerung</th>
-                                </tr>
-                                <tr>
-                                    <td><img src="{{ innocdn_url('/graphic/unit/unit_ram.png') }}" title="Rammbock"
-                                            alt="" class=""><input id="unit_input_ram" name="ram" type="text"
-                                            style="width: 40px"></td>
-                                </tr>
-                                <tr>
-                                    <td><img src="{{ innocdn_url('/graphic/unit/unit_catapult.png') }}" title="Katapult"
-                                            alt="" class=""><input id="unit_input_catapult" name="catapult" type="text"
-                                            style="width: 40px"></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </td>
-                    <td valign="top">
-                        <table class="table" width="100%">
-                            <tbody>
-                                <tr>
-                                    <th>Andere</th>
-                                </tr>
-                                <tr>
-                                    <td><img src="{{ innocdn_url('/graphic/unit/unit_knight.png') }}" title="Paladin"
-                                            alt="" class=""><input id="unit_input_knight" name="knight" type="text"
-                                            style="width: 40px"></td>
-                                </tr>
-                                <tr>
-                                    <td><img src="{{ innocdn_url('/graphic/unit/unit_snob.png') }}"
-                                            title="Adelsgeschlecht" alt="" class=""><input id="unit_input_snob"
-                                            name="snob" type="text" style="width: 40px"></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </td>
-                </tr>
-            </tbody>
-        </table><br>
-        <button type="submit" name="type" value="create_template" class="btn btn-default">Speichern</button>
-    </form>
-</div>
 <h2>Vorlagen verwalten</h2>
 <table class="table">
     <tr>
@@ -124,15 +24,39 @@
         <th>Truppen</th>
         <th>Aktionen</th>
     </tr>
-    {% for template in templates%}
     <tr>
-        <td><b>{{ template.name }}</b></td>
+    <form action="" method="post">
+        <td>
+            <input type="text" style="width: 60px" name="new_template_name" id="new_template_name" value="{{ current_name }}">
+        </td>
         <td>
             <table>
                 <tr>
                     {% for unitname in unitnames %}
                     <td width="70px" align="right">
-                        <span class="badge alert-success" title="{{unitname}}">{{template.units[unitname]}}<img
+                        <img src="{{ innocdn_url('/graphic/unit/unit_' + unitname + '.png') }}">
+                        <input type="text" style="width: 40px" name="new_template_unit_{{unitname}}" class="new_unit {{unitname}}" value="{{ current_units[unitname] }}">
+                    </td>    
+                    {% endfor %}
+                </tr>
+                
+            </table>
+        </td>
+        <td>
+            <button id="new_template_submit" type="submit" name="type" value="new_template" class="btn btn-default">Speichern</button>
+        </td>
+        
+    </tr>
+    </form>
+    {% for template in templates%}
+    <tr class="template-row id-{{template.id}}">
+        <td><span class="{% if template.is_default %}badge alert-success {% endif %}name id-{{template.id}}"><b>{{ template.name }}</b></span></td>
+        <td>
+            <table>
+                <tr>
+                    {% for unitname in unitnames %}
+                    <td width="70px" align="right">
+                        <span class="badge alert-success unit id-{{template.id}}" title="{{unitname}}">{{template.get_units()[unitname]}}<img
                                 src="{{ innocdn_url('/graphic/unit/unit_' + unitname + '.png') }}"></span>
                     </td>
                     {% endfor %}
@@ -143,6 +67,11 @@
             <form action="" method="post">
                 <button type="submit" name="type" value="delete_{{template.id}}"
                     class="btn btn-default">Löschen</button>
+                <button type="button" onclick="edit_template({{template.id}})"
+                    class="btn btn-default">Edit</button>   
+                <br>
+                <button type="submit" name="type" value="set-default_{{template.id}}"
+                    class="btn btn-default">Als Standard setzen</button>
             </form>
         </td>
     </tr>
