@@ -1,6 +1,9 @@
 {% extends "layout.html" %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
+<form action="" method="post">
+    <button type="submit" name="type" value="restart" class="btn btn-default">Neustart</button>
+</form>
 <h2>Dashboard</h2>
 
 {% if players != [] %}

@@ -19,7 +19,7 @@ from dstimer.import_keks import check_and_save_sids
 from operator import itemgetter, attrgetter
 import logging
 from dstimer.models import *
-from dstimer import app, db
+from dstimer import app, db, restart
 logger = logging.getLogger("dstimer")
 
 
@@ -842,6 +842,11 @@ def dashboard_get():
         flash("Keine Standard Template gesetzt!")
 
     return render_template("dashboard.html", players=players, atts=atts, incs = incs)
+
+@app.route("/dashboard", methods=["POST"])
+def dashboard_post():
+    if request.form.get("type") == "restart":
+        restart.restart_program()
 
 @app.route("/add_inc/<domain>/<player_id>", methods=["GET"])
 def add_inc(domain, player_id):
