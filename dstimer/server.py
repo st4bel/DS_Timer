@@ -248,7 +248,20 @@ def schedule_db_post():
                 filter_by[filter.split("filter_by_")[1]] = request.form.get(filter)
         return redirect(url_for("schedule_db", filter_by=filter_by))
     elif "delete__all" in type:
+        status = None
+        if "status"  in current_filter_by:
+            status = current_filter_by["status"]
+            del current_filter_by["status"]
         attacks = Attacks.query.filter_by(**current_filter_by).all()
+        if status:
+            if status == "active":
+                attacks = [attack for attack in attacks if not attack.is_expired()]
+            elif status == "expired":
+                attacks = [attack for attack in attacks if attack.status == "expired"]
+            elif status == "finished":
+                attacks = [attack for attack in attacks if attack.status == "finished"]
+            else:
+                attacks = [attack for attack in attacks if attack.status == "failed"]
         for attack in attacks:
             db.session.delete(attack)
     elif "delete__selected" in type:
@@ -313,8 +326,13 @@ def schedule_db_post():
     
         for a_id in request.form.getlist("selected"):
             attack = Attacks.query.filter_by(id = int(a_id)).first()
+            if attack.status == "pending":
+                continue
             attack.departure_time = attack.departure_time + diff
             attack.arrival_time = attack.arrival_time + diff
+            if not attack.is_expired():
+                attack.status = "scheduled"
+            
             if template != "default":
                 attack.template = Template.query.filter_by(id = int(template)).first()
             if building != "default":
@@ -323,7 +341,7 @@ def schedule_db_post():
             
     db.session.commit()
 
-    return redirect(url_for("schedule_db", filter_by = current_filter_by))
+    return redirect(url_for("schedule_db", filter_by = ast.literal_eval(request.args.get('filter_by') if request.args.get('filter_by') else "{}")))
 
 @app.route("/schedule", methods=["POST"])
 def schedule_post():
